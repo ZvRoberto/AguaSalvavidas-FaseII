@@ -1,29 +1,29 @@
 
-/* ==========================================================
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+/* =====================================================
    GREAT VALUE - FASE II
-   ESTILOS COMPLEMENTARIOS
-   DUALIDAD, SENSIBILIDAD, TRANSPORTE Y MODI
-   SOPORTE PARA MATRICES DE HASTA 20 X 20
-   ========================================================== */
+   SIMULADOR DE INVESTIGACIÓN DE OPERACIONES
+   HOJA DE ESTILOS GENERAL
+   ===================================================== */
 
 :root {
-    --gv-azul: #0877dc;
-    --gv-azul-oscuro: #0759a8;
-    --gv-marino: #071b36;
-    --gv-celeste: #e7f8ff;
-    --gv-fondo: #f3f7fc;
-    --gv-blanco: #ffffff;
-    --gv-texto: #142640;
-    --gv-gris: #708198;
-    --gv-borde: #e1eaf3;
-    --gv-verde: #14976a;
-    --gv-rojo: #d84857;
-    --gv-sombra: 0 12px 38px rgba(12, 40, 80, 0.07);
+    --navy: #071b36;
+    --navy-light: #102c50;
+    --blue: #0877dc;
+    --blue-dark: #0758a6;
+    --cyan: #00c7ed;
+    --sky: #eaf7ff;
+    --background: #f3f7fc;
+    --white: #ffffff;
+    --text: #172b46;
+    --muted: #6b7c92;
+    --border: #dce7f1;
+    --green: #14875e;
+    --red: #d64453;
+    --shadow: 0 14px 40px rgba(7, 27, 54, 0.08);
+    --radius: 18px;
 }
-
-/* ==========================================================
-   ESTILOS GENERALES
-   ========================================================== */
 
 * {
     box-sizing: border-box;
@@ -36,15 +36,25 @@ html {
 body {
     margin: 0;
     min-height: 100vh;
-    background: var(--gv-fondo);
-    color: var(--gv-texto);
+    background: var(--background);
+    color: var(--text);
     font-family: "DM Sans", Arial, sans-serif;
     line-height: 1.6;
 }
 
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Outfit", "DM Sans", sans-serif;
+    line-height: 1.25;
+}
+
+a {
+    color: var(--blue);
+}
+
 button,
 input,
-select {
+select,
+textarea {
     font: inherit;
 }
 
@@ -60,78 +70,514 @@ button:disabled {
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
+textarea:focus-visible,
 a:focus-visible {
-    outline: 3px solid var(--gv-azul);
+    outline: 3px solid var(--cyan);
     outline-offset: 3px;
 }
 
-.oculto {
+.oculto,
+.hidden {
     display: none !important;
 }
 
-/* ==========================================================
-   PÁGINAS DE LOS NUEVOS MÓDULOS
-   ========================================================== */
+/* =====================================================
+   ENCABEZADO PRINCIPAL
+   ===================================================== */
 
+.encabezado {
+    position: relative;
+    z-index: 10;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+}
+
+.nav-contenido {
+    width: min(92%, 1200px);
+    min-height: 90px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo-texto {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.gota {
+    width: 50px;
+    height: 50px;
+    display: grid;
+    place-items: center;
+    border-radius: 15px;
+    background: #e6f7ff;
+    font-size: 27px;
+}
+
+.logo-texto h1 {
+    margin: 0;
+    color: var(--navy);
+    font-size: 1.6rem;
+    font-weight: 900;
+}
+
+.logo-texto p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+.nav-enlace {
+    padding: 11px 18px;
+    border: 1px solid #cbe3f8;
+    border-radius: 10px;
+    background: #eff8ff;
+    color: var(--blue-dark);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 800;
+    transition: 0.2s;
+}
+
+.nav-enlace:hover {
+    background: var(--blue);
+    color: var(--white);
+}
+
+/* =====================================================
+   PORTADA PRINCIPAL
+   ===================================================== */
+
+.hero {
+    position: relative;
+    overflow: hidden;
+    min-height: 560px;
+    display: flex;
+    align-items: center;
+    background:
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(0, 199, 237, 0.18),
+            transparent 32%
+        ),
+        linear-gradient(
+            125deg,
+            #071b36 0%,
+            #103e6e 65%,
+            #0877dc 100%
+        );
+    color: var(--white);
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    right: -120px;
+    top: -150px;
+    width: 550px;
+    height: 550px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    right: 40px;
+    bottom: -240px;
+    width: 450px;
+    height: 450px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-contenido {
+    position: relative;
+    z-index: 1;
+    width: min(92%, 1200px);
+    margin: auto;
+    padding: 75px 0;
+}
+
+.hero-etiqueta {
+    display: inline-block;
+    margin-bottom: 25px;
+    padding: 9px 15px;
+    border: 1px solid rgba(160, 231, 255, 0.25);
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #a7eaff;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.hero h2 {
+    margin: 0 0 22px;
+    color: var(--white);
+    font-size: clamp(3rem, 6vw, 5.2rem);
+    font-weight: 900;
+    letter-spacing: -2px;
+    line-height: 1.05;
+}
+
+.hero h2 span {
+    color: #69ddff;
+}
+
+.hero-descripcion {
+    max-width: 720px;
+    margin: 0 0 28px;
+    color: #dbeaf8;
+    font-size: 1.08rem;
+    line-height: 1.85;
+}
+
+.hero-acciones {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 45px;
+}
+
+.btn-hero,
+.btn-hero-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 13px 24px;
+    border-radius: 11px;
+    text-decoration: none;
+    font-weight: 800;
+    transition: 0.2s;
+}
+
+.btn-hero {
+    background: #ffffff;
+    color: var(--navy);
+}
+
+.btn-hero:hover {
+    background: #dff5ff;
+    transform: translateY(-2px);
+}
+
+.btn-hero-outline {
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.07);
+    color: #ffffff;
+}
+
+.btn-hero-outline:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.hero-estadisticas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 45px;
+    padding-top: 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.hero-estadisticas div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.hero-estadisticas strong {
+    color: #ffffff;
+    font-family: "Outfit", sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+}
+
+.hero-estadisticas span {
+    color: #c3dbef;
+    font-size: 0.83rem;
+}
+
+/* =====================================================
+   CONTENEDOR DE MÉTODOS
+   ===================================================== */
+
+.contenedor {
+    width: min(92%, 1200px);
+    margin: auto;
+}
+
+.bienvenida {
+    max-width: 850px;
+    margin: 75px auto 45px;
+    text-align: center;
+}
+
+.etiqueta {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: var(--blue);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.bienvenida h2 {
+    margin: 0 0 15px;
+    color: var(--navy);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+}
+
+.descripcion {
+    margin: 0 auto;
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+
+/* =====================================================
+   TARJETAS DE LOS 8 MÉTODOS
+   ===================================================== */
+
+.metodos {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(260px, 1fr)
+    );
+    gap: 24px;
+    margin-bottom: 65px;
+}
+
+.tarjeta {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 30px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--white);
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tarjeta:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 45px rgba(7, 27, 54, 0.13);
+}
+
+.tarjeta .numero {
+    position: absolute;
+    top: 27px;
+    right: 27px;
+    color: #a6b8cb;
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+.tarjeta .icono {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    margin-bottom: 20px;
+    border-radius: 16px;
+    background: #e8f6ff;
+    color: var(--blue-dark);
+    font-size: 1.75rem;
+    font-weight: 900;
+}
+
+.tarjeta h3 {
+    margin: 0 0 12px;
+    color: var(--navy);
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.tarjeta > p {
+    flex: 1;
+    margin: 0 0 20px;
+    color: var(--muted);
+    font-size: 0.93rem;
+    line-height: 1.75;
+}
+
+.caracteristicas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 24px;
+}
+
+.caracteristicas span {
+    padding: 6px 10px;
+    border-radius: 7px;
+    background: #edf6ff;
+    color: #315d83;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.tarjeta button {
+    width: 100%;
+    min-height: 45px;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 10px;
+    background: var(--blue);
+    color: #ffffff;
+    font-weight: 800;
+    transition: background 0.2s;
+}
+
+.tarjeta button:hover {
+    background: var(--blue-dark);
+}
+
+/* =====================================================
+   INFORMACIÓN GENERAL
+   ===================================================== */
+
+.informacion {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(180px, 1fr)
+    );
+    gap: 20px;
+    margin: 30px 0 75px;
+    padding: 35px;
+    border-radius: 20px;
+    background: #e7f3ff;
+}
+
+.informacion div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    text-align: center;
+}
+
+.informacion strong {
+    color: var(--blue-dark);
+    font-size: 2rem;
+    font-weight: 900;
+}
+
+.informacion span {
+    color: #4e6884;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+footer {
+    padding: 28px 15px;
+    border-top: 1px solid var(--border);
+    background: #ffffff;
+    color: var(--muted);
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+footer p {
+    margin: 0;
+}
+
+/* =====================================================
+   ESTILOS GENERALES DE LAS PÁGINAS DE MÉTODOS
+   ===================================================== */
+
+.pagina-grafico,
+.pagina-simplex,
+.pagina-mgrande,
+.pagina-noroeste,
 .pagina-dualidad,
 .pagina-sensibilidad,
 .pagina-transporte,
 .pagina-modi {
-    background: var(--gv-fondo);
-    color: var(--gv-texto);
+    background: var(--background);
+    color: var(--text);
 }
 
-/* ==========================================================
-   BARRAS DE NAVEGACIÓN
-   ========================================================== */
+header a {
+    text-decoration: none;
+}
+
+.panel,
+.card,
+.tarjeta-formulario,
+.bloque,
+.seccion {
+    min-width: 0;
+}
+
+.panel,
+.card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--white);
+    box-shadow: var(--shadow);
+}
+
+/* =====================================================
+   NAVEGACIÓN DE MÓDULOS
+   ===================================================== */
 
 .dual-nav,
 .sen-nav,
 .tra-nav,
 .modi-nav {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     flex-wrap: wrap;
     gap: 15px;
     padding: 20px 6%;
-    background: var(--gv-blanco);
-    border-bottom: 1px solid var(--gv-borde);
-    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.025);
+    border-bottom: 1px solid var(--border);
+    background: var(--white);
 }
 
 .dual-nav a,
 .sen-nav a,
 .tra-nav a,
 .modi-nav a {
-    color: var(--gv-azul-oscuro);
-    font-weight: 700;
-    text-decoration: none;
+    color: var(--blue-dark);
+    font-weight: 800;
 }
 
 .dual-nav strong,
 .sen-nav strong,
 .tra-nav strong,
-.modi-nav strong,
-.dual-marca {
-    color: var(--gv-marino);
+.modi-nav strong {
+    color: var(--navy);
     font-size: 1.15rem;
-    font-weight: 800;
 }
 
 .dual-nav span,
 .sen-nav span,
 .tra-nav span,
 .modi-nav span {
-    color: var(--gv-gris);
-    font-size: 0.78rem;
+    color: var(--muted);
+    font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 1px;
 }
 
-/* ==========================================================
-   CONTENEDORES PRINCIPALES
-   ========================================================== */
+/* =====================================================
+   CONTENEDORES DE MÓDULOS
+   ===================================================== */
 
 .dual-contenedor,
 .sen-contenedor,
@@ -141,38 +587,37 @@ a:focus-visible {
     margin: 35px auto 65px;
 }
 
-/* ==========================================================
-   ENCABEZADOS DE CADA MÓDULO
-   ========================================================== */
+/* =====================================================
+   PORTADAS DE MÓDULOS
+   ===================================================== */
 
 .dual-hero,
 .sen-hero,
 .tra-hero,
 .modi-hero {
-    padding: 45px;
     margin-bottom: 28px;
-    border-radius: 24px;
+    padding: 45px;
+    border-radius: 22px;
     background: linear-gradient(
         125deg,
-        #071b36 0%,
-        #103d6c 65%,
-        #0877dc 100%
+        #071b36,
+        #103e6e 65%,
+        #0877dc
     );
     color: #ffffff;
-    box-shadow: var(--gv-sombra);
+    box-shadow: var(--shadow);
 }
 
 .dual-hero > span,
 .sen-hero > span,
 .tra-hero > span,
-.modi-hero > span,
-.dual-etiqueta {
+.modi-hero > span {
     display: inline-block;
     margin-bottom: 12px;
-    color: #a9eaff;
+    color: #a8eaff;
     font-size: 0.8rem;
     font-weight: 800;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.4px;
 }
 
 .dual-hero h1,
@@ -182,7 +627,7 @@ a:focus-visible {
     margin: 0 0 12px;
     color: #ffffff;
     font-size: clamp(2rem, 4vw, 3.2rem);
-    line-height: 1.2;
+    font-weight: 900;
 }
 
 .dual-hero p,
@@ -191,24 +636,24 @@ a:focus-visible {
 .modi-hero p {
     max-width: 760px;
     margin: 0;
-    color: #e1f0ff;
-    font-size: 1rem;
+    color: #e0f0ff;
 }
 
-/* ==========================================================
-   PANELES
-   ========================================================== */
+/* =====================================================
+   PANELES DE MÓDULOS
+   ===================================================== */
 
 .dual-panel,
 .sen-panel,
 .tra-panel,
 .modi-panel {
+    min-width: 0;
     margin-bottom: 25px;
     padding: 32px;
-    background: var(--gv-blanco);
-    border: 1px solid var(--gv-borde);
-    border-radius: 22px;
-    box-shadow: var(--gv-sombra);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--white);
+    box-shadow: var(--shadow);
 }
 
 .dual-panel-titulo,
@@ -226,8 +671,8 @@ a:focus-visible {
 .tra-titulo h2,
 .modi-titulo h2 {
     margin: 0 0 6px;
-    color: var(--gv-marino);
-    font-size: 1.4rem;
+    color: var(--navy);
+    font-size: 1.45rem;
 }
 
 .dual-panel-titulo p,
@@ -235,7 +680,7 @@ a:focus-visible {
 .tra-titulo p,
 .modi-titulo p {
     margin: 0;
-    color: var(--gv-gris);
+    color: var(--muted);
 }
 
 .dual-numero,
@@ -247,15 +692,15 @@ a:focus-visible {
     place-items: center;
     width: 45px;
     height: 45px;
-    border-radius: 13px;
-    background: var(--gv-celeste);
-    color: var(--gv-azul-oscuro);
-    font-weight: 800;
+    border-radius: 12px;
+    background: #e8f6ff;
+    color: var(--blue-dark);
+    font-weight: 900;
 }
 
-/* ==========================================================
-   CONFIGURACIÓN DE VARIABLES Y RESTRICCIONES
-   ========================================================== */
+/* =====================================================
+   CONFIGURACIÓN DE PROBLEMAS
+   ===================================================== */
 
 .dual-grid-config,
 .sen-config,
@@ -273,21 +718,57 @@ a:focus-visible {
 .dual-grid-config label,
 .sen-config label,
 .tra-config label,
-.modi-config label,
+.modi-config label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.dual-fila,
+.sen-campos {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(100px, 1fr)
+    );
+    gap: 12px;
+    margin: 15px 0 25px;
+}
+
 .dual-fila label,
 .sen-campos label {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    min-width: 0;
-    color: var(--gv-texto);
+    gap: 7px;
     font-weight: 700;
-    font-size: 0.9rem;
 }
 
-/* ==========================================================
-   CAMPOS
-   ========================================================== */
+/* =====================================================
+   CAMPOS DE ENTRADA
+   ===================================================== */
+
+input[type="number"],
+input[type="text"],
+select,
+textarea {
+    max-width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid #cbd9e8;
+    border-radius: 9px;
+    background: #ffffff;
+    color: var(--text);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(8, 119, 220, 0.12);
+    outline: none;
+}
 
 .dual-grid-config input,
 .dual-grid-config select,
@@ -296,45 +777,13 @@ a:focus-visible {
 .tra-config input,
 .tra-config select,
 .modi-config input,
-.modi-config select,
-.dual-fila input,
-.sen-campos input {
+.modi-config select {
     width: 100%;
-    min-height: 45px;
-    padding: 10px 12px;
-    border: 1px solid #cbd9e8;
-    border-radius: 10px;
-    background: #ffffff;
-    color: var(--gv-texto);
-    outline: none;
 }
 
-.dual-grid-config input:focus,
-.dual-grid-config select:focus,
-.sen-config input:focus,
-.sen-config select:focus,
-.tra-config input:focus,
-.modi-config input:focus,
-.dual-fila input:focus,
-.sen-campos input:focus {
-    border-color: var(--gv-azul);
-    box-shadow: 0 0 0 3px rgba(8, 119, 220, 0.12);
-}
-
-.dual-fila,
-.sen-campos {
-    display: grid;
-    grid-template-columns: repeat(
-        auto-fill,
-        minmax(110px, 1fr)
-    );
-    gap: 14px;
-    margin: 15px 0 25px;
-}
-
-/* ==========================================================
-   BOTONES
-   ========================================================== */
+/* =====================================================
+   BOTONES DE MÓDULOS
+   ===================================================== */
 
 .dual-acciones,
 .sen-botones,
@@ -350,60 +799,57 @@ a:focus-visible {
 .dual-acciones button,
 .sen-botones button,
 .tra-botones button,
-.modi-botones button,
-.dual-verificacion button,
-.sen-escenario button {
+.modi-botones button {
     min-height: 45px;
     padding: 11px 20px;
     border: 1px solid transparent;
-    border-radius: 11px;
-    background: var(--gv-azul);
+    border-radius: 10px;
+    background: var(--blue);
     color: #ffffff;
-    font-weight: 700;
-    transition: background 0.2s, transform 0.2s;
+    font-weight: 800;
+    transition: 0.2s;
 }
 
 .dual-acciones button:hover,
 .sen-botones button:hover,
 .tra-botones button:hover,
-.modi-botones button:hover,
-.dual-verificacion button:hover,
-.sen-escenario button:hover {
-    background: var(--gv-azul-oscuro);
-    transform: translateY(-1px);
+.modi-botones button:hover {
+    background: var(--blue-dark);
 }
 
-.dual-acciones .dual-btn-secundario,
-.sen-botones .sen-secundario,
-.tra-botones .tra-secundario,
-.modi-botones .modi-secundario {
-    background: #edf5fd;
-    color: var(--gv-azul-oscuro);
-    border-color: #d3e6f8;
+.dual-btn-secundario,
+.sen-secundario,
+.tra-secundario,
+.modi-secundario {
+    background: #eaf4ff !important;
+    color: var(--blue-dark) !important;
+    border-color: #cce2f5 !important;
 }
 
-.dual-acciones .dual-btn-secundario:hover,
-.sen-botones .sen-secundario:hover,
-.tra-botones .tra-secundario:hover,
-.modi-botones .modi-secundario:hover {
-    background: #dceeff;
+.dual-btn-secundario:hover,
+.sen-secundario:hover,
+.tra-secundario:hover,
+.modi-secundario:hover {
+    background: #d7ecff !important;
 }
 
-/* ==========================================================
-   TABLAS GRANDES DE HASTA 20 X 20
-   ========================================================== */
+/* =====================================================
+   TABLAS DE HASTA 20 X 20
+   ===================================================== */
 
 .dual-tabla-scroll,
 .sen-tabla-scroll,
 .tra-tabla-scroll,
-.modi-tabla-scroll {
+.modi-tabla-scroll,
+.tabla-scroll,
+.tabla-contenedor,
+.tabla-responsive {
     width: 100%;
     max-width: 100%;
     overflow-x: auto;
-    overflow-y: visible;
     margin: 18px 0;
-    border: 1px solid var(--gv-borde);
-    border-radius: 13px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -416,7 +862,7 @@ a:focus-visible {
     border-collapse: separate;
     border-spacing: 0;
     background: #ffffff;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
 }
 
 .dual-tabla th,
@@ -427,11 +873,11 @@ a:focus-visible {
 .tra-tabla td,
 .modi-tabla th,
 .modi-tabla td {
-    padding: 12px 14px;
+    padding: 11px 13px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     text-align: center;
     vertical-align: middle;
-    border-right: 1px solid var(--gv-borde);
-    border-bottom: 1px solid var(--gv-borde);
     white-space: nowrap;
 }
 
@@ -439,8 +885,8 @@ a:focus-visible {
 .sen-tabla thead th,
 .tra-tabla thead th,
 .modi-tabla thead th {
-    background: #eaf4ff;
-    color: var(--gv-marino);
+    background: #e9f4ff;
+    color: var(--navy);
     font-weight: 800;
 }
 
@@ -449,57 +895,119 @@ a:focus-visible {
 .tra-tabla tbody th,
 .modi-tabla tbody th {
     background: #f5f9fd;
-    color: var(--gv-marino);
+    color: var(--navy);
     font-weight: 800;
 }
 
 .dual-tabla input,
-.dual-tabla select,
 .sen-tabla input,
 .tra-tabla input,
 .modi-tabla input {
     width: 90px;
-    min-width: 80px;
-    padding: 9px;
-    border: 1px solid #cbd9e8;
-    border-radius: 8px;
-    background: #ffffff;
-    color: var(--gv-texto);
+    min-width: 75px;
+    padding: 8px;
     text-align: center;
 }
 
 .dual-tabla select {
-    width: 75px;
-}
-
-.dual-tabla input:focus,
-.sen-tabla input:focus,
-.tra-tabla input:focus,
-.modi-tabla input:focus {
-    outline: 2px solid var(--gv-azul);
-    outline-offset: 1px;
+    min-width: 70px;
 }
 
 .tra-tabla td small,
 .modi-tabla td small {
     display: block;
     margin-top: 4px;
-    color: var(--gv-gris);
-    font-size: 0.75rem;
+    color: var(--muted);
+    font-size: 0.74rem;
 }
 
-/* ==========================================================
-   TÍTULOS Y EXPLICACIONES INTERNAS
-   ========================================================== */
+/* =====================================================
+   TABLAS GENÉRICAS DE RESULTADOS
+   ===================================================== */
 
-#dualFormulario h3,
+table {
+    border-collapse: collapse;
+}
+
+table th,
+table td {
+    vertical-align: middle;
+}
+
+.tabla-resultados,
+.tabla-iteraciones,
+.tabla-simplex,
+.tabla-mgrande {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+}
+
+.tabla-resultados th,
+.tabla-resultados td,
+.tabla-iteraciones th,
+.tabla-iteraciones td,
+.tabla-simplex th,
+.tabla-simplex td,
+.tabla-mgrande th,
+.tabla-mgrande td {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    text-align: center;
+}
+
+.tabla-resultados th,
+.tabla-iteraciones th,
+.tabla-simplex th,
+.tabla-mgrande th {
+    background: #e9f4ff;
+    color: var(--navy);
+}
+
+/* =====================================================
+   MENSAJES DE ERROR
+   ===================================================== */
+
+.dual-error,
+.sen-error,
+.tra-error,
+.modi-error,
+.mensaje-error {
+    margin: 18px 0;
+    padding: 15px 18px;
+    border: 1px solid #f1b9c1;
+    border-left: 5px solid var(--red);
+    border-radius: 10px;
+    background: #fff1f3;
+    color: #a52e3d;
+    font-weight: 700;
+}
+
+/* =====================================================
+   NOTAS Y EXPLICACIONES
+   ===================================================== */
+
+.dual-ayuda,
+.sen-nota,
+.tra-nota,
+.modi-nota,
+.nota,
+.ayuda {
+    margin: 14px 0;
+    padding: 13px 16px;
+    border-left: 4px solid var(--blue);
+    border-radius: 8px;
+    background: #edf6ff;
+    color: #405a76;
+    font-size: 0.9rem;
+}
+
 #dualContenido h3,
-#senFormulario h3,
 #senContenido h3,
 #traResultados h3,
 #modiResultados h3 {
     margin: 26px 0 12px;
-    color: var(--gv-marino);
+    color: var(--navy);
     font-size: 1.25rem;
 }
 
@@ -507,43 +1015,12 @@ a:focus-visible {
 #senContenido h4,
 #modiResultados h4 {
     margin: 18px 0 10px;
-    color: var(--gv-marino);
+    color: var(--navy);
 }
 
-.dual-ayuda,
-.sen-nota,
-.tra-nota,
-.modi-nota {
-    margin: 12px 0;
-    padding: 13px 16px;
-    border-left: 4px solid var(--gv-azul);
-    border-radius: 8px;
-    background: #f0f7ff;
-    color: #405873;
-    font-size: 0.9rem;
-}
-
-/* ==========================================================
-   MENSAJES DE ERROR
-   ========================================================== */
-
-.dual-error,
-.sen-error,
-.tra-error,
-.modi-error {
-    margin: 18px 0;
-    padding: 15px 18px;
-    border: 1px solid #f1b9c1;
-    border-left: 5px solid var(--gv-rojo);
-    border-radius: 11px;
-    background: #fff1f3;
-    color: #a52e3d;
-    font-weight: 600;
-}
-
-/* ==========================================================
+/* =====================================================
    DUALIDAD
-   ========================================================== */
+   ===================================================== */
 
 .dual-modelos {
     display: grid;
@@ -554,74 +1031,63 @@ a:focus-visible {
     gap: 20px;
 }
 
-.dual-modelo {
+.dual-modelo,
+.dual-explicacion,
+.dual-verificacion,
+.dual-resumen {
     min-width: 0;
     padding: 22px;
-    border: 1px solid var(--gv-borde);
-    border-radius: 15px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
     background: #f8fbff;
     overflow-wrap: anywhere;
 }
 
 .dual-modelo h3 {
-    margin-top: 0 !important;
-}
-
-.dual-ecuaciones {
-    margin: 14px 0;
+    margin-top: 0;
 }
 
 .dual-ecuaciones p {
     padding: 8px 0;
-    border-bottom: 1px solid var(--gv-borde);
+    border-bottom: 1px solid var(--border);
 }
 
-.dual-explicacion,
-.dual-verificacion,
-.dual-resumen {
-    margin-top: 22px;
-    padding: 22px;
-    border: 1px solid var(--gv-borde);
-    border-radius: 15px;
-    background: #f8fbff;
-}
-
-/* ==========================================================
+/* =====================================================
    SENSIBILIDAD
-   ========================================================== */
+   ===================================================== */
 
 .sen-resumen,
 .sen-comparacion {
-    padding: 22px;
     margin: 18px 0;
-    border: 1px solid #c9e8da;
-    border-radius: 15px;
+    padding: 22px;
+    border: 1px solid #c5e8d6;
+    border-radius: 14px;
     background: #f0faf5;
 }
 
 .sen-resumen h3,
 .sen-comparacion h4 {
-    color: #126d4c !important;
+    color: #126d4c;
 }
 
 .sen-escenario,
 .sen-iteracion {
-    margin: 22px 0;
+    margin: 20px 0;
     padding: 22px;
-    border: 1px solid var(--gv-borde);
-    border-radius: 15px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
     background: #f8fbff;
 }
 
-/* ==========================================================
-   TRANSPORTE - COSTO MÍNIMO
-   ========================================================== */
+/* =====================================================
+   COSTO MÍNIMO
+   ===================================================== */
 
 .tra-resumen {
-    padding: 22px;
     margin-bottom: 20px;
-    border: 1px solid #c9e8da;
-    border-radius: 15px;
+    padding: 22px;
+    border: 1px solid #c5e8d6;
+    border-radius: 14px;
     background: #f0faf5;
 }
 
@@ -634,14 +1100,14 @@ a:focus-visible {
     padding: 15px;
     border-radius: 10px;
     background: #edf5fd;
-    color: var(--gv-marino);
-    font-weight: 700;
+    color: var(--navy);
+    font-weight: 800;
     overflow-wrap: anywhere;
 }
 
-/* ==========================================================
-   MODI
-   ========================================================== */
+/* =====================================================
+   MÉTODO MODI
+   ===================================================== */
 
 .modi-resumen {
     display: grid;
@@ -658,18 +1124,18 @@ a:focus-visible {
     flex-direction: column;
     gap: 6px;
     padding: 22px;
-    border: 1px solid var(--gv-borde);
+    border: 1px solid var(--border);
     border-radius: 14px;
     background: #f8fbff;
 }
 
 .modi-resumen small {
-    color: var(--gv-gris);
+    color: var(--muted);
     font-weight: 700;
 }
 
 .modi-resumen strong {
-    color: var(--gv-azul-oscuro);
+    color: var(--blue-dark);
     font-size: 1.5rem;
 }
 
@@ -677,14 +1143,14 @@ a:focus-visible {
 .modi-iteracion {
     margin: 22px 0;
     padding: 22px;
-    border: 1px solid var(--gv-borde);
-    border-radius: 15px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
     background: #f8fbff;
 }
 
 .modi-paso-inicial {
-    padding: 12px 15px;
     margin: 8px 0;
+    padding: 12px 15px;
     border-radius: 9px;
     background: #edf5fd;
 }
@@ -700,7 +1166,8 @@ a:focus-visible {
     font-weight: 800;
 }
 
-.modi-exito {
+.modi-exito,
+.mensaje-exito {
     margin: 20px 0;
     padding: 20px;
     border: 1px solid #b8e3cb;
@@ -709,9 +1176,9 @@ a:focus-visible {
     color: #126d4c;
 }
 
-/* ==========================================================
-   NOROESTE - MEJORAS VISUALES
-   ========================================================== */
+/* =====================================================
+   ESQUINA NOROESTE
+   ===================================================== */
 
 .noroeste-asignacion-destacada {
     background: #e3f7ed !important;
@@ -722,7 +1189,7 @@ a:focus-visible {
 .noroeste-paso-visual {
     margin: 15px 0;
     padding: 18px;
-    border: 1px solid var(--gv-borde);
+    border: 1px solid var(--border);
     border-radius: 13px;
     background: #f8fbff;
 }
@@ -734,9 +1201,8 @@ a:focus-visible {
     height: 30px;
     margin-right: 10px;
     border-radius: 50%;
-    background: var(--gv-azul);
+    background: var(--blue);
     color: #ffffff;
-    font-size: 0.85rem;
     font-weight: 800;
 }
 
@@ -747,26 +1213,159 @@ a:focus-visible {
     background: #eaf9f0;
 }
 
-/* ==========================================================
-   FOOTERS
-   ========================================================== */
+/* =====================================================
+   RESULTADOS GENERALES
+   ===================================================== */
+
+.resultado,
+.resultados,
+.resultado-final,
+.resumen-resultados {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.resultado-final,
+.resumen-resultados {
+    margin: 18px 0;
+    padding: 22px;
+    border: 1px solid #b8e3cb;
+    border-radius: 14px;
+    background: #eaf9f0;
+}
+
+.resultado-final strong,
+.resumen-resultados strong {
+    color: #126d4c;
+}
+
+.iteracion,
+.paso,
+.paso-solucion {
+    margin: 18px 0;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    background: #f8fbff;
+}
+
+.formula,
+.ecuacion {
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 12px 15px;
+    border-radius: 9px;
+    background: #edf5fd;
+    font-family: monospace;
+    font-size: 0.95rem;
+}
+
+/* =====================================================
+   PIE DE PÁGINA DE MÓDULOS
+   ===================================================== */
 
 .dual-footer,
 .sen-footer,
 .tra-footer,
 .modi-footer {
     padding: 25px 15px;
-    border-top: 1px solid var(--gv-borde);
-    color: var(--gv-gris);
+    border-top: 1px solid var(--border);
+    background: #ffffff;
+    color: var(--muted);
     text-align: center;
     font-size: 0.85rem;
 }
 
-/* ==========================================================
-   DISEÑO RESPONSIVO
-   ========================================================== */
+/* =====================================================
+   RESPONSIVE - TABLET
+   ===================================================== */
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+    .hero {
+        min-height: 500px;
+    }
+
+    .hero h2 {
+        font-size: 3.5rem;
+    }
+
+    .metodos {
+        grid-template-columns: repeat(
+            2,
+            minmax(0, 1fr)
+        );
+    }
+
+    .dual-contenedor,
+    .sen-contenedor,
+    .tra-contenedor,
+    .modi-contenedor {
+        width: 95%;
+    }
+}
+
+/* =====================================================
+   RESPONSIVE - MÓVIL
+   ===================================================== */
+
+@media (max-width: 600px) {
+    .nav-contenido {
+        min-height: 78px;
+    }
+
+    .logo-texto h1 {
+        font-size: 1.2rem;
+    }
+
+    .logo-texto p {
+        font-size: 0.72rem;
+    }
+
+    .nav-enlace {
+        padding: 9px 11px;
+        font-size: 0.75rem;
+    }
+
+    .hero {
+        min-height: auto;
+    }
+
+    .hero-contenido {
+        padding: 65px 0;
+    }
+
+    .hero h2 {
+        font-size: 2.8rem;
+        letter-spacing: -1px;
+    }
+
+    .hero-descripcion {
+        font-size: 0.95rem;
+    }
+
+    .hero-estadisticas {
+        gap: 22px;
+    }
+
+    .hero-estadisticas strong {
+        font-size: 1.6rem;
+    }
+
+    .bienvenida {
+        margin: 50px auto 30px;
+    }
+
+    .metodos {
+        grid-template-columns: 1fr;
+    }
+
+    .tarjeta {
+        padding: 24px;
+    }
+
+    .informacion {
+        padding: 25px 15px;
+    }
 
     .dual-nav,
     .sen-nav,
@@ -788,7 +1387,7 @@ a:focus-visible {
     .tra-hero,
     .modi-hero {
         padding: 28px 22px;
-        border-radius: 18px;
+        border-radius: 17px;
     }
 
     .dual-panel,
@@ -796,7 +1395,7 @@ a:focus-visible {
     .tra-panel,
     .modi-panel {
         padding: 20px 15px;
-        border-radius: 16px;
+        border-radius: 15px;
     }
 
     .dual-grid-config,
@@ -844,17 +1443,18 @@ a:focus-visible {
     }
 }
 
-/* ==========================================================
-   IMPRESIÓN DE RESULTADOS
-   ========================================================== */
+/* =====================================================
+   IMPRESIÓN
+   ===================================================== */
 
 @media print {
-
     body {
         background: #ffffff !important;
         color: #000000 !important;
     }
 
+    .encabezado,
+    .nav-enlace,
     .dual-nav,
     .sen-nav,
     .tra-nav,
@@ -862,9 +1462,7 @@ a:focus-visible {
     .dual-acciones,
     .sen-botones,
     .tra-botones,
-    .modi-botones,
-    .dual-verificacion button,
-    .sen-escenario button {
+    .modi-botones {
         display: none !important;
     }
 
@@ -874,7 +1472,6 @@ a:focus-visible {
     .modi-panel {
         box-shadow: none !important;
         border: 1px solid #dddddd;
-        break-inside: avoid;
     }
 
     .dual-tabla-scroll,
@@ -882,13 +1479,6 @@ a:focus-visible {
     .tra-tabla-scroll,
     .modi-tabla-scroll {
         overflow: visible;
-    }
-
-    .dual-tabla,
-    .sen-tabla,
-    .tra-tabla,
-    .modi-tabla {
-        font-size: 9px;
     }
 
     .dual-hero,
@@ -905,5 +1495,12 @@ a:focus-visible {
     .tra-hero *,
     .modi-hero * {
         color: #000000 !important;
+    }
+
+    .dual-tabla,
+    .sen-tabla,
+    .tra-tabla,
+    .modi-tabla {
+        font-size: 9px;
     }
 }

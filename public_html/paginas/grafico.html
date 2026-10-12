@@ -1,14 +1,587 @@
 
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Método Gráfico | Agua Salvavidas</title>
+    <title>Método Gráfico | Great Value</title>
 
     <link rel="stylesheet" href="../css/estilos.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f3f7fc;
+            color: #172b46;
+            font-family: "DM Sans", Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        .encabezado {
+            background: #ffffff;
+            border-bottom: 1px solid #dce7f1;
+        }
+
+        .barra-superior {
+            width: min(92%, 1200px);
+            min-height: 88px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .logo-texto {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .gota {
+            display: grid;
+            place-items: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: #e7f7ff;
+            font-size: 26px;
+        }
+
+        .logo-texto h1 {
+            margin: 0;
+            color: #071b36;
+            font-size: 1.5rem;
+        }
+
+        .logo-texto p {
+            margin: 0;
+            color: #71829a;
+            font-size: 0.8rem;
+        }
+
+        .btn-volver {
+            display: inline-block;
+            padding: 11px 17px;
+            border-radius: 10px;
+            background: #eaf4ff;
+            color: #0758a6;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .btn-volver:hover {
+            background: #d7ebff;
+        }
+
+        .contenedor-metodo {
+            width: min(94%, 1200px);
+            margin: 30px auto 65px;
+        }
+
+        /* PORTADA */
+
+        .simplex-hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px;
+            padding: 45px;
+            border-radius: 22px;
+            background: linear-gradient(
+                120deg,
+                #071b36,
+                #104575 70%,
+                #0877dc
+            );
+            color: #ffffff;
+            box-shadow: 0 15px 35px #071b3615;
+        }
+
+        .simplex-categoria {
+            color: #a8eaff;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 1.3px;
+        }
+
+        .simplex-hero h2 {
+            margin: 13px 0;
+            color: #ffffff;
+            font-size: clamp(2rem, 4vw, 3.1rem);
+        }
+
+        .simplex-hero p {
+            max-width: 690px;
+            color: #deefff;
+            line-height: 1.8;
+        }
+
+        .simplex-hero-etiquetas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .simplex-hero-etiquetas span {
+            padding: 7px 12px;
+            border: 1px solid #ffffff40;
+            border-radius: 20px;
+            background: #ffffff15;
+            font-size: 0.82rem;
+        }
+
+        .simplex-hero-icono {
+            display: grid;
+            place-items: center;
+            width: 125px;
+            height: 125px;
+            flex-shrink: 0;
+            border: 1px solid #ffffff40;
+            border-radius: 25px;
+            background: #ffffff16;
+            font-size: 65px;
+        }
+
+        /* INDICADOR DE ETAPAS */
+
+        .simplex-progreso {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .simplex-etapa {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px;
+            border: 1px solid #dce7f1;
+            border-radius: 14px;
+            background: #ffffff;
+        }
+
+        .simplex-etapa.activa {
+            border-color: #0877dc;
+            background: #edf7ff;
+        }
+
+        .simplex-etapa-numero {
+            display: grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            border-radius: 11px;
+            background: #e8f4ff;
+            color: #0758a6;
+            font-weight: 800;
+        }
+
+        .simplex-etapa strong,
+        .simplex-etapa small {
+            display: block;
+        }
+
+        .simplex-etapa small {
+            color: #71829a;
+        }
+
+        /* PANELES */
+
+        .panel {
+            margin-bottom: 25px;
+            padding: 30px;
+            border: 1px solid #dce7f1;
+            border-radius: 20px;
+            background: #ffffff;
+            box-shadow: 0 10px 30px #071b360a;
+        }
+
+        .panel-titulo {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .paso {
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            background: #e8f4ff;
+            color: #0758a6;
+            font-weight: 800;
+        }
+
+        .panel-titulo h3 {
+            margin: 0 0 5px;
+            color: #071b36;
+            font-size: 1.45rem;
+        }
+
+        .panel-titulo p {
+            margin: 0;
+            color: #71829a;
+        }
+
+        /* AYUDA */
+
+        .simplex-ayuda {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 18px;
+            border: 1px solid #d2e8fa;
+            border-radius: 12px;
+            background: #f0f8ff;
+        }
+
+        .simplex-ayuda-icono {
+            font-size: 25px;
+        }
+
+        .simplex-ayuda p {
+            margin: 5px 0 0;
+            color: #506b86;
+        }
+
+        /* FORMULARIOS */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fit,
+                minmax(210px, 1fr)
+            );
+            gap: 20px;
+        }
+
+        .campo label {
+            display: block;
+            margin-bottom: 9px;
+            color: #405a76;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .campo input,
+        .campo select {
+            width: 100%;
+            min-height: 46px;
+            padding: 10px 13px;
+            border: 1px solid #cbd9e8;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #172b46;
+        }
+
+        .campo input:focus,
+        .campo select:focus {
+            border-color: #0877dc;
+            outline: none;
+            box-shadow: 0 0 0 3px #0877dc20;
+        }
+
+        /* BOTONES */
+
+        .acciones {
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .acciones button {
+            min-height: 46px;
+            padding: 11px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #0877dc;
+            color: #ffffff;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .acciones button:hover {
+            background: #0758a6;
+        }
+
+        .acciones .btn-secundario,
+        .acciones .btn-limpiar {
+            border: 1px solid #cce2f5;
+            background: #edf6ff;
+            color: #0758a6;
+        }
+
+        /* MODELO MATEMÁTICO */
+
+        .simplex-bloque-etiqueta {
+            margin: 24px 0 12px;
+            color: #0877dc;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .bloque-modelo {
+            min-width: 0;
+            margin-bottom: 22px;
+            padding: 22px;
+            border: 1px solid #dce7f1;
+            border-radius: 13px;
+            background: #f8fbff;
+            overflow-x: auto;
+        }
+
+        .bloque-modelo h4 {
+            margin: 0 0 18px;
+            color: #071b36;
+        }
+
+        .grafico-objetivo {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .grafico-simbolo {
+            color: #071b36;
+            font-size: 1.15rem;
+            font-weight: 900;
+        }
+
+        .bloque-modelo input {
+            width: 85px;
+            max-width: none;
+            padding: 9px;
+            border: 1px solid #cbd9e8;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .bloque-modelo select {
+            padding: 9px;
+            border: 1px solid #cbd9e8;
+            border-radius: 8px;
+        }
+
+        #restriccionesGrafico > div {
+            margin-bottom: 12px;
+        }
+
+        .simplex-nota {
+            padding: 16px 19px;
+            border-left: 4px solid #0877dc;
+            border-radius: 10px;
+            background: #edf6ff;
+        }
+
+        .simplex-nota p {
+            margin: 5px 0 0;
+            color: #506b86;
+        }
+
+        .mensaje-error {
+            margin-top: 18px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #fff0f2;
+            color: #a52e3d;
+        }
+
+        /* GRÁFICA */
+
+        .grafico-presentacion {
+            margin-top: 20px;
+            padding: 25px;
+            border: 1px solid #dce7f1;
+            border-radius: 16px;
+            background: #f8fbff;
+        }
+
+        .grafico-presentacion-cabecera {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .grafico-presentacion-cabecera h3 {
+            margin: 5px 0;
+            color: #071b36;
+        }
+
+        .grafico-indicador {
+            padding: 8px 12px;
+            border-radius: 20px;
+            background: #e5f8ef;
+            color: #14875e;
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
+
+        .grafico-presentacion > p {
+            color: #71829a;
+        }
+
+        .grafico-contenedor {
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #dce7f1;
+            border-radius: 14px;
+            background: #ffffff;
+            overflow-x: auto;
+        }
+
+        #canvasGrafico {
+            display: block;
+            width: 100%;
+            max-width: 900px;
+            height: auto;
+            margin: auto;
+            background: #ffffff;
+        }
+
+        .grafico-leyenda {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 18px;
+            color: #506b86;
+            font-size: 0.85rem;
+        }
+
+        .grafico-leyenda span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .grafico-muestra-region,
+        .grafico-muestra-vertice,
+        .grafico-muestra-optimo {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+        }
+
+        .grafico-muestra-region {
+            background: #cfeaff;
+        }
+
+        .grafico-muestra-vertice {
+            background: #ffca75;
+            border-radius: 50%;
+        }
+
+        .grafico-muestra-optimo {
+            background: #20ad74;
+            border-radius: 50%;
+        }
+
+        .grafico-procedimiento-titulo {
+            margin: 30px 0 20px;
+        }
+
+        .grafico-procedimiento-titulo h3 {
+            margin: 8px 0;
+            color: #071b36;
+            font-size: 1.5rem;
+        }
+
+        .grafico-procedimiento-titulo p {
+            color: #71829a;
+        }
+
+        /* RESULTADOS */
+
+        #procedimientoGrafico {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        #procedimientoGrafico table {
+            width: max-content;
+            min-width: 100%;
+            margin: 15px 0;
+            border-collapse: collapse;
+            background: #ffffff;
+        }
+
+        #procedimientoGrafico th,
+        #procedimientoGrafico td {
+            padding: 10px 13px;
+            border: 1px solid #dce7f1;
+            text-align: center;
+        }
+
+        #procedimientoGrafico th {
+            background: #eaf4ff;
+            color: #071b36;
+        }
+
+        .oculto {
+            display: none !important;
+        }
+
+        footer {
+            padding: 25px 15px;
+            border-top: 1px solid #dce7f1;
+            background: #ffffff;
+            color: #71829a;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 700px) {
+            .simplex-hero {
+                padding: 28px;
+            }
+
+            .simplex-hero-icono {
+                display: none;
+            }
+
+            .simplex-progreso {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                padding: 20px 15px;
+            }
+
+            .grafico-presentacion {
+                padding: 15px;
+            }
+
+            .acciones button {
+                width: 100%;
+            }
+
+            .barra-superior {
+                flex-wrap: wrap;
+                padding: 15px 0;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -18,8 +591,9 @@
 
         <div class="logo-texto">
             <div class="gota">💧</div>
+
             <div>
-                <h1>AGUA SALVAVIDAS</h1>
+                <h1>Great Value</h1>
                 <p>Investigación de Operaciones</p>
             </div>
         </div>
@@ -33,7 +607,7 @@
 
 <main class="contenedor-metodo">
 
-    <!-- PRESENTACIÓN -->
+    <!-- PORTADA -->
 
     <section class="simplex-hero">
 
@@ -47,8 +621,8 @@
 
             <p>
                 Representa restricciones en el plano cartesiano,
-                identifica la región factible y analiza los puntos
-                extremos para encontrar la solución óptima.
+                identifica la región factible y analiza los
+                puntos extremos para encontrar la solución óptima.
             </p>
 
             <div class="simplex-hero-etiquetas">
@@ -59,7 +633,9 @@
 
         </div>
 
-        <div class="simplex-hero-icono">📈</div>
+        <div class="simplex-hero-icono">
+            📈
+        </div>
 
     </section>
 
@@ -69,6 +645,7 @@
 
         <div class="simplex-etapa activa" id="etapaG1">
             <span class="simplex-etapa-numero">01</span>
+
             <div>
                 <strong>Configuración</strong>
                 <small>Definir el problema</small>
@@ -77,6 +654,7 @@
 
         <div class="simplex-etapa" id="etapaG2">
             <span class="simplex-etapa-numero">02</span>
+
             <div>
                 <strong>Modelo</strong>
                 <small>Ingresar restricciones</small>
@@ -85,38 +663,41 @@
 
         <div class="simplex-etapa" id="etapaG3">
             <span class="simplex-etapa-numero">03</span>
+
             <div>
-                <strong>Gráfica y resultados</strong>
-                <small>Analizar la solución</small>
+                <strong>Resultados</strong>
+                <small>Gráfica y solución</small>
             </div>
         </div>
 
     </section>
 
-    <!-- CONFIGURACIÓN -->
+    <!-- PASO 1 -->
 
     <section class="panel">
 
         <div class="panel-titulo">
             <span class="paso">1</span>
+
             <div>
                 <h3>Configuración del problema</h3>
                 <p>
-                    Selecciona el tipo de optimización y la
-                    cantidad de restricciones.
+                    Selecciona el tipo de optimización
+                    y la cantidad de restricciones.
                 </p>
             </div>
         </div>
 
         <div class="simplex-ayuda">
             <div class="simplex-ayuda-icono">💡</div>
+
             <div>
                 <strong>¿Cómo funciona el método gráfico?</strong>
                 <p>
-                    Este método utiliza dos variables de decisión.
-                    Cada restricción se representa mediante una
-                    recta y se analiza la región que cumple
-                    todas las condiciones.
+                    Este método utiliza dos variables de
+                    decisión. Cada restricción se representa
+                    mediante una recta para identificar
+                    la región factible del problema.
                 </p>
             </div>
         </div>
@@ -143,14 +724,12 @@
                     type="number"
                     id="numRestriccionesGrafico"
                     min="1"
-                    max="10"
+                    max="20"
                     value="3">
             </div>
 
             <div class="campo">
-                <label>
-                    VARIABLES DE DECISIÓN
-                </label>
+                <label>VARIABLES DE DECISIÓN</label>
 
                 <input
                     type="text"
@@ -166,34 +745,33 @@
                 type="button"
                 class="btn-secundario"
                 onclick="cargarEjemploGrafico()">
-
-                ✦ Cargar ejemplo Agua Salvavidas
-
+                ✦ Cargar ejemplo Great Value
             </button>
 
             <button
                 type="button"
                 onclick="generarModeloGrafico()">
-
                 Generar modelo →
-
             </button>
 
         </div>
 
     </section>
 
-    <!-- MODELO -->
+    <!-- PASO 2 -->
 
-    <section class="panel oculto" id="panelModeloGrafico">
+    <section
+        class="panel oculto"
+        id="panelModeloGrafico">
 
         <div class="panel-titulo">
             <span class="paso">2</span>
+
             <div>
                 <h3>Construcción del modelo</h3>
                 <p>
-                    Ingresa la función objetivo y las
-                    restricciones del problema.
+                    Ingresa los coeficientes de la función
+                    objetivo y las restricciones.
                 </p>
             </div>
         </div>
@@ -203,15 +781,16 @@
         </div>
 
         <div class="bloque-modelo">
+
             <h4>Coeficientes de la función objetivo</h4>
 
-            <div class="ecuacion grafico-objetivo">
+            <div class="grafico-objetivo">
+
                 <span class="grafico-simbolo">Z =</span>
 
                 <input
                     type="number"
                     id="g_fo_0"
-                    class="input-coeficiente"
                     step="any"
                     value="0">
 
@@ -220,12 +799,13 @@
                 <input
                     type="number"
                     id="g_fo_1"
-                    class="input-coeficiente"
                     step="any"
                     value="0">
 
                 <strong>X₂</strong>
+
             </div>
+
         </div>
 
         <div class="simplex-bloque-etiqueta">
@@ -233,13 +813,16 @@
         </div>
 
         <div class="bloque-modelo">
+
             <h4>Restricciones y recursos disponibles</h4>
 
             <div id="restriccionesGrafico"></div>
+
         </div>
 
         <div class="simplex-nota">
-            <strong>Condición de no negatividad</strong>
+            <strong>Condiciones de no negatividad</strong>
+
             <p>
                 Las variables X₁ y X₂ deben ser mayores
                 o iguales que cero. El análisis se realiza
@@ -271,7 +854,7 @@
 
     </section>
 
-    <!-- RESULTADOS -->
+    <!-- PASO 3 -->
 
     <section
         class="panel oculto"
@@ -279,12 +862,12 @@
 
         <div class="panel-titulo">
             <span class="paso">3</span>
+
             <div>
                 <h3>Análisis gráfico y resultados</h3>
                 <p>
-                    Observa la representación de las
-                    restricciones y el procedimiento
-                    para evaluar la solución.
+                    Visualiza las restricciones, la región
+                    factible y la solución encontrada.
                 </p>
             </div>
         </div>
@@ -297,6 +880,7 @@
                     <span class="simplex-bloque-etiqueta">
                         VISUALIZACIÓN MATEMÁTICA
                     </span>
+
                     <h3>Plano cartesiano</h3>
                 </div>
 
@@ -307,20 +891,23 @@
             </div>
 
             <p>
-                Las líneas representan las restricciones.
+                Las rectas representan las restricciones.
                 La región sombreada muestra las soluciones
                 factibles identificadas por el simulador.
             </p>
 
             <div class="grafico-contenedor">
+
                 <canvas
                     id="canvasGrafico"
                     width="900"
                     height="560">
                 </canvas>
+
             </div>
 
             <div class="grafico-leyenda">
+
                 <span>
                     <i class="grafico-muestra-region"></i>
                     Región factible
@@ -335,11 +922,13 @@
                     <i class="grafico-muestra-optimo"></i>
                     Solución óptima
                 </span>
+
             </div>
 
         </div>
 
         <div class="grafico-procedimiento-titulo">
+
             <span class="simplex-bloque-etiqueta">
                 DESARROLLO DEL PROBLEMA
             </span>
@@ -347,9 +936,11 @@
             <h3>Procedimiento paso a paso</h3>
 
             <p>
-                Revisa los puntos encontrados, su evaluación
-                y la interpretación del resultado.
+                Revisa los puntos encontrados, la evaluación
+                de la función objetivo y la interpretación
+                del resultado.
             </p>
+
         </div>
 
         <div id="procedimientoGrafico"></div>
@@ -360,17 +951,15 @@
 
 <footer>
     <p>
-        © 2026 Agua Salvavidas ·
+        © 2026 Great Value ·
         Simulador de Investigación de Operaciones
     </p>
 </footer>
-
 
 <script src="../js/validaciones.js"></script>
 <script src="../js/grafico.js"></script>
 <script src="../js/grafico-corrector.js"></script>
 <script src="../js/grafico-visual.js"></script>
-
 
 </body>
 </html>

@@ -6,16 +6,448 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Esquina Noroeste | Great Value</title>
     <link rel="stylesheet" href="../css/estilos.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f3f7fc;
+            color: #172b46;
+            font-family: "DM Sans", Arial, sans-serif;
+        }
+
+        .encabezado {
+            background: #fff;
+            border-bottom: 1px solid #dce7f1;
+        }
+
+        .barra-superior {
+            width: min(92%, 1200px);
+            min-height: 88px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-texto {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .gota {
+            display: grid;
+            place-items: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: #e7f7ff;
+            font-size: 26px;
+        }
+
+        .logo-texto h1 {
+            margin: 0;
+            color: #071b36;
+            font-size: 1.5rem;
+        }
+
+        .logo-texto p {
+            margin: 0;
+            color: #71829a;
+            font-size: 0.8rem;
+        }
+
+        .btn-volver {
+            padding: 11px 17px;
+            border-radius: 10px;
+            background: #eaf4ff;
+            color: #0758a6;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .contenedor-metodo {
+            width: min(94%, 1200px);
+            margin: 30px auto 65px;
+        }
+
+        .simplex-hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px;
+            padding: 45px;
+            border-radius: 22px;
+            background: linear-gradient(
+                120deg,
+                #071b36,
+                #104575 70%,
+                #0877dc
+            );
+            color: #fff;
+        }
+
+        .simplex-categoria {
+            color: #a8eaff;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 1.3px;
+        }
+
+        .simplex-hero h2 {
+            margin: 13px 0;
+            color: #fff;
+            font-size: clamp(2rem, 4vw, 3.1rem);
+        }
+
+        .simplex-hero p {
+            max-width: 690px;
+            color: #deefff;
+            line-height: 1.8;
+        }
+
+        .simplex-hero-etiquetas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .simplex-hero-etiquetas span {
+            padding: 7px 12px;
+            border: 1px solid #ffffff40;
+            border-radius: 20px;
+            background: #ffffff15;
+            font-size: 0.82rem;
+        }
+
+        .simplex-hero-icono {
+            display: grid;
+            place-items: center;
+            width: 125px;
+            height: 125px;
+            flex-shrink: 0;
+            border: 1px solid #ffffff40;
+            border-radius: 25px;
+            background: #ffffff16;
+            font-size: 65px;
+        }
+
+        .simplex-progreso {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .simplex-etapa {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px;
+            border: 1px solid #dce7f1;
+            border-radius: 14px;
+            background: #fff;
+        }
+
+        .simplex-etapa.activa {
+            border-color: #0877dc;
+            background: #edf7ff;
+        }
+
+        .simplex-etapa-numero {
+            display: grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            border-radius: 11px;
+            background: #e8f4ff;
+            color: #0758a6;
+            font-weight: 800;
+        }
+
+        .simplex-etapa strong,
+        .simplex-etapa small {
+            display: block;
+        }
+
+        .simplex-etapa small {
+            color: #71829a;
+        }
+
+        .panel {
+            margin-bottom: 25px;
+            padding: 30px;
+            border: 1px solid #dce7f1;
+            border-radius: 20px;
+            background: #fff;
+            box-shadow: 0 10px 30px #071b360a;
+        }
+
+        .panel-titulo {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .paso {
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            background: #e8f4ff;
+            color: #0758a6;
+            font-weight: 800;
+        }
+
+        .panel-titulo h3 {
+            margin: 0 0 5px;
+            color: #071b36;
+            font-size: 1.45rem;
+        }
+
+        .panel-titulo p {
+            margin: 0;
+            color: #71829a;
+        }
+
+        .simplex-ayuda {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 18px;
+            border: 1px solid #d2e8fa;
+            border-radius: 12px;
+            background: #f0f8ff;
+        }
+
+        .simplex-ayuda-icono {
+            font-size: 25px;
+        }
+
+        .simplex-ayuda p {
+            margin: 5px 0 0;
+            color: #506b86;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fit,
+                minmax(210px, 1fr)
+            );
+            gap: 20px;
+        }
+
+        .campo label {
+            display: block;
+            margin-bottom: 9px;
+            color: #405a76;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .campo input {
+            width: 100%;
+            min-height: 46px;
+            padding: 10px 13px;
+            border: 1px solid #cbd9e8;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .acciones {
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .acciones button {
+            min-height: 46px;
+            padding: 11px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #0877dc;
+            color: #fff;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .acciones button:hover {
+            background: #0758a6;
+        }
+
+        .acciones .btn-secundario,
+        .acciones .btn-limpiar {
+            border: 1px solid #cce2f5;
+            background: #edf6ff;
+            color: #0758a6;
+        }
+
+        .simplex-bloque-etiqueta {
+            margin: 24px 0 12px;
+            color: #0877dc;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .bloque-modelo {
+            min-width: 0;
+            margin-bottom: 22px;
+            padding: 22px;
+            border: 1px solid #dce7f1;
+            border-radius: 13px;
+            background: #f8fbff;
+            overflow-x: auto;
+        }
+
+        .bloque-modelo h4 {
+            margin: 0 0 18px;
+            color: #071b36;
+        }
+
+        .bloque-modelo table {
+            width: max-content;
+            min-width: 100%;
+            border-collapse: collapse;
+        }
+
+        .bloque-modelo th,
+        .bloque-modelo td {
+            padding: 10px;
+            border: 1px solid #dce7f1;
+            text-align: center;
+        }
+
+        .bloque-modelo th {
+            background: #eaf4ff;
+            color: #071b36;
+        }
+
+        .bloque-modelo input {
+            width: 85px;
+            min-width: 75px;
+            padding: 9px;
+            border: 1px solid #cbd9e8;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .simplex-nota {
+            padding: 16px 19px;
+            border-left: 4px solid #0877dc;
+            border-radius: 10px;
+            background: #edf6ff;
+        }
+
+        .simplex-nota p {
+            margin: 5px 0 0;
+            color: #506b86;
+        }
+
+        .mensaje-error {
+            margin-top: 18px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #fff0f2;
+            color: #a52e3d;
+        }
+
+        #procedimientoNoroeste {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        #procedimientoNoroeste table {
+            width: max-content;
+            min-width: 100%;
+            margin: 15px 0;
+            border-collapse: collapse;
+            background: #fff;
+        }
+
+        #procedimientoNoroeste th,
+        #procedimientoNoroeste td {
+            padding: 10px 13px;
+            border: 1px solid #dce7f1;
+            text-align: center;
+        }
+
+        #procedimientoNoroeste th {
+            background: #eaf4ff;
+        }
+
+        .resultado-destacado {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #b8e3cb;
+            border-radius: 13px;
+            background: #eaf9f0;
+            color: #126d4c;
+        }
+
+        .oculto {
+            display: none !important;
+        }
+
+        footer {
+            padding: 25px 15px;
+            border-top: 1px solid #dce7f1;
+            background: #fff;
+            color: #71829a;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 700px) {
+            .simplex-hero {
+                padding: 28px;
+            }
+
+            .simplex-hero-icono {
+                display: none;
+            }
+
+            .simplex-progreso {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                padding: 20px 15px;
+            }
+
+            .acciones button {
+                width: 100%;
+            }
+
+            .barra-superior {
+                flex-wrap: wrap;
+                padding: 15px 0;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<!-- ENCABEZADO -->
-
 <header class="encabezado">
     <div class="barra-superior">
+
         <div class="logo-texto">
             <div class="gota">💧</div>
+
             <div>
                 <h1>Great Value</h1>
                 <p>Investigación de Operaciones</p>
@@ -25,15 +457,18 @@
         <a href="../index.html" class="btn-volver">
             ← Volver al menú
         </a>
+
     </div>
 </header>
 
 <main class="contenedor-metodo">
 
-    <!-- PRESENTACIÓN -->
+    <!-- PORTADA -->
 
     <section class="simplex-hero">
+
         <div class="simplex-hero-contenido">
+
             <span class="simplex-categoria">
                 MODELOS DE TRANSPORTE · MÉTODO 04
             </span>
@@ -41,20 +476,24 @@
             <h2>Método de la Esquina Noroeste</h2>
 
             <p>
-                Organiza los costos de transporte, la oferta
-                de cada origen y la demanda de cada destino.
-                Construye una solución inicial factible
-                mediante asignaciones sucesivas.
+                Encuentra una solución básica factible inicial
+                para un problema de transporte, asignando
+                recursos desde la esquina superior izquierda
+                de la matriz.
             </p>
 
             <div class="simplex-hero-etiquetas">
-                <span>✓ Matriz de costos</span>
-                <span>✓ Balance de oferta y demanda</span>
+                <span>✓ Matriz de transporte</span>
+                <span>✓ Oferta y demanda</span>
                 <span>✓ Asignaciones paso a paso</span>
             </div>
+
         </div>
 
-        <div class="simplex-hero-icono">🚚</div>
+        <div class="simplex-hero-icono">
+            🚚
+        </div>
+
     </section>
 
     <!-- ETAPAS -->
@@ -63,6 +502,7 @@
 
         <div class="simplex-etapa activa" id="etapaN1">
             <span class="simplex-etapa-numero">01</span>
+
             <div>
                 <strong>Configuración</strong>
                 <small>Orígenes y destinos</small>
@@ -71,14 +511,16 @@
 
         <div class="simplex-etapa" id="etapaN2">
             <span class="simplex-etapa-numero">02</span>
+
             <div>
                 <strong>Matriz</strong>
-                <small>Costos, oferta y demanda</small>
+                <small>Oferta, demanda y costos</small>
             </div>
         </div>
 
         <div class="simplex-etapa" id="etapaN3">
             <span class="simplex-etapa-numero">03</span>
+
             <div>
                 <strong>Resultados</strong>
                 <small>Asignaciones y costo total</small>
@@ -87,32 +529,32 @@
 
     </section>
 
-    <!-- CONFIGURACIÓN -->
+    <!-- PASO 1 -->
 
     <section class="panel">
 
         <div class="panel-titulo">
             <span class="paso">1</span>
+
             <div>
                 <h3>Configuración del transporte</h3>
                 <p>
-                    Define cuántos orígenes y destinos
-                    participan en el problema.
+                    Indica cuántos puntos de origen y
+                    destino tendrá tu problema.
                 </p>
             </div>
         </div>
 
         <div class="simplex-ayuda">
             <div class="simplex-ayuda-icono">💡</div>
+
             <div>
-                <strong>¿Qué es la Esquina Noroeste?</strong>
+                <strong>¿Cómo funciona la Esquina Noroeste?</strong>
                 <p>
-                    Es un procedimiento que inicia en la
-                    primera celda de la matriz y distribuye
-                    las cantidades disponibles avanzando
-                    hacia la derecha o hacia abajo.
-                    Permite obtener una solución inicial,
-                    aunque no necesariamente la de menor costo.
+                    Se comienza asignando la mayor cantidad
+                    posible en la primera celda de la matriz,
+                    avanzando hacia la derecha o hacia abajo
+                    conforme se satisface la oferta o demanda.
                 </p>
             </div>
         </div>
@@ -142,24 +584,13 @@
                     id="numDestinos"
                     min="1"
                     max="20"
-                    value="4">
-            </div>
-
-            <div class="campo">
-                <label for="tipoProcedimientoNoroeste">
-                    TIPO DE PROCEDIMIENTO
-                </label>
-
-                <input
-                    type="text"
-                    id="tipoProcedimientoNoroeste"
-                    value="Solución inicial de transporte"
-                    disabled>
+                    value="3">
             </div>
 
         </div>
 
         <div class="acciones">
+
             <button
                 type="button"
                 class="btn-secundario"
@@ -172,11 +603,12 @@
                 onclick="generarMatrizNoroeste()">
                 Generar matriz →
             </button>
+
         </div>
 
     </section>
 
-    <!-- MATRIZ DE TRANSPORTE -->
+    <!-- PASO 2 -->
 
     <section
         class="panel oculto"
@@ -184,71 +616,36 @@
 
         <div class="panel-titulo">
             <span class="paso">2</span>
+
             <div>
                 <h3>Matriz de transporte</h3>
                 <p>
-                    Ingresa los costos unitarios, la oferta
+                    Completa los costos unitarios, la oferta
                     disponible y la demanda requerida.
                 </p>
             </div>
         </div>
 
-        <div class="noroeste-guia">
-
-            <div class="noroeste-guia-item">
-                <span class="noroeste-guia-icono">🏭</span>
-                <div>
-                    <strong>Orígenes</strong>
-                    <small>
-                        Puntos desde donde se distribuye
-                    </small>
-                </div>
-            </div>
-
-            <div class="noroeste-guia-item">
-                <span class="noroeste-guia-icono">📍</span>
-                <div>
-                    <strong>Destinos</strong>
-                    <small>
-                        Puntos que reciben el producto
-                    </small>
-                </div>
-            </div>
-
-            <div class="noroeste-guia-item">
-                <span class="noroeste-guia-icono">💰</span>
-                <div>
-                    <strong>Costos</strong>
-                    <small>
-                        Costo por unidad transportada
-                    </small>
-                </div>
-            </div>
-
-        </div>
-
         <div class="simplex-bloque-etiqueta">
-            MATRIZ DE COSTOS
+            MATRIZ DE COSTOS Y CAPACIDADES
         </div>
 
-        <div class="noroeste-matriz-marco">
-            <div id="matrizEntradaNoroeste"></div>
-        </div>
+        <div class="bloque-modelo">
 
-        <div class="simplex-bloque-etiqueta">
-            VERIFICACIÓN DEL BALANCE
-        </div>
+            <h4>Datos del problema</h4>
 
-        <div id="resumenBalance"></div>
+            <div id="matrizNoroeste"></div>
+
+        </div>
 
         <div class="simplex-nota">
-            <strong>Balance automático</strong>
+            <strong>Equilibrio de transporte</strong>
+
             <p>
-                Si la oferta total es diferente de la demanda,
-                el simulador puede agregar un origen o destino
-                ficticio para equilibrar el problema.
-                Las asignaciones ficticias no representan
-                envíos reales.
+                La oferta total y la demanda total deben
+                coincidir para que el problema esté balanceado.
+                Si son diferentes, será necesario considerar
+                un origen o destino ficticio.
             </p>
         </div>
 
@@ -269,48 +666,34 @@
             <button
                 type="button"
                 onclick="resolverNoroeste()">
-                Calcular asignaciones →
+                Resolver paso a paso →
             </button>
 
         </div>
 
     </section>
 
-    <!-- RESULTADOS -->
+    <!-- PASO 3 -->
 
     <section
-        id="panelResultadosNoroeste"
-        class="panel oculto">
+        class="panel oculto"
+        id="panelResultadosNoroeste">
 
         <div class="panel-titulo">
             <span class="paso">3</span>
+
             <div>
                 <h3>Asignaciones y resultados</h3>
                 <p>
-                    Examina cómo se distribuyen las unidades,
-                    los costos de cada asignación
-                    y el costo total obtenido.
+                    Consulta el procedimiento de asignación,
+                    la matriz final y el costo total
+                    del transporte.
                 </p>
             </div>
         </div>
 
-        <div class="noroeste-leyenda">
-
-            <div>
-                <span class="noroeste-muestra-asignacion"></span>
-                Celda con asignación
-            </div>
-
-            <div>
-                <span class="noroeste-muestra-oferta"></span>
-                Oferta disponible
-            </div>
-
-            <div>
-                <span class="noroeste-muestra-demanda"></span>
-                Demanda requerida
-            </div>
-
+        <div class="simplex-bloque-etiqueta">
+            PROCEDIMIENTO MATEMÁTICO
         </div>
 
         <div id="procedimientoNoroeste"></div>
@@ -326,12 +709,8 @@
     </p>
 </footer>
 
-<!-- ARCHIVOS JAVASCRIPT -->
-
 <script src="../js/validaciones.js"></script>
 <script src="../js/noroeste.js"></script>
-<script src="../js/noroeste-corrector.js"></script>
-<script src="../js/noroeste-visual.js"></script>
 
 </body>
 </html>
