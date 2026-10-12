@@ -1,0 +1,435 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Esquina Noroeste | Great Values</title>
+
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+
+<body>
+
+<!-- ENCABEZADO -->
+
+<header class="encabezado">
+
+    <div class="barra-superior">
+
+        <div class="logo-texto">
+
+            <div class="gota">💧</div>
+
+            <div>
+                <h1>Great Value</h1>
+                <p>Investigación de Operaciones</p>
+            </div>
+
+        </div>
+
+        <a href="../index.html" class="btn-volver">
+            ← Volver al menú
+        </a>
+
+    </div>
+
+</header>
+
+
+<main class="contenedor-metodo">
+
+    <!-- PRESENTACIÓN -->
+
+    <section class="simplex-hero">
+
+        <div class="simplex-hero-contenido">
+
+            <span class="simplex-categoria">
+                MODELOS DE TRANSPORTE · MÉTODO 04
+            </span>
+
+            <h2>Método de la Esquina Noroeste</h2>
+
+            <p>
+                Organiza los costos de transporte, la oferta
+                de cada origen y la demanda de cada destino.
+                Construye una solución inicial factible
+                mediante asignaciones sucesivas.
+            </p>
+
+            <div class="simplex-hero-etiquetas">
+
+                <span>✓ Matriz de costos</span>
+                <span>✓ Balance de oferta y demanda</span>
+                <span>✓ Asignaciones paso a paso</span>
+
+            </div>
+
+        </div>
+
+        <div class="simplex-hero-icono">🚚</div>
+
+    </section>
+
+
+    <!-- ETAPAS -->
+
+    <section class="simplex-progreso">
+
+        <div class="simplex-etapa activa" id="etapaN1">
+
+            <span class="simplex-etapa-numero">01</span>
+
+            <div>
+                <strong>Configuración</strong>
+                <small>Orígenes y destinos</small>
+            </div>
+
+        </div>
+
+        <div class="simplex-etapa" id="etapaN2">
+
+            <span class="simplex-etapa-numero">02</span>
+
+            <div>
+                <strong>Matriz</strong>
+                <small>Costos, oferta y demanda</small>
+            </div>
+
+        </div>
+
+        <div class="simplex-etapa" id="etapaN3">
+
+            <span class="simplex-etapa-numero">03</span>
+
+            <div>
+                <strong>Resultados</strong>
+                <small>Asignaciones y costo total</small>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- PASO 1 -->
+
+    <section class="panel">
+
+        <div class="panel-titulo">
+
+            <span class="paso">1</span>
+
+            <div>
+                <h3>Configuración del transporte</h3>
+
+                <p>
+                    Define cuántos orígenes y destinos
+                    participan en el problema.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="simplex-ayuda">
+
+            <div class="simplex-ayuda-icono">💡</div>
+
+            <div>
+
+                <strong>¿Qué es la Esquina Noroeste?</strong>
+
+                <p>
+                    Es un procedimiento que inicia en la
+                    primera celda de la matriz y distribuye
+                    las cantidades disponibles avanzando
+                    hacia la derecha o hacia abajo.
+                    Permite obtener una solución inicial,
+                    aunque no necesariamente la de menor costo.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-grid">
+
+            <div class="campo">
+
+                <label for="numOrigenes">
+                    NÚMERO DE ORÍGENES
+                </label>
+
+                <input
+                    type="number"
+                    id="numOrigenes"
+                    min="1"
+                    max="10"
+                    value="3">
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="numDestinos">
+                    NÚMERO DE DESTINOS
+                </label>
+
+                <input
+                    type="number"
+                    id="numDestinos"
+                    min="1"
+                    max="10"
+                    value="4">
+
+            </div>
+
+
+            <div class="campo">
+
+                <label>
+                    TIPO DE PROCEDIMIENTO
+                </label>
+
+                <input
+                    type="text"
+                    value="Solución inicial de transporte"
+                    disabled>
+
+            </div>
+
+        </div>
+
+
+        <div class="acciones">
+
+            <button
+                type="button"
+                class="btn-secundario"
+                onclick="cargarEjemploNoroeste()">
+
+                ✦ Cargar ejemplo Agua Salvavidas
+
+            </button>
+
+
+            <button
+                type="button"
+                onclick="generarMatrizNoroeste()">
+
+                Generar matriz →
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- PASO 2 -->
+
+    <section
+        class="panel oculto"
+        id="panelMatrizNoroeste">
+
+        <div class="panel-titulo">
+
+            <span class="paso">2</span>
+
+            <div>
+
+                <h3>Matriz de transporte</h3>
+
+                <p>
+                    Ingresa los costos unitarios, la oferta
+                    disponible y la demanda requerida.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="noroeste-guia">
+
+            <div class="noroeste-guia-item">
+
+                <span class="noroeste-guia-icono">🏭</span>
+
+                <div>
+                    <strong>Orígenes</strong>
+                    <small>Puntos desde donde se distribuye</small>
+                </div>
+
+            </div>
+
+
+            <div class="noroeste-guia-item">
+
+                <span class="noroeste-guia-icono">📍</span>
+
+                <div>
+                    <strong>Destinos</strong>
+                    <small>Puntos que reciben el producto</small>
+                </div>
+
+            </div>
+
+
+            <div class="noroeste-guia-item">
+
+                <span class="noroeste-guia-icono">💰</span>
+
+                <div>
+                    <strong>Costos</strong>
+                    <small>Costo por unidad transportada</small>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="simplex-bloque-etiqueta">
+            MATRIZ DE COSTOS
+        </div>
+
+
+        <div class="noroeste-matriz-marco">
+
+            <div id="matrizEntradaNoroeste"></div>
+
+        </div>
+
+
+        <div class="simplex-bloque-etiqueta">
+            VERIFICACIÓN DEL BALANCE
+        </div>
+
+
+        <div id="resumenBalance"></div>
+
+
+        <div class="simplex-nota">
+
+            <strong>Balance automático</strong>
+
+            <p>
+                Si la oferta total es diferente de la demanda,
+                el simulador puede agregar un origen o destino
+                ficticio para equilibrar el problema.
+                Las asignaciones ficticias no representan
+                envíos reales.
+            </p>
+
+        </div>
+
+
+        <div
+            id="mensajeErrorNoroeste"
+            class="mensaje-error oculto">
+        </div>
+
+
+        <div class="acciones">
+
+            <button
+                type="button"
+                class="btn-limpiar"
+                onclick="limpiarNoroeste()">
+
+                Limpiar datos
+
+            </button>
+
+
+            <button
+                type="button"
+                onclick="resolverNoroeste()">
+
+                Calcular asignaciones →
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- PASO 3 -->
+
+    <section
+        id="panelResultadosNoroeste"
+        class="panel oculto">
+
+        <div class="panel-titulo">
+
+            <span class="paso">3</span>
+
+            <div>
+
+                <h3>Asignaciones y resultados</h3>
+
+                <p>
+                    Examina cómo se distribuyen las unidades,
+                    los costos de cada asignación
+                    y el costo total obtenido.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="noroeste-leyenda">
+
+            <div>
+                <span class="noroeste-muestra-asignacion"></span>
+                Celda con asignación
+            </div>
+
+            <div>
+                <span class="noroeste-muestra-oferta"></span>
+                Oferta disponible
+            </div>
+
+            <div>
+                <span class="noroeste-muestra-demanda"></span>
+                Demanda requerida
+            </div>
+
+        </div>
+
+
+        <div id="procedimientoNoroeste"></div>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <p>
+        © 2026 Great Value ·
+        Simulador de Investigación de Operaciones
+    </p>
+
+</footer>
+
+
+
+<script src="../js/validaciones.js"></script>
+<script src="../js/noroeste.js"></script>
+<script src="../js/noroeste-corrector.js"></script>
+<script src="../js/noroeste-visual.js"></script>
+
+
+</body>
+</html>

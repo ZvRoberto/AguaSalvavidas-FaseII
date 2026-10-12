@@ -1,0 +1,458 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Great Value | Simulador de Investigación de Operaciones
+    </title>
+
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+
+<body>
+
+    <!-- =====================================
+         ENCABEZADO
+         ===================================== -->
+
+    <header class="encabezado">
+
+        <div class="nav-contenido">
+
+            <div class="logo-texto">
+
+                <div class="gota">💧</div>
+
+                <div>
+                    <h1>Great Value</h1>
+                    <p>Investigación de Operaciones</p>
+                </div>
+
+            </div>
+
+            <a href="#metodos" class="nav-enlace">
+                Explorar métodos ↓
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================
+         PORTADA PRINCIPAL
+         ===================================== -->
+
+    <section class="hero">
+
+        <div class="hero-contenido">
+
+            <span class="hero-etiqueta">
+                ✦ PLATAFORMA DE OPTIMIZACIÓN
+            </span>
+
+            <h2>
+                Optimiza.<br>
+                Analiza.<br>
+                <span>Decide mejor.</span>
+            </h2>
+
+            <p class="hero-descripcion">
+                Bienvenido al simulador interactivo de
+                Investigación de Operaciones de Agua Salvavidas.
+                Explora modelos matemáticos, desarrolla
+                procedimientos paso a paso y comprende
+                los resultados de cada problema.
+            </p>
+
+            <div class="hero-acciones">
+
+                <a href="#metodos" class="btn-hero">
+                    Explorar métodos &nbsp; →
+                </a>
+
+                <a href="#informacion" class="btn-hero-outline">
+                    Conocer el simulador
+                </a>
+
+            </div>
+
+
+            <!-- ESTADÍSTICAS PRINCIPALES -->
+
+            <div class="hero-estadisticas">
+
+                <div>
+                    <strong>08</strong>
+                    <span>Métodos disponibles</span>
+                </div>
+
+                <div>
+                    <strong>100%</strong>
+                    <span>Interactivo</span>
+                </div>
+
+                <div>
+                    <strong>∞</strong>
+                    <span>Problemas para practicar</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================
+         SECCIÓN DE MÉTODOS
+         ===================================== -->
+
+    <main class="contenedor" id="metodos">
+
+        <section class="bienvenida">
+
+            <span class="etiqueta">
+                HERRAMIENTAS MATEMÁTICAS
+            </span>
+
+            <h2>
+                Explora nuestros métodos
+            </h2>
+
+            <p class="descripcion">
+                Selecciona un método de resolución para
+                ingresar tus datos, analizar el
+                procedimiento matemático y obtener
+                resultados organizados.
+            </p>
+
+        </section>
+
+
+        <!-- TARJETAS DE LOS MÉTODOS -->
+
+        <section class="metodos">
+
+
+            <!-- =====================================
+                 01 - MÉTODO GRÁFICO
+                 ===================================== -->
+
+            <article class="tarjeta">
+
+                <div class="numero">01</div>
+
+                <div class="icono">📈</div>
+
+                <h3>Método Gráfico</h3>
+
+                <p>
+                    Visualiza problemas de programación
+                    lineal con dos variables mediante
+                    un plano cartesiano, restricciones
+                    y evaluación de vértices.
+                </p>
+
+                <div class="caracteristicas">
+                    <span>Región factible</span>
+                    <span>Puntos extremos</span>
+                    <span>Función objetivo</span>
+                </div>
+
+                <button type="button"
+                        onclick="abrirMetodo('grafico')">
+                    Abrir método &nbsp; →
+                </button>
+
+            </article>
+
+
+            <!-- =====================================
+                 02 - MÉTODO SIMPLEX
+                 ===================================== -->
+
+            <article class="tarjeta">
+
+                <div class="numero">02</div>
+
+                <div class="icono">📊</div>
+
+                <h3>Método Simplex</h3>
+
+                <p>
+                    Resuelve modelos de programación
+                    lineal utilizando tablas,
+                    operaciones de pivoteo e iteraciones
+                    hasta encontrar una solución.
+                </p>
+
+                <div class="caracteristicas">
+                    <span>Tabla inicial</span>
+                    <span>Pivoteo</span>
+                    <span>Iteraciones</span>
+                </div>
+
+                <button type="button"
+                        onclick="abrirMetodo('simplex')">
+                    Abrir método &nbsp; →
+                </button>
+
+            </article>
+
+
+            <!-- =====================================
+                 03 - MÉTODO M GRANDE
+                 ===================================== -->
+
+            <article class="tarjeta">
+
+                <div class="numero">03</div>
+
+                <div class="icono">M</div>
+
+                <h3>Método M Grande</h3>
+
+                <p>
+                    Trabaja con restricciones de igualdad
+                    y desigualdad, incorporando variables
+                    de holgura, exceso y artificiales
+                    durante la resolución.
+                </p>
+
+                <div class="caracteristicas">
+                    <span>Variables artificiales</span>
+                    <span>Penalización M</span>
+                    <span>Tablas</span>
+                </div>
+
+                <button type="button"
+                        onclick="abrirMetodo('mgrande')">
+                    Abrir método &nbsp; →
+                </button>
+
+            </article>
+
+
+            <!-- =====================================
+                 04 - ESQUINA NOROESTE
+                 ===================================== -->
+
+            <article class="tarjeta">
+
+                <div class="numero">04</div>
+
+                <div class="icono">🧭</div>
+
+                <h3>Esquina Noroeste</h3>
+
+                <p>
+                    Construye una solución inicial para
+                    problemas de transporte mediante
+                    una matriz de costos, oferta,
+                    demanda y asignaciones sucesivas.
+                </p>
+
+                <div class="caracteristicas">
+                    <span>Matriz de transporte</span>
+                    <span>Oferta y demanda</span>
+                    <span>Costo total</span>
+                </div>
+
+                <button type="button"
+                        onclick="abrirMetodo('noroeste')">
+                    Abrir método &nbsp; →
+                </button>
+
+            </article>
+
+
+            <!-- =====================================
+                 05 - MÉTODO DE DUALIDAD
+                 ===================================== -->
+
+            <article class="tarjeta">
+
+                <div class="numero">05</div>
+
+                <div class="icono">⚖️</div>
+
+                <h3>Método de Dualidad</h3>
+
+                <p>
+                    Construye el problema dual a partir
+                    de un modelo primal, analiza sus
+                    restricciones y comprueba la relación
+                    entre ambas soluciones.
+                </p>
+
+                <div class="caracteristicas">
+                    <span>Problema primal</span>
+                    <span>Problema dual</span>
+                    <span>Brecha de dualidad</span>
+                </div>
+
+                <button type="button"
+                        onclick="abrirMetodo('dualidad')">
+                    Abrir método &nbsp; →
+                </button>
+
+            </article>
+
+
+            <!-- =====================================
+                 06 - ANÁLISIS DE SENSIBILIDAD
+                 ===================================== -->
+
+            <article class="tarjeta">
+
+                <div class="numero">06</div>
+
+                <div class="icono">📉</div>
+
+                <h3>Análisis de Sensibilidad</h3>
+
+                <p>
+                    Estudia cómo afectan los cambios
+                    en los recursos disponibles y
+                    beneficios unitarios a la solución
+                    óptima de un problema de
+                    programación lineal.
+                </p>
+
+                <div class="caracteristicas">
+                    <span>Precios sombra</span>
+                    <span>Rangos permisibles</span>
+                    <span>Escenarios</span>
+                </div>
+
+                <button type="button"
+                        onclick="abrirMetodo('sensibilidad')">
+                    Abrir método &nbsp; →
+                </button>
+
+            </article>
+
+
+            <!-- =====================================
+                 07 - MÉTODO DE TRANSPORTE
+                 ===================================== -->
+
+            <article class="tarjeta">
+
+                <div class="numero">07</div>
+
+                <div class="icono">🚚</div>
+
+                <h3>Método de Transporte</h3>
+
+                <p>
+                    Calcula una distribución inicial
+                    mediante el Método del Costo Mínimo,
+                    considerando la oferta, la demanda
+                    y los costos de distribución.
+                </p>
+
+                <div class="caracteristicas">
+                    <span>Costo Mínimo</span>
+                    <span>Balanceo</span>
+                    <span>Asignaciones</span>
+                </div>
+
+                <button type="button"
+                        onclick="abrirMetodo('transporte')">
+                    Abrir método &nbsp; →
+                </button>
+
+            </article>
+            
+            
+<!-- =====================================
+     08 - MÉTODO MODI
+     ===================================== -->
+
+<article class="tarjeta">
+
+    <div class="numero">08</div>
+
+    <div class="icono">🔄</div>
+
+    <h3>Método MODI</h3>
+
+    <p>
+        Optimiza problemas de transporte mediante
+        potenciales U y V, costos de oportunidad
+        y ciclos de ajuste hasta comprobar
+        el costo mínimo de distribución.
+    </p>
+
+    <div class="caracteristicas">
+        <span>Potenciales U-V</span>
+        <span>Costos de oportunidad</span>
+        <span>Optimización</span>
+    </div>
+
+    <button type="button"
+            onclick="abrirMetodo('modi')">
+        Abrir método &nbsp; →
+    </button>
+
+</article>
+
+
+        </section>
+
+
+        <!-- =====================================
+             INFORMACIÓN GENERAL
+             ===================================== -->
+
+        <section class="informacion" id="informacion">
+
+            <div>
+                <strong>08</strong>
+                <span>Métodos disponibles</span>
+            </div>
+
+            <div>
+                <strong>✓</strong>
+                <span>Ingreso y validación de datos</span>
+            </div>
+
+            <div>
+                <strong>∞</strong>
+                <span>Ejercicios personalizados</span>
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =====================================
+         PIE DE PÁGINA
+         ===================================== -->
+
+    <footer>
+
+        <p>
+            © 2026 Great Value ·
+            Simulador de Investigación de Operaciones
+        </p>
+
+    </footer>
+
+
+    <!-- =====================================
+         JAVASCRIPT PRINCIPAL
+         ===================================== -->
+
+    <script src="js/principal.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,258 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Método M Grande | Great Value</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body>
+
+<header class="encabezado">
+    <div class="barra-superior">
+        <div class="logo-texto">
+            <div class="gota">💧</div>
+            <div>
+                <h1>Great ValueS</h1>
+                <p>Investigación de Operaciones</p>
+            </div>
+        </div>
+        <a href="../index.html" class="btn-volver">← Volver al menú</a>
+    </div>
+</header>
+
+<main class="contenedor-metodo">
+
+    <!-- PRESENTACIÓN -->
+    <section class="simplex-hero">
+        <div class="simplex-hero-contenido">
+            <span class="simplex-categoria">
+                PROGRAMACIÓN LINEAL · MÉTODO 03
+            </span>
+
+            <h2>Método M Grande</h2>
+
+            <p>
+                Resuelve problemas de programación lineal con
+                restricciones de igualdad y desigualdad mediante
+                variables artificiales, penalización M y
+                operaciones de pivoteo.
+            </p>
+
+            <div class="simplex-hero-etiquetas">
+                <span>✓ Variables artificiales</span>
+                <span>✓ Restricciones mixtas</span>
+                <span>✓ Procedimiento paso a paso</span>
+            </div>
+        </div>
+
+        <div class="simplex-hero-icono">M</div>
+    </section>
+
+    <!-- PROGRESO -->
+    <section class="simplex-progreso">
+        <div class="simplex-etapa activa" id="etapaM1">
+            <span class="simplex-etapa-numero">01</span>
+            <div>
+                <strong>Configuración</strong>
+                <small>Definir el problema</small>
+            </div>
+        </div>
+
+        <div class="simplex-etapa" id="etapaM2">
+            <span class="simplex-etapa-numero">02</span>
+            <div>
+                <strong>Modelo</strong>
+                <small>Ingresar coeficientes</small>
+            </div>
+        </div>
+
+        <div class="simplex-etapa" id="etapaM3">
+            <span class="simplex-etapa-numero">03</span>
+            <div>
+                <strong>Resultados</strong>
+                <small>Analizar iteraciones</small>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONFIGURACIÓN -->
+    <section class="panel">
+        <div class="panel-titulo">
+            <span class="paso">1</span>
+            <div>
+                <h3>Configuración del problema</h3>
+                <p>
+                    Selecciona el tipo de optimización y las
+                    dimensiones del modelo.
+                </p>
+            </div>
+        </div>
+
+        <div class="simplex-ayuda">
+            <div class="simplex-ayuda-icono">💡</div>
+            <div>
+                <strong>¿Cuándo utilizar M Grande?</strong>
+                <p>
+                    Cuando un modelo tiene restricciones ≥ o =,
+                    puede ser necesario introducir variables
+                    artificiales para construir una solución
+                    básica inicial.
+                </p>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="campo">
+                <label for="tipoOptimizacionM">
+                    TIPO DE OPTIMIZACIÓN
+                </label>
+                <select id="tipoOptimizacionM">
+                    <option value="max">Maximizar</option>
+                    <option value="min">Minimizar</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="numVariablesM">
+                    VARIABLES DE DECISIÓN
+                </label>
+                <input type="number" id="numVariablesM"
+                       min="1" max="10" value="2">
+            </div>
+
+            <div class="campo">
+                <label for="numRestriccionesM">
+                    NÚMERO DE RESTRICCIONES
+                </label>
+                <input type="number" id="numRestriccionesM"
+                       min="1" max="10" value="2">
+            </div>
+        </div>
+
+        <div class="acciones">
+            <button type="button"
+                    class="btn-secundario"
+                    onclick="cargarEjemploMGrande()">
+                ✦ Cargar ejemplo Agua Salvavidas
+            </button>
+
+            <button type="button"
+                    onclick="generarModeloMGrande()">
+                Generar modelo →
+            </button>
+        </div>
+    </section>
+
+    <!-- MODELO -->
+    <section class="panel oculto" id="panelModeloM">
+        <div class="panel-titulo">
+            <span class="paso">2</span>
+            <div>
+                <h3>Construcción del modelo</h3>
+                <p>
+                    Ingresa los coeficientes y selecciona
+                    el signo de cada restricción.
+                </p>
+            </div>
+        </div>
+
+        <div class="simplex-bloque-etiqueta">
+            FUNCIÓN OBJETIVO
+        </div>
+
+        <div class="bloque-modelo">
+            <h4>Coeficientes de la función objetivo</h4>
+            <div id="funcionObjetivoM" class="ecuacion"></div>
+        </div>
+
+        <div class="simplex-bloque-etiqueta">
+            RESTRICCIONES DEL MODELO
+        </div>
+
+        <div class="bloque-modelo">
+            <h4>Restricciones y recursos disponibles</h4>
+            <div id="restriccionesM"></div>
+        </div>
+
+        <div class="leyenda-m">
+            <strong>Variables utilizadas:</strong>
+            <span>S = Holgura</span>
+            <span>E = Exceso</span>
+            <span>A = Artificial</span>
+            <span>M = Penalización</span>
+        </div>
+
+        <div class="simplex-nota">
+            <strong>Condición de no negatividad</strong>
+            <p>
+                Todas las variables de decisión deben ser
+                mayores o iguales que cero.
+            </p>
+        </div>
+
+        <div id="mensajeErrorM" class="mensaje-error oculto"></div>
+
+        <div class="acciones">
+            <button type="button"
+                    class="btn-limpiar"
+                    onclick="limpiarMGrande()">
+                Limpiar datos
+            </button>
+
+            <button type="button"
+                    onclick="resolverMGrande()">
+                Resolver paso a paso →
+            </button>
+        </div>
+    </section>
+
+    <!-- RESULTADOS -->
+    <section class="panel oculto" id="panelResultadosM">
+        <div class="panel-titulo">
+            <span class="paso">3</span>
+            <div>
+                <h3>Procedimiento matemático</h3>
+                <p>
+                    Examina la transformación del modelo,
+                    las variables artificiales y las
+                    iteraciones realizadas.
+                </p>
+            </div>
+        </div>
+
+        <div class="simplex-leyenda">
+            <div>
+                <span class="simplex-color-entrante"></span>
+                Columna entrante
+            </div>
+            <div>
+                <span class="simplex-color-saliente"></span>
+                Fila saliente
+            </div>
+            <div>
+                <span class="simplex-color-pivote"></span>
+                Elemento pivote
+            </div>
+        </div>
+
+        <div id="procedimientoMGrande"></div>
+    </section>
+
+</main>
+
+<footer>
+    <p>
+        © 2026 Great Value ·
+        Simulador de Investigación de Operaciones
+    </p>
+</footer>
+
+<script src="../js/validaciones.js"></script>
+<script src="../js/mgrande.js"></script>
+<script src="../js/mgrande-corrector.js"></script>
+<script src="../js/mgrande-visual.js"></script>
+
+</body>
+</html>

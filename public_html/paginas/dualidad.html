@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Dualidad | Great Value</title>
+
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+
+<body class="pagina-dualidad">
+
+    <header class="dual-nav">
+        <a href="../index.html" class="dual-regresar">
+            ← Volver al menú
+        </a>
+
+        <div class="dual-marca">
+            💧 Great Value
+        </div>
+
+        <span>FASE II · DUALIDAD</span>
+    </header>
+
+    <main class="dual-contenedor">
+
+        <section class="dual-hero">
+            <span class="dual-etiqueta">
+                PROGRAMACIÓN LINEAL
+            </span>
+
+            <h1>Método de Dualidad</h1>
+
+            <p>
+                Construye el problema dual a partir
+                de un modelo primal, analiza sus
+                restricciones y comprueba la relación
+                entre sus soluciones.
+            </p>
+        </section>
+
+        <section class="dual-panel">
+            <div class="dual-panel-titulo">
+                <span class="dual-numero">01</span>
+                <div>
+                    <h2>Configurar problema primal</h2>
+                    <p>
+                        Define las dimensiones y el tipo
+                        de optimización.
+                    </p>
+                </div>
+            </div>
+
+            <div class="dual-grid-config">
+
+                <label>
+                    Variables de decisión
+                    <input type="number"
+                           id="dualVariables"
+                           min="1"
+                           max="6"
+                           step="1"
+                           value="2">
+                </label>
+
+                <label>
+                    Restricciones
+                    <input type="number"
+                           id="dualRestricciones"
+                           min="1"
+                           max="6"
+                           step="1"
+                           value="2">
+                </label>
+
+                <label>
+                    Tipo de optimización
+                    <select id="dualTipo">
+                        <option value="max">
+                            Maximización
+                        </option>
+                        <option value="min">
+                            Minimización
+                        </option>
+                    </select>
+                </label>
+
+            </div>
+
+            <div class="dual-acciones">
+                <button class="dual-btn"
+                        onclick="generarDualidad()">
+                    Generar modelo
+                </button>
+
+                <button class="dual-btn-secundario"
+                        onclick="ejemploDualidad()">
+                    Cargar ejemplo
+                </button>
+
+                <button class="dual-btn-secundario"
+                        onclick="limpiarDualidad()">
+                    Limpiar
+                </button>
+            </div>
+        </section>
+
+        <section id="dualPanelModelo"
+                 class="dual-panel oculto">
+
+            <div class="dual-panel-titulo">
+                <span class="dual-numero">02</span>
+                <div>
+                    <h2>Ingresar datos del primal</h2>
+                    <p>
+                        Introduce la función objetivo
+                        y los coeficientes de cada
+                        restricción.
+                    </p>
+                </div>
+            </div>
+
+            <div id="dualFormulario"></div>
+
+            <div class="dual-acciones">
+                <button class="dual-btn"
+                        onclick="resolverDualidad()">
+                    Construir dual →
+                </button>
+            </div>
+        </section>
+
+        <div id="dualError"
+             class="dual-error oculto"
+             role="alert"></div>
+
+        <section id="dualResultados"
+                 class="dual-panel oculto">
+
+            <div class="dual-panel-titulo">
+                <span class="dual-numero">03</span>
+                <div>
+                    <h2>Resultados y procedimiento</h2>
+                    <p>
+                        Transformación del primal
+                        y comprobación de dualidad.
+                    </p>
+                </div>
+            </div>
+
+            <div id="dualContenido"></div>
+
+            <div class="dual-acciones">
+                <button class="dual-btn-secundario"
+                        onclick="window.print()">
+                    Imprimir resultados
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="dual-footer">
+        Great Value · Investigación de Operaciones
+        · Fase II · 2026
+    </footer>
+
+    <script src="../js/dualidad.js"></script>
+</body>
+</html>

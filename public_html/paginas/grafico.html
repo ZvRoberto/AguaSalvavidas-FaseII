@@ -1,0 +1,376 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Método Gráfico | Agua Salvavidas</title>
+
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+
+<body>
+
+<header class="encabezado">
+    <div class="barra-superior">
+
+        <div class="logo-texto">
+            <div class="gota">💧</div>
+            <div>
+                <h1>AGUA SALVAVIDAS</h1>
+                <p>Investigación de Operaciones</p>
+            </div>
+        </div>
+
+        <a href="../index.html" class="btn-volver">
+            ← Volver al menú
+        </a>
+
+    </div>
+</header>
+
+<main class="contenedor-metodo">
+
+    <!-- PRESENTACIÓN -->
+
+    <section class="simplex-hero">
+
+        <div class="simplex-hero-contenido">
+
+            <span class="simplex-categoria">
+                PROGRAMACIÓN LINEAL · MÉTODO 01
+            </span>
+
+            <h2>Método Gráfico</h2>
+
+            <p>
+                Representa restricciones en el plano cartesiano,
+                identifica la región factible y analiza los puntos
+                extremos para encontrar la solución óptima.
+            </p>
+
+            <div class="simplex-hero-etiquetas">
+                <span>✓ Plano cartesiano</span>
+                <span>✓ Región factible</span>
+                <span>✓ Evaluación de vértices</span>
+            </div>
+
+        </div>
+
+        <div class="simplex-hero-icono">📈</div>
+
+    </section>
+
+    <!-- ETAPAS -->
+
+    <section class="simplex-progreso">
+
+        <div class="simplex-etapa activa" id="etapaG1">
+            <span class="simplex-etapa-numero">01</span>
+            <div>
+                <strong>Configuración</strong>
+                <small>Definir el problema</small>
+            </div>
+        </div>
+
+        <div class="simplex-etapa" id="etapaG2">
+            <span class="simplex-etapa-numero">02</span>
+            <div>
+                <strong>Modelo</strong>
+                <small>Ingresar restricciones</small>
+            </div>
+        </div>
+
+        <div class="simplex-etapa" id="etapaG3">
+            <span class="simplex-etapa-numero">03</span>
+            <div>
+                <strong>Gráfica y resultados</strong>
+                <small>Analizar la solución</small>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- CONFIGURACIÓN -->
+
+    <section class="panel">
+
+        <div class="panel-titulo">
+            <span class="paso">1</span>
+            <div>
+                <h3>Configuración del problema</h3>
+                <p>
+                    Selecciona el tipo de optimización y la
+                    cantidad de restricciones.
+                </p>
+            </div>
+        </div>
+
+        <div class="simplex-ayuda">
+            <div class="simplex-ayuda-icono">💡</div>
+            <div>
+                <strong>¿Cómo funciona el método gráfico?</strong>
+                <p>
+                    Este método utiliza dos variables de decisión.
+                    Cada restricción se representa mediante una
+                    recta y se analiza la región que cumple
+                    todas las condiciones.
+                </p>
+            </div>
+        </div>
+
+        <div class="form-grid">
+
+            <div class="campo">
+                <label for="tipoGrafico">
+                    TIPO DE OPTIMIZACIÓN
+                </label>
+
+                <select id="tipoGrafico">
+                    <option value="max">Maximizar</option>
+                    <option value="min">Minimizar</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="numRestriccionesGrafico">
+                    NÚMERO DE RESTRICCIONES
+                </label>
+
+                <input
+                    type="number"
+                    id="numRestriccionesGrafico"
+                    min="1"
+                    max="10"
+                    value="3">
+            </div>
+
+            <div class="campo">
+                <label>
+                    VARIABLES DE DECISIÓN
+                </label>
+
+                <input
+                    type="text"
+                    value="X₁ y X₂"
+                    disabled>
+            </div>
+
+        </div>
+
+        <div class="acciones">
+
+            <button
+                type="button"
+                class="btn-secundario"
+                onclick="cargarEjemploGrafico()">
+
+                ✦ Cargar ejemplo Agua Salvavidas
+
+            </button>
+
+            <button
+                type="button"
+                onclick="generarModeloGrafico()">
+
+                Generar modelo →
+
+            </button>
+
+        </div>
+
+    </section>
+
+    <!-- MODELO -->
+
+    <section class="panel oculto" id="panelModeloGrafico">
+
+        <div class="panel-titulo">
+            <span class="paso">2</span>
+            <div>
+                <h3>Construcción del modelo</h3>
+                <p>
+                    Ingresa la función objetivo y las
+                    restricciones del problema.
+                </p>
+            </div>
+        </div>
+
+        <div class="simplex-bloque-etiqueta">
+            FUNCIÓN OBJETIVO
+        </div>
+
+        <div class="bloque-modelo">
+            <h4>Coeficientes de la función objetivo</h4>
+
+            <div class="ecuacion grafico-objetivo">
+                <span class="grafico-simbolo">Z =</span>
+
+                <input
+                    type="number"
+                    id="g_fo_0"
+                    class="input-coeficiente"
+                    step="any"
+                    value="0">
+
+                <strong>X₁ +</strong>
+
+                <input
+                    type="number"
+                    id="g_fo_1"
+                    class="input-coeficiente"
+                    step="any"
+                    value="0">
+
+                <strong>X₂</strong>
+            </div>
+        </div>
+
+        <div class="simplex-bloque-etiqueta">
+            RESTRICCIONES DEL MODELO
+        </div>
+
+        <div class="bloque-modelo">
+            <h4>Restricciones y recursos disponibles</h4>
+
+            <div id="restriccionesGrafico"></div>
+        </div>
+
+        <div class="simplex-nota">
+            <strong>Condición de no negatividad</strong>
+            <p>
+                Las variables X₁ y X₂ deben ser mayores
+                o iguales que cero. El análisis se realiza
+                en el primer cuadrante.
+            </p>
+        </div>
+
+        <div
+            id="mensajeErrorGrafico"
+            class="mensaje-error oculto">
+        </div>
+
+        <div class="acciones">
+
+            <button
+                type="button"
+                class="btn-limpiar"
+                onclick="limpiarGrafico()">
+                Limpiar datos
+            </button>
+
+            <button
+                type="button"
+                onclick="resolverGrafico()">
+                Generar gráfica y resolver →
+            </button>
+
+        </div>
+
+    </section>
+
+    <!-- RESULTADOS -->
+
+    <section
+        class="panel oculto"
+        id="panelResultadosGrafico">
+
+        <div class="panel-titulo">
+            <span class="paso">3</span>
+            <div>
+                <h3>Análisis gráfico y resultados</h3>
+                <p>
+                    Observa la representación de las
+                    restricciones y el procedimiento
+                    para evaluar la solución.
+                </p>
+            </div>
+        </div>
+
+        <div class="grafico-presentacion">
+
+            <div class="grafico-presentacion-cabecera">
+
+                <div>
+                    <span class="simplex-bloque-etiqueta">
+                        VISUALIZACIÓN MATEMÁTICA
+                    </span>
+                    <h3>Plano cartesiano</h3>
+                </div>
+
+                <span class="grafico-indicador">
+                    ● Gráfica generada
+                </span>
+
+            </div>
+
+            <p>
+                Las líneas representan las restricciones.
+                La región sombreada muestra las soluciones
+                factibles identificadas por el simulador.
+            </p>
+
+            <div class="grafico-contenedor">
+                <canvas
+                    id="canvasGrafico"
+                    width="900"
+                    height="560">
+                </canvas>
+            </div>
+
+            <div class="grafico-leyenda">
+                <span>
+                    <i class="grafico-muestra-region"></i>
+                    Región factible
+                </span>
+
+                <span>
+                    <i class="grafico-muestra-vertice"></i>
+                    Puntos extremos
+                </span>
+
+                <span>
+                    <i class="grafico-muestra-optimo"></i>
+                    Solución óptima
+                </span>
+            </div>
+
+        </div>
+
+        <div class="grafico-procedimiento-titulo">
+            <span class="simplex-bloque-etiqueta">
+                DESARROLLO DEL PROBLEMA
+            </span>
+
+            <h3>Procedimiento paso a paso</h3>
+
+            <p>
+                Revisa los puntos encontrados, su evaluación
+                y la interpretación del resultado.
+            </p>
+        </div>
+
+        <div id="procedimientoGrafico"></div>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>
+        © 2026 Agua Salvavidas ·
+        Simulador de Investigación de Operaciones
+    </p>
+</footer>
+
+
+<script src="../js/validaciones.js"></script>
+<script src="../js/grafico.js"></script>
+<script src="../js/grafico-corrector.js"></script>
+<script src="../js/grafico-visual.js"></script>
+
+
+</body>
+</html>
