@@ -1,50 +1,36 @@
 
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Método Simplex | Great Value</title>
-
     <link rel="stylesheet" href="../css/estilos.css">
 </head>
 
 <body>
 
 <header class="encabezado">
-
     <div class="barra-superior">
-
         <div class="logo-texto">
-
             <div class="gota">💧</div>
-
             <div>
                 <h1>Great Value</h1>
                 <p>Investigación de Operaciones</p>
             </div>
-
         </div>
 
         <a href="../index.html" class="btn-volver">
             ← Volver al menú
         </a>
-
     </div>
-
 </header>
-
 
 <main class="contenedor-metodo">
 
-    <!-- PRESENTACIÓN -->
-
+    <!-- PRESENTACIÓN DEL MÉTODO -->
     <section class="simplex-hero">
-
         <div class="simplex-hero-contenido">
-
             <span class="simplex-categoria">
                 PROGRAMACIÓN LINEAL · MÉTODO 02
             </span>
@@ -58,124 +44,85 @@
             </p>
 
             <div class="simplex-hero-etiquetas">
-
-                <span>✓ Modelo matemático</span>
+                <span>✓ Hasta 20 variables</span>
+                <span>✓ Hasta 20 restricciones</span>
                 <span>✓ Tablas de iteración</span>
                 <span>✓ Solución final</span>
-
             </div>
-
         </div>
 
-        <div class="simplex-hero-icono">
-            📊
-        </div>
-
+        <div class="simplex-hero-icono">📊</div>
     </section>
 
-
     <!-- INDICADOR DE ETAPAS -->
-
     <section class="simplex-progreso">
 
         <div class="simplex-etapa activa" id="etapaSimplex1">
-
             <span class="simplex-etapa-numero">01</span>
-
             <div>
                 <strong>Configuración</strong>
                 <small>Definir el problema</small>
             </div>
-
         </div>
 
         <div class="simplex-etapa" id="etapaSimplex2">
-
             <span class="simplex-etapa-numero">02</span>
-
             <div>
                 <strong>Modelo</strong>
                 <small>Ingresar coeficientes</small>
             </div>
-
         </div>
 
         <div class="simplex-etapa" id="etapaSimplex3">
-
             <span class="simplex-etapa-numero">03</span>
-
             <div>
                 <strong>Resultados</strong>
                 <small>Analizar iteraciones</small>
             </div>
-
         </div>
 
     </section>
 
-
-    <!-- PASO 1 -->
-
+    <!-- PASO 1: CONFIGURACIÓN -->
     <section class="panel">
 
         <div class="panel-titulo">
-
             <span class="paso">1</span>
-
             <div>
                 <h3>Configuración del problema</h3>
-
                 <p>
                     Define las dimensiones de tu modelo
                     de programación lineal.
                 </p>
             </div>
-
         </div>
-
 
         <div class="simplex-ayuda">
-
             <div class="simplex-ayuda-icono">💡</div>
-
             <div>
                 <strong>¿Cómo comenzar?</strong>
-
                 <p>
-                    Selecciona la optimización y la cantidad de
-                    variables y restricciones. También puedes
-                    cargar un ejemplo para practicar.
+                    Selecciona la optimización y la cantidad
+                    de variables y restricciones. Puedes
+                    trabajar con modelos de hasta 20 variables.
                 </p>
             </div>
-
         </div>
-
 
         <div class="form-grid">
 
             <div class="campo">
-
                 <label for="tipoOptimizacion">
                     TIPO DE OPTIMIZACIÓN
                 </label>
 
                 <select id="tipoOptimizacion">
-
-                    <option value="max">
-                        Maximizar
-                    </option>
-
-                    <option value="min">
-                        Minimizar
-                    </option>
-
+                    <option value="max">Maximizar</option>
+                    <option value="min">Minimizar</option>
                 </select>
-
             </div>
 
-
             <div class="campo">
-
                 <label for="numVariables">
                     VARIABLES DE DECISIÓN
                 </label>
@@ -184,14 +131,13 @@
                     type="number"
                     id="numVariables"
                     min="1"
-                    max="10"
-                    value="2">
-
+                    max="20"
+                    step="1"
+                    value="2"
+                    required>
             </div>
 
-
             <div class="campo">
-
                 <label for="numRestricciones">
                     NÚMERO DE RESTRICCIONES
                 </label>
@@ -200,13 +146,13 @@
                     type="number"
                     id="numRestricciones"
                     min="1"
-                    max="10"
-                    value="3">
-
+                    max="20"
+                    step="1"
+                    value="3"
+                    required>
             </div>
 
         </div>
-
 
         <div class="acciones">
 
@@ -214,101 +160,69 @@
                 type="button"
                 class="btn-secundario"
                 onclick="cargarEjemploSimplex()">
-
-                ✦ Cargar ejemplo Agua Salvavidas
-
+                ✦ Cargar ejemplo Great Value
             </button>
-
 
             <button
                 type="button"
                 onclick="generarModeloSimplex()">
-
                 Generar modelo →
-
             </button>
 
         </div>
-
     </section>
 
-
-    <!-- PASO 2 -->
-
-    <section
-        class="panel oculto"
-        id="panelModelo">
+    <!-- PASO 2: MODELO MATEMÁTICO -->
+    <section class="panel oculto" id="panelModelo">
 
         <div class="panel-titulo">
-
             <span class="paso">2</span>
-
             <div>
                 <h3>Construcción del modelo</h3>
-
                 <p>
                     Completa la función objetivo y cada
                     una de las restricciones.
                 </p>
             </div>
-
         </div>
-
 
         <div class="simplex-bloque-etiqueta">
             FUNCIÓN OBJETIVO
         </div>
 
-
         <div class="bloque-modelo">
-
-            <h4>
-                Coeficientes de la función objetivo
-            </h4>
-
+            <h4>Coeficientes de la función objetivo</h4>
             <div
                 id="funcionObjetivo"
                 class="ecuacion">
             </div>
-
         </div>
-
 
         <div class="simplex-bloque-etiqueta">
             RESTRICCIONES DEL MODELO
         </div>
 
-
         <div class="bloque-modelo">
-
-            <h4>
-                Limitaciones de recursos
-            </h4>
-
+            <h4>Limitaciones de recursos</h4>
             <div id="restricciones"></div>
-
         </div>
 
-
         <div class="simplex-nota">
-
             <strong>Condiciones del modelo</strong>
-
             <p>
                 Las variables de decisión son no negativas.
                 Este formulario utiliza restricciones ≤
                 y valores del lado derecho mayores o iguales
-                que cero.
+                que cero. Si tu ejercicio contiene restricciones
+                ≥ o =, utiliza un método compatible, como
+                M Grande, según las condiciones del modelo.
             </p>
-
         </div>
-
 
         <div
             id="mensajeErrorSimplex"
             class="mensaje-error oculto">
         </div>
-
 
         <div class="acciones">
 
@@ -316,49 +230,36 @@
                 type="button"
                 class="btn-limpiar"
                 onclick="limpiarSimplex()">
-
                 Limpiar datos
-
             </button>
-
 
             <button
                 type="button"
                 onclick="resolverSimplex()">
-
                 Resolver paso a paso →
-
             </button>
 
         </div>
 
     </section>
 
-
-    <!-- PASO 3 -->
-
+    <!-- PASO 3: RESULTADOS -->
     <section
         id="panelResultados"
         class="panel oculto">
 
         <div class="panel-titulo">
-
             <span class="paso">3</span>
-
             <div>
                 <h3>Procedimiento matemático</h3>
-
                 <p>
-                    Observa las tablas generadas y las operaciones
-                    que conducen a la solución.
+                    Observa las tablas generadas y las
+                    operaciones que conducen a la solución.
                 </p>
             </div>
-
         </div>
 
-
         <div class="simplex-leyenda">
-
             <div>
                 <span class="simplex-color-entrante"></span>
                 Columna entrante
@@ -373,9 +274,7 @@
                 <span class="simplex-color-pivote"></span>
                 Elemento pivote
             </div>
-
         </div>
-
 
         <div id="procedimientoSimplex"></div>
 
@@ -383,23 +282,18 @@
 
 </main>
 
-
 <footer>
-
     <p>
-        © 2026 Great Value · Simulador de Investigación de Operaciones
+        © 2026 Great Value ·
+        Simulador de Investigación de Operaciones
     </p>
-
 </footer>
 
-
-
+<!-- ARCHIVOS JAVASCRIPT -->
 <script src="../js/validaciones.js"></script>
 <script src="../js/simplex.js"></script>
 <script src="../js/simplex-corrector.js"></script>
 <script src="../js/simplex-visual.js"></script>
 
-
 </body>
-
 </html>

@@ -1,366 +1,389 @@
 
 /*
- * AGUA SALVAVIDAS
- * Corrector del Método Esquina Noroeste
- *
- * Funciones:
- * - Validar dimensiones.
- * - Evitar matrices desactualizadas.
- * - Verificar oferta y demanda.
- * - Comprobar asignaciones y costo total.
- * - Detectar degeneración.
+ * GREAT VALUE - FASE II
+ * Corrector del Método de la Esquina Noroeste
+ * Compatible con hasta 20 orígenes y 20 destinos
  */
 
 (function () {
     "use strict";
 
     const EPS = 1e-7;
+    const MAX_DIMENSION = 20;
 
     const generarOriginal = window.generarMatrizNoroeste;
-    const resolverOriginal = window.resolverNoroeste;
     const ejecutarOriginal = window.ejecutarNoroeste;
+    const resolverOriginal = window.resolverNoroeste;
     const ejemploOriginal = window.cargarEjemploNoroeste;
-    const limpiarOriginal = window.limpiarNoroeste;
 
-    function elemento(id) {
+    function obtenerElemento(id) {
         return document.getElementById(id);
     }
 
-    function mostrarError(mensaje) {
-        window.mostrarErrorNoroeste(mensaje);
+    function numeroCercano(a, b) {
+        return Math.abs(a - b) <=
+            EPS * Math.max(1, Math.abs(a), Math.abs(b));
     }
 
-    function dimensiones() {
-        const origenInput = elemento("numOrigenes");
-        const destinoInput = elemento("numDestinos");
+    // =====================================================
+    // VALIDAR DIMENSIONES
+    // =====================================================
 
-        const origenes = Number(origenInput.value);
-        const destinos = Number(destinoInput.value);
+    function validarDimensiones() {
+        const origenes = Number(
+            obtenerElemento("numOrigenes").value
+        );
+
+        const destinos = Number(
+            obtenerElemento("numDestinos").value
+        );
 
         if (
-            origenInput.value.trim() === "" ||
-            destinoInput.value.trim() === "" ||
             !Number.isInteger(origenes) ||
             !Number.isInteger(destinos) ||
             origenes < 1 ||
             destinos < 1 ||
-            origenes > 10 ||
-            destinos > 10
+            origenes > MAX_DIMENSION ||
+            destinos > MAX_DIMENSION
         ) {
             throw new Error(
-                "Los orígenes y destinos deben ser " +
-                "números enteros entre 1 y 10."
+                "Debes ingresar entre 1 y 20 orígenes y destinos."
             );
         }
 
         return { origenes, destinos };
     }
 
-    function firmaDimensiones() {
-        const { origenes, destinos } = dimensiones();
-        return origenes + "," + destinos;
-    }
-
-    function ocultarResultados() {
-        const panel = elemento("panelResultadosNoroeste");
-
-        if (panel) {
-            panel.classList.add("oculto");
-        }
-    }
-
-    /*
-     * VALIDAR GENERACIÓN DE MATRIZ
-     */
+    // =====================================================
+    // GENERAR MATRIZ Y GUARDAR DIMENSIONES
+    // =====================================================
 
     window.generarMatrizNoroeste = function () {
         try {
-            const firma = firmaDimensiones();
+            const dimensiones = validarDimensiones();
 
             generarOriginal();
 
-            const panel = elemento("panelMatrizNoroeste");
+            const panel = obtenerElemento(
+                "panelMatrizNoroeste"
+            );
 
             if (panel && !panel.classList.contains("oculto")) {
-                panel.dataset.dimension = firma;
+                panel.dataset.dimension =
+                    dimensiones.origenes + "," +
+                    dimensiones.destinos;
             }
 
         } catch (error) {
-            ocultarResultados();
-            mostrarError(error.message);
+            window.mostrarErrorNoroeste(error.message);
         }
     };
 
-    /*
-     * COMPROBAR CONSERVACIÓN DE UNIDADES
-     *
-     * Cada origen debe distribuir toda su oferta.
-     * Cada destino debe recibir toda su demanda.
-     */
+    // =====================================================
+    // VERIFICAR QUE LA MATRIZ ESTÉ ACTUALIZADA
+    // =====================================================
 
-    function verificarAsignaciones(resultado) {
-        const {
-            asignaciones,
-            oferta,
-            demanda,
-            costos
-        } = resultado;
+    function verificarMatrizActual() {
+        const dimensiones = validarDimensiones();
+
+        const panel = obtenerElemento(
+            "panelMatrizNoroeste"
+        );
 
         if (
-            asignaciones.length !== oferta.length ||
-            costos.length !== oferta.length
+            !panel ||
+            panel.classList.contains("oculto")
         ) {
             throw new Error(
-                "La matriz resultante tiene dimensiones incorrectas."
+                "Primero debes generar la matriz de transporte."
             );
         }
 
-        for (let i = 0; i < oferta.length; i++) {
+        const dimensionActual =
+            dimensiones.origenes + "," +
+            dimensiones.destinos;
+
+        if (panel.dataset.dimension !== dimensionActual) {
+            throw new Error(
+                "Cambiaste el número de orígenes o destinos. " +
+                "Presiona Generar matriz nuevamente."
+            );
+        }
+
+        return dimensiones;
+    }
+
+    // =====================================================
+    // VALIDAR DATOS DE ENTRADA
+    // =====================================================
+
+    function validarDatos(datos) {
+        if (!datos || typeof datos !== "object") {
+            throw new Error(
+                "No se encontraron datos de transporte."
+            );
+        }
+
+        const {
+            origenes,
+            destinos,
+            costos,
+            oferta,
+            demanda
+        } = datos;
+
+        if (
+            !Array.isArray(costos) ||
+            !Array.isArray(oferta) ||
+            !Array.isArray(demanda) ||
+            costos.length !== origenes ||
+            oferta.length !== origenes ||
+            demanda.length !== destinos
+        ) {
+            throw new Error(
+                "Las dimensiones de la matriz son incorrectas."
+            );
+        }
+
+        for (let i = 0; i < origenes; i++) {
             if (
-                asignaciones[i].length !== demanda.length ||
-                costos[i].length !== demanda.length
+                !Array.isArray(costos[i]) ||
+                costos[i].length !== destinos
             ) {
                 throw new Error(
-                    "Una fila tiene una cantidad incorrecta de destinos."
+                    "La fila " + (i + 1) +
+                    " de costos está incompleta."
                 );
             }
 
-            let enviado = 0;
+            if (
+                !Number.isFinite(oferta[i]) ||
+                oferta[i] < 0
+            ) {
+                throw new Error(
+                    "La oferta del origen " + (i + 1) +
+                    " debe ser no negativa."
+                );
+            }
 
-            for (let j = 0; j < demanda.length; j++) {
-                const cantidad = asignaciones[i][j];
+            for (let j = 0; j < destinos; j++) {
+                if (
+                    !Number.isFinite(costos[i][j]) ||
+                    costos[i][j] < 0
+                ) {
+                    throw new Error(
+                        "El costo de O" + (i + 1) +
+                        " a D" + (j + 1) +
+                        " debe ser no negativo."
+                    );
+                }
+            }
+        }
+
+        for (let j = 0; j < destinos; j++) {
+            if (
+                !Number.isFinite(demanda[j]) ||
+                demanda[j] < 0
+            ) {
+                throw new Error(
+                    "La demanda del destino " + (j + 1) +
+                    " debe ser no negativa."
+                );
+            }
+        }
+
+        const totalOferta = oferta.reduce(
+            (total, valor) => total + valor,
+            0
+        );
+
+        const totalDemanda = demanda.reduce(
+            (total, valor) => total + valor,
+            0
+        );
+
+        if (
+            !Number.isFinite(totalOferta) ||
+            !Number.isFinite(totalDemanda) ||
+            totalOferta <= EPS ||
+            totalDemanda <= EPS
+        ) {
+            throw new Error(
+                "La oferta y la demanda totales deben ser " +
+                "mayores que cero."
+            );
+        }
+    }
+
+    // =====================================================
+    // VALIDAR SOLUCIÓN
+    // =====================================================
+
+    function validarResultado(resultado) {
+        if (
+            !resultado ||
+            !Array.isArray(resultado.asignaciones) ||
+            !Array.isArray(resultado.oferta) ||
+            !Array.isArray(resultado.demanda) ||
+            !Array.isArray(resultado.costos)
+        ) {
+            throw new Error(
+                "El algoritmo no devolvió una solución válida."
+            );
+        }
+
+        const filas = resultado.oferta.length;
+        const columnas = resultado.demanda.length;
+
+        if (
+            resultado.asignaciones.length !== filas ||
+            resultado.costos.length !== filas
+        ) {
+            throw new Error(
+                "La matriz de resultados tiene dimensiones incorrectas."
+            );
+        }
+
+        let costoCalculado = 0;
+
+        // Comprobar cada origen.
+        for (let i = 0; i < filas; i++) {
+            const fila = resultado.asignaciones[i];
+            const filaCostos = resultado.costos[i];
+
+            if (
+                !Array.isArray(fila) ||
+                !Array.isArray(filaCostos) ||
+                fila.length !== columnas ||
+                filaCostos.length !== columnas
+            ) {
+                throw new Error(
+                    "La fila " + (i + 1) +
+                    " de resultados está incompleta."
+                );
+            }
+
+            let sumaFila = 0;
+
+            for (let j = 0; j < columnas; j++) {
+                const cantidad = fila[j];
+                const costo = filaCostos[j];
 
                 if (
                     !Number.isFinite(cantidad) ||
-                    cantidad < -EPS
+                    cantidad < -EPS ||
+                    !Number.isFinite(costo)
                 ) {
                     throw new Error(
-                        "Existe una asignación inválida."
+                        "Se encontró una asignación o costo inválido."
                     );
                 }
 
-                enviado += cantidad;
+                sumaFila += cantidad;
+                costoCalculado += cantidad * costo;
             }
 
-            if (Math.abs(enviado - oferta[i]) > EPS) {
+            if (!numeroCercano(sumaFila, resultado.oferta[i])) {
                 throw new Error(
-                    "La oferta del origen " + (i + 1) +
-                    " no coincide con sus asignaciones."
+                    "La asignación del origen " + (i + 1) +
+                    " no coincide con su oferta."
                 );
             }
         }
 
-        for (let j = 0; j < demanda.length; j++) {
-            let recibido = 0;
+        // Comprobar cada destino.
+        for (let j = 0; j < columnas; j++) {
+            let sumaColumna = 0;
 
-            for (let i = 0; i < oferta.length; i++) {
-                recibido += asignaciones[i][j];
+            for (let i = 0; i < filas; i++) {
+                sumaColumna += resultado.asignaciones[i][j];
             }
 
-            if (Math.abs(recibido - demanda[j]) > EPS) {
+            if (
+                !numeroCercano(
+                    sumaColumna,
+                    resultado.demanda[j]
+                )
+            ) {
                 throw new Error(
-                    "La demanda del destino " + (j + 1) +
-                    " no coincide con sus asignaciones."
+                    "La asignación del destino " + (j + 1) +
+                    " no coincide con su demanda."
                 );
-            }
-        }
-
-        /*
-         * RECALCULAR COSTO INDEPENDIENTEMENTE
-         */
-
-        let costoVerificado = 0;
-
-        for (let i = 0; i < oferta.length; i++) {
-            for (let j = 0; j < demanda.length; j++) {
-                costoVerificado +=
-                    asignaciones[i][j] * costos[i][j];
             }
         }
 
         if (
-            Math.abs(costoVerificado - resultado.costoTotal) >
-            EPS * Math.max(1, Math.abs(costoVerificado))
+            !Number.isFinite(resultado.costoTotal) ||
+            !numeroCercano(
+                costoCalculado,
+                resultado.costoTotal
+            )
         ) {
             throw new Error(
-                "El costo total calculado no coincide " +
-                "con las asignaciones."
+                "El costo total no coincide con las asignaciones."
             );
         }
 
-        return costoVerificado;
+        return true;
     }
 
-    /*
-     * DETECTAR DEGENERACIÓN
-     *
-     * En un problema de transporte con:
-     * m orígenes y n destinos,
-     *
-     * una solución básica no degenerada
-     * tiene m + n - 1 variables básicas.
-     *
-     * Las asignaciones positivas pueden ser
-     * menos que esa cantidad.
-     */
-
-    function analizarDegeneracion(resultado) {
-        const m = resultado.oferta.length;
-        const n = resultado.demanda.length;
-
-        let positivas = 0;
-
-        resultado.asignaciones.forEach(fila => {
-            fila.forEach(cantidad => {
-                if (cantidad > EPS) {
-                    positivas++;
-                }
-            });
-        });
-
-        return {
-            positivas,
-            requeridas: m + n - 1,
-            degenerada: positivas < m + n - 1
-        };
-    }
-
-    /*
-     * REVISAR EL ALGORITMO ORIGINAL
-     */
+    // =====================================================
+    // EJECUTAR CON VERIFICACIÓN
+    // =====================================================
 
     window.ejecutarNoroeste = function (datos) {
+        validarDatos(datos);
+
         const resultado = ejecutarOriginal(datos);
 
-        const costoVerificado =
-            verificarAsignaciones(resultado);
-
-        const degeneracion =
-            analizarDegeneracion(resultado);
-
-        resultado.verificacion = {
-            correcta: true,
-            costoVerificado,
-            ...degeneracion
-        };
+        validarResultado(resultado);
 
         return resultado;
     };
 
-    /*
-     * MOSTRAR INFORMACIÓN DE VERIFICACIÓN
-     */
-
-    const mostrarOriginal = window.mostrarResultadoNoroeste;
-
-    window.mostrarResultadoNoroeste = function (
-        datos,
-        resultado
-    ) {
-        mostrarOriginal(datos, resultado);
-
-        const contenedor = elemento("procedimientoNoroeste");
-
-        if (!contenedor || !resultado.verificacion) {
-            return;
-        }
-
-        const v = resultado.verificacion;
-
-        const bloque = document.createElement("section");
-        bloque.className = "noroeste-verificacion";
-
-        const titulo = document.createElement("h4");
-        titulo.textContent = "Verificación matemática";
-        bloque.appendChild(titulo);
-
-        const parrafo = document.createElement("p");
-        parrafo.textContent =
-            "Todas las ofertas y demandas se cumplen. " +
-            "El costo total se recalculó de manera independiente: " +
-            Number(v.costoVerificado.toFixed(6)) + ".";
-        bloque.appendChild(parrafo);
-
-        const basicas = document.createElement("p");
-        basicas.textContent =
-            "Asignaciones positivas: " + v.positivas +
-            ". Cantidad de variables básicas requerida: " +
-            v.requeridas + ".";
-        bloque.appendChild(basicas);
-
-        if (v.degenerada) {
-            const aviso = document.createElement("p");
-            aviso.className = "noroeste-aviso";
-            aviso.textContent =
-                "Solución degenerada: para aplicar MODI " +
-                "será necesario completar una base válida " +
-                "con asignaciones básicas de valor cero.";
-            bloque.appendChild(aviso);
-        }
-
-        const nota = document.createElement("p");
-        nota.textContent =
-            "La Esquina Noroeste proporciona una solución " +
-            "factible inicial. No garantiza el costo mínimo.";
-        bloque.appendChild(nota);
-
-        contenedor.appendChild(bloque);
-    };
-
-    /*
-     * RESOLVER CON MATRIZ ACTUALIZADA
-     */
+    // =====================================================
+    // RESOLVER CON CONTROL DE ERRORES
+    // =====================================================
 
     window.resolverNoroeste = function () {
         window.ocultarErrorNoroeste();
 
         try {
-            const firma = firmaDimensiones();
-            const panel = elemento("panelMatrizNoroeste");
+            verificarMatrizActual();
 
-            if (
-                !panel ||
-                panel.classList.contains("oculto") ||
-                panel.dataset.dimension !== firma
-            ) {
-                throw new Error(
-                    "Cambiaste la cantidad de orígenes o " +
-                    "destinos. Genera nuevamente la matriz."
-                );
-            }
-
-            ocultarResultados();
-
+            // Resolver usando el motor y el corrector.
             resolverOriginal();
 
         } catch (error) {
-            ocultarResultados();
-            mostrarError(error.message);
+            const panel = obtenerElemento(
+                "panelResultadosNoroeste"
+            );
+
+            if (panel) {
+                panel.classList.add("oculto");
+            }
+
+            window.mostrarErrorNoroeste(error.message);
         }
     };
 
-    /*
-     * CONSERVAR BOTONES EXISTENTES
-     */
+    // =====================================================
+    // CARGAR EJEMPLO
+    // =====================================================
 
     window.cargarEjemploNoroeste = function () {
         ejemploOriginal();
 
-        const panel = elemento("panelMatrizNoroeste");
+        const panel = obtenerElemento(
+            "panelMatrizNoroeste"
+        );
 
         if (panel && !panel.classList.contains("oculto")) {
-            panel.dataset.dimension = firmaDimensiones();
-        }
-    };
+            const dimensiones = validarDimensiones();
 
-    window.limpiarNoroeste = function () {
-        limpiarOriginal();
-        ocultarResultados();
-
-        const panel = elemento("panelMatrizNoroeste");
-
-        if (panel) {
-            delete panel.dataset.dimension;
+            panel.dataset.dimension =
+                dimensiones.origenes + "," +
+                dimensiones.destinos;
         }
     };
 

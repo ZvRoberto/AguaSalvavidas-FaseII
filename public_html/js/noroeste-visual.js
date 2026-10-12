@@ -1,51 +1,128 @@
-/* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/javascript.js to edit this template
- */
-
-
 
 /*
- * Agua Salvavidas
- * Mejoras visuales de Esquina Noroeste
- *
- * Este archivo no modifica los cálculos.
+ * GREAT VALUE - FASE II
+ * Visualización del Método de la Esquina Noroeste
+ * Compatible con hasta 20 orígenes y 20 destinos
  */
 
 (function () {
+    "use strict";
 
-    const generarOriginal = generarMatrizNoroeste;
-    const resolverOriginal = resolverNoroeste;
-    const limpiarOriginal = limpiarNoroeste;
+    const generarOriginal = window.generarMatrizNoroeste;
+    const resolverOriginal = window.resolverNoroeste;
+    const limpiarOriginal = window.limpiarNoroeste;
+    const ejemploOriginal = window.cargarEjemploNoroeste;
+    const mostrarOriginal = window.mostrarResultadoNoroeste;
 
-    function actualizarEtapasNoroeste(etapa) {
+    // =====================================================
+    // CONTROL DE ETAPAS
+    // =====================================================
 
+    function actualizarEtapasNoroeste(etapaActual) {
         for (let i = 1; i <= 3; i++) {
+            const etapa = document.getElementById("etapaN" + i);
 
-            const elemento = document.getElementById(
-                "etapaN" + i
-            );
-
-            if (!elemento) continue;
-
-            elemento.classList.remove(
-                "activa",
-                "completada"
-            );
-
-            if (i < etapa) {
-                elemento.classList.add("completada");
+            if (!etapa) {
+                continue;
             }
 
-            if (i === etapa) {
-                elemento.classList.add("activa");
+            etapa.classList.remove("activa", "completada");
+
+            if (i < etapaActual) {
+                etapa.classList.add("completada");
+            } else if (i === etapaActual) {
+                etapa.classList.add("activa");
             }
         }
     }
 
+    // =====================================================
+    // MEJORAR TABLAS DE RESULTADOS
+    // =====================================================
 
-    generarMatrizNoroeste = function () {
+    function resaltarAsignacionesNoroeste() {
+        const contenedor = document.getElementById(
+            "procedimientoNoroeste"
+        );
 
+        if (!contenedor) {
+            return;
+        }
+
+        const tablas = contenedor.querySelectorAll(
+            ".tabla-transporte"
+        );
+
+        tablas.forEach(tabla => {
+            const filas = tabla.querySelectorAll("tbody tr");
+
+            filas.forEach(fila => {
+                const celdas = fila.querySelectorAll("td");
+
+                celdas.forEach(celda => {
+                    if (
+                        celda.classList.contains(
+                            "noroeste-celda-asignada"
+                        )
+                    ) {
+                        celda.classList.add(
+                            "noroeste-asignacion-destacada"
+                        );
+                    }
+                });
+            });
+        });
+    }
+
+    // =====================================================
+    // ENUMERAR PASOS
+    // =====================================================
+
+    function mejorarPasosNoroeste() {
+        const pasos = document.querySelectorAll(
+            "#procedimientoNoroeste .noroeste-paso"
+        );
+
+        pasos.forEach((paso, indice) => {
+            paso.classList.add("noroeste-paso-visual");
+
+            const titulo = paso.querySelector("h4");
+
+            if (!titulo) {
+                return;
+            }
+
+            const numero = document.createElement("span");
+            numero.className = "noroeste-numero-paso";
+            numero.textContent = String(indice + 1);
+
+            titulo.prepend(numero);
+        });
+    }
+
+    // =====================================================
+    // MEJORAR RESULTADO FINAL
+    // =====================================================
+
+    function destacarCostoTotal() {
+        const resultado = document.querySelector(
+            "#procedimientoNoroeste .resultado-final"
+        );
+
+        if (!resultado) {
+            return;
+        }
+
+        resultado.classList.add(
+            "noroeste-resultado-destacado"
+        );
+    }
+
+    // =====================================================
+    // GENERAR MATRIZ
+    // =====================================================
+
+    window.generarMatrizNoroeste = function () {
         generarOriginal();
 
         const panel = document.getElementById(
@@ -57,9 +134,28 @@
         }
     };
 
+    // =====================================================
+    // MOSTRAR RESULTADOS
+    // =====================================================
 
-    resolverNoroeste = function () {
+    window.mostrarResultadoNoroeste = function (
+        datos,
+        resultado
+    ) {
+        mostrarOriginal(datos, resultado);
 
+        resaltarAsignacionesNoroeste();
+        mejorarPasosNoroeste();
+        destacarCostoTotal();
+
+        actualizarEtapasNoroeste(3);
+    };
+
+    // =====================================================
+    // RESOLVER
+    // =====================================================
+
+    window.resolverNoroeste = function () {
         resolverOriginal();
 
         const panel = document.getElementById(
@@ -67,52 +163,50 @@
         );
 
         if (panel && !panel.classList.contains("oculto")) {
-
             actualizarEtapasNoroeste(3);
-
-            mejorarTablasNoroeste();
         }
     };
 
+    // =====================================================
+    // CARGAR EJEMPLO
+    // =====================================================
 
-    limpiarNoroeste = function () {
+    window.cargarEjemploNoroeste = function () {
+        ejemploOriginal();
 
-        limpiarOriginal();
-
-        actualizarEtapasNoroeste(1);
-    };
-
-
-    function mejorarTablasNoroeste() {
-
-        const tablas = document.querySelectorAll(
-            "#procedimientoNoroeste table"
+        const panel = document.getElementById(
+            "panelMatrizNoroeste"
         );
 
-        tablas.forEach(tabla => {
+        if (panel && !panel.classList.contains("oculto")) {
+            actualizarEtapasNoroeste(2);
+        }
+    };
 
-            tabla.classList.add("noroeste-tabla-premium");
+    // =====================================================
+    // LIMPIAR DATOS
+    // =====================================================
 
-            const filas = tabla.querySelectorAll("tr");
+    window.limpiarNoroeste = function () {
+        limpiarOriginal();
 
-            filas.forEach(fila => {
+        const panel = document.getElementById(
+            "panelResultadosNoroeste"
+        );
 
-                const celdas = fila.querySelectorAll("td");
+        if (panel) {
+            panel.classList.add("oculto");
+        }
 
-                celdas.forEach(celda => {
+        actualizarEtapasNoroeste(2);
+    };
 
-                    if (
-                        celda.classList.contains(
-                            "asignacion-activa"
-                        )
-                    ) {
-                        celda.classList.add(
-                            "noroeste-asignacion-premium"
-                        );
-                    }
-                });
-            });
-        });
-    }
+    // =====================================================
+    // ESTADO INICIAL
+    // =====================================================
+
+    document.addEventListener("DOMContentLoaded", function () {
+        actualizarEtapasNoroeste(1);
+    });
 
 })();

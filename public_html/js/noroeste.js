@@ -1,436 +1,263 @@
 
-const EPSILON_N = 1e-9;
+/*
+ * GREAT VALUE - FASE II
+ * Método de la Esquina Noroeste
+ * Hasta 20 orígenes y 20 destinos
+ */
 
+"use strict";
+
+const EPSILON_N = 1e-8;
+const MAX_NOROESTE = 20;
+
+function elementoN(id) {
+    return document.getElementById(id);
+}
+
+function formatoN(numero) {
+    if (Math.abs(numero) < EPSILON_N) return "0";
+    return Number(numero.toFixed(6)).toString();
+}
+
+function formatearNoroeste(numero) {
+    return formatoN(numero);
+}
+
+function mostrarErrorNoroeste(mensaje) {
+    const elemento = elementoN("mensajeErrorNoroeste");
+    elemento.textContent = "⚠ " + mensaje;
+    elemento.classList.remove("oculto");
+}
+
+function ocultarErrorNoroeste() {
+    const elemento = elementoN("mensajeErrorNoroeste");
+    elemento.textContent = "";
+    elemento.classList.add("oculto");
+}
+
+function crearInputN(id, tipo) {
+    const input = document.createElement("input");
+    input.type = "number";
+    input.step = "any";
+    input.min = "0";
+    input.id = id;
+    input.className = "input-matriz";
+    input.placeholder = "0";
+    input.setAttribute("aria-label", tipo);
+
+    input.addEventListener("input", function () {
+        input.classList.remove("campo-invalido");
+        actualizarBalanceVisual();
+        ocultarErrorNoroeste();
+    });
+
+    return input;
+}
 
 // =====================================================
 // GENERAR MATRIZ
 // =====================================================
 
 function generarMatrizNoroeste() {
+    ocultarErrorNoroeste();
 
-    const origenes =
-        parseInt(
-            document.getElementById(
-                "numOrigenes"
-            ).value
-        );
-
-
-    const destinos =
-        parseInt(
-            document.getElementById(
-                "numDestinos"
-            ).value
-        );
-
+    const origenes = Number(elementoN("numOrigenes").value);
+    const destinos = Number(elementoN("numDestinos").value);
 
     if (
         !Number.isInteger(origenes) ||
-        origenes < 1 ||
-        origenes > 10
-    ) {
-
-        alert(
-            "El número de orígenes debe estar entre 1 y 10."
-        );
-
-        return;
-    }
-
-
-    if (
         !Number.isInteger(destinos) ||
+        origenes < 1 ||
         destinos < 1 ||
-        destinos > 10
+        origenes > MAX_NOROESTE ||
+        destinos > MAX_NOROESTE
     ) {
-
-        alert(
-            "El número de destinos debe estar entre 1 y 10."
+        mostrarErrorNoroeste(
+            "Ingresa entre 1 y 20 orígenes y destinos."
         );
-
         return;
     }
 
+    const contenedor = elementoN("matrizEntradaNoroeste");
+    contenedor.innerHTML = "";
 
-    construirMatrizEntrada(
-        origenes,
-        destinos
-    );
+    const envoltura = document.createElement("div");
+    envoltura.className = "tabla-responsive";
 
+    const tabla = document.createElement("table");
+    tabla.className = "tabla-simplex tabla-transporte";
 
-    document
-        .getElementById(
-            "panelMatrizNoroeste"
-        )
-        .classList.remove(
-            "oculto"
-        );
+    const thead = document.createElement("thead");
+    const encabezado = document.createElement("tr");
 
+    ["Origen / Destino"].concat(
+        Array.from({ length: destinos }, (_, j) => "D" + (j + 1)),
+        ["Oferta"]
+    ).forEach(texto => {
+        const th = document.createElement("th");
+        th.textContent = texto;
+        encabezado.appendChild(th);
+    });
 
-    document
-        .getElementById(
-            "panelResultadosNoroeste"
-        )
-        .classList.add(
-            "oculto"
-        );
+    thead.appendChild(encabezado);
+    tabla.appendChild(thead);
 
+    const tbody = document.createElement("tbody");
 
-    document.getElementById(
-        "resumenBalance"
-    ).innerHTML = "";
+    for (let i = 0; i < origenes; i++) {
+        const tr = document.createElement("tr");
 
+        const nombre = document.createElement("th");
+        nombre.textContent = "O" + (i + 1);
+        tr.appendChild(nombre);
 
-    ocultarErrorNoroeste();
-}
+        for (let j = 0; j < destinos; j++) {
+            const td = document.createElement("td");
 
+            td.appendChild(
+                crearInputN(
+                    `n_costo_${i}_${j}`,
+                    `Costo del origen ${i + 1} al destino ${j + 1}`
+                )
+            );
 
-// =====================================================
-// CONSTRUIR MATRIZ
-// =====================================================
-
-function construirMatrizEntrada(
-    origenes,
-    destinos
-) {
-
-    const contenedor =
-        document.getElementById(
-            "matrizEntradaNoroeste"
-        );
-
-
-    let html = `
-
-        <table class="tabla-transporte">
-
-            <thead>
-
-                <tr>
-
-                    <th>Origen / Destino</th>
-
-    `;
-
-
-    for (
-        let j = 0;
-        j < destinos;
-        j++
-    ) {
-
-        html += `
-            <th>
-                Destino ${j + 1}
-            </th>
-        `;
-    }
-
-
-    html += `
-
-                    <th class="columna-oferta">
-                        Oferta
-                    </th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-    `;
-
-
-    for (
-        let i = 0;
-        i < origenes;
-        i++
-    ) {
-
-        html += `
-
-            <tr>
-
-                <th>
-                    Origen ${i + 1}
-                </th>
-
-        `;
-
-
-        for (
-            let j = 0;
-            j < destinos;
-            j++
-        ) {
-
-            html += `
-
-                <td>
-
-                    <input
-                        type="number"
-                        step="any"
-                        min="0"
-                        id="n_costo_${i}_${j}"
-                        class="input-matriz"
-                        placeholder="Costo">
-
-                </td>
-
-            `;
+            tr.appendChild(td);
         }
 
-
-        html += `
-
-                <td class="celda-oferta">
-
-                    <input
-                        type="number"
-                        step="any"
-                        min="0"
-                        id="n_oferta_${i}"
-                        class="input-matriz"
-                        placeholder="Oferta">
-
-                </td>
-
-            </tr>
-
-        `;
-    }
-
-
-    html += `
-
-            <tr class="fila-demanda">
-
-                <th>
-                    Demanda
-                </th>
-
-    `;
-
-
-    for (
-        let j = 0;
-        j < destinos;
-        j++
-    ) {
-
-        html += `
-
-            <td>
-
-                <input
-                    type="number"
-                    step="any"
-                    min="0"
-                    id="n_demanda_${j}"
-                    class="input-matriz"
-                    placeholder="Demanda">
-
-            </td>
-
-        `;
-    }
-
-
-    html += `
-
-                <td class="celda-bloqueada">
-                    —
-                </td>
-
-            </tr>
-
-            </tbody>
-
-        </table>
-
-    `;
-
-
-    contenedor.innerHTML =
-        html;
-
-
-    document
-        .querySelectorAll(
-            ".input-matriz"
-        )
-        .forEach(
-            input => {
-
-                input.addEventListener(
-                    "input",
-                    function () {
-
-                        this.classList.remove(
-                            "campo-invalido"
-                        );
-
-                        ocultarErrorNoroeste();
-
-                        actualizarBalanceVisual();
-                    }
-                );
-            }
+        const oferta = document.createElement("td");
+        oferta.appendChild(
+            crearInputN(
+                `n_oferta_${i}`,
+                `Oferta del origen ${i + 1}`
+            )
         );
-}
 
+        tr.appendChild(oferta);
+        tbody.appendChild(tr);
+    }
+
+    const filaDemanda = document.createElement("tr");
+    const etiqueta = document.createElement("th");
+    etiqueta.textContent = "Demanda";
+    filaDemanda.appendChild(etiqueta);
+
+    for (let j = 0; j < destinos; j++) {
+        const td = document.createElement("td");
+        td.appendChild(
+            crearInputN(
+                `n_demanda_${j}`,
+                `Demanda del destino ${j + 1}`
+            )
+        );
+        filaDemanda.appendChild(td);
+    }
+
+    const vacia = document.createElement("td");
+    vacia.textContent = "—";
+    filaDemanda.appendChild(vacia);
+
+    tbody.appendChild(filaDemanda);
+    tabla.appendChild(tbody);
+    envoltura.appendChild(tabla);
+    contenedor.appendChild(envoltura);
+
+    elementoN("panelMatrizNoroeste")
+        .classList.remove("oculto");
+
+    elementoN("panelResultadosNoroeste")
+        .classList.add("oculto");
+
+    elementoN("procedimientoNoroeste").innerHTML = "";
+    actualizarBalanceVisual();
+}
 
 // =====================================================
 // LEER DATOS
 // =====================================================
 
+function leerNumeroNoroeste(input, descripcion) {
+    if (!input || input.value.trim() === "") {
+        if (input) input.classList.add("campo-invalido");
+        throw new Error(
+            "Completa el valor de " + descripcion + "."
+        );
+    }
+
+    const valor = Number(input.value);
+
+    if (!Number.isFinite(valor) || valor < 0) {
+        input.classList.add("campo-invalido");
+        throw new Error(
+            "El valor de " + descripcion +
+            " debe ser un número no negativo."
+        );
+    }
+
+    input.classList.remove("campo-invalido");
+    return valor;
+}
+
 function obtenerDatosNoroeste() {
+    const origenes = Number(elementoN("numOrigenes").value);
+    const destinos = Number(elementoN("numDestinos").value);
 
-    const origenes =
-        parseInt(
-            document.getElementById(
-                "numOrigenes"
-            ).value
-        );
-
-
-    const destinos =
-        parseInt(
-            document.getElementById(
-                "numDestinos"
-            ).value
-        );
-
+    if (
+        !Number.isInteger(origenes) ||
+        !Number.isInteger(destinos) ||
+        origenes < 1 ||
+        destinos < 1 ||
+        origenes > 20 ||
+        destinos > 20
+    ) {
+        throw new Error("Las dimensiones deben estar entre 1 y 20.");
+    }
 
     const costos = [];
 
-
-    for (
-        let i = 0;
-        i < origenes;
-        i++
-    ) {
-
+    for (let i = 0; i < origenes; i++) {
         const fila = [];
 
-
-        for (
-            let j = 0;
-            j < destinos;
-            j++
-        ) {
-
-            const valor =
+        for (let j = 0; j < destinos; j++) {
+            fila.push(
                 leerNumeroNoroeste(
-                    document.getElementById(
-                        `n_costo_${i}_${j}`
-                    ),
-                    "Los costos"
-                );
-
-
-            if (valor < 0) {
-
-                throw new Error(
-                    "Los costos de transporte no pueden ser negativos."
-                );
-            }
-
-
-            fila.push(valor);
+                    elementoN(`n_costo_${i}_${j}`),
+                    `costo O${i + 1} → D${j + 1}`
+                )
+            );
         }
-
 
         costos.push(fila);
     }
 
-
     const oferta = [];
-
-
-    for (
-        let i = 0;
-        i < origenes;
-        i++
-    ) {
-
-        const valor =
-            leerNumeroNoroeste(
-                document.getElementById(
-                    `n_oferta_${i}`
-                ),
-                "La oferta"
-            );
-
-
-        if (valor < 0) {
-
-            throw new Error(
-                "La oferta no puede ser negativa."
-            );
-        }
-
-
-        oferta.push(valor);
-    }
-
-
     const demanda = [];
 
-
-    for (
-        let j = 0;
-        j < destinos;
-        j++
-    ) {
-
-        const valor =
+    for (let i = 0; i < origenes; i++) {
+        oferta.push(
             leerNumeroNoroeste(
-                document.getElementById(
-                    `n_demanda_${j}`
-                ),
-                "La demanda"
-            );
-
-
-        if (valor < 0) {
-
-            throw new Error(
-                "La demanda no puede ser negativa."
-            );
-        }
-
-
-        demanda.push(valor);
+                elementoN(`n_oferta_${i}`),
+                `oferta O${i + 1}`
+            )
+        );
     }
 
-
-    const totalOferta =
-        oferta.reduce(
-            (a, b) => a + b,
-            0
+    for (let j = 0; j < destinos; j++) {
+        demanda.push(
+            leerNumeroNoroeste(
+                elementoN(`n_demanda_${j}`),
+                `demanda D${j + 1}`
+            )
         );
+    }
 
+    const totalOferta = oferta.reduce((a, b) => a + b, 0);
+    const totalDemanda = demanda.reduce((a, b) => a + b, 0);
 
-    const totalDemanda =
-        demanda.reduce(
-            (a, b) => a + b,
-            0
-        );
-
-
-    if (
-        totalOferta <= EPSILON_N ||
-        totalDemanda <= EPSILON_N
-    ) {
-
+    if (totalOferta <= EPSILON_N || totalDemanda <= EPSILON_N) {
         throw new Error(
-            "La oferta y la demanda total deben ser mayores que cero."
+            "La oferta y demanda totales deben ser mayores que cero."
         );
     }
-
 
     return {
         origenes,
@@ -443,226 +270,42 @@ function obtenerDatosNoroeste() {
     };
 }
 
-
-// =====================================================
-// LEER NÚMERO
-// =====================================================
-
-function leerNumeroNoroeste(
-    input,
-    nombre
-) {
-
-    const texto =
-        input.value.trim();
-
-
-    if (texto === "") {
-
-        input.classList.add(
-            "campo-invalido"
-        );
-
-
-        throw new Error(
-            `${nombre} deben contener valores numéricos.`
-        );
-    }
-
-
-    const valor =
-        Number(texto);
-
-
-    if (!Number.isFinite(valor)) {
-
-        input.classList.add(
-            "campo-invalido"
-        );
-
-
-        throw new Error(
-            "Se encontró un valor no válido."
-        );
-    }
-
-
-    input.classList.remove(
-        "campo-invalido"
-    );
-
-
-    return valor;
-}
-
-
-// =====================================================
-// RESOLVER
-// =====================================================
-
-function resolverNoroeste() {
-
-    ocultarErrorNoroeste();
-
-
-    let datos;
-
-
-    try {
-
-        datos =
-            obtenerDatosNoroeste();
-
-    } catch (error) {
-
-        mostrarErrorNoroeste(
-            error.message
-        );
-
-        return;
-    }
-
-
-    const resultado =
-        ejecutarNoroeste(datos);
-
-
-    mostrarResultadoNoroeste(
-        datos,
-        resultado
-    );
-}
-
-
 // =====================================================
 // ALGORITMO ESQUINA NOROESTE
 // =====================================================
 
-function ejecutarNoroeste(
-    datosOriginales
-) {
+function ejecutarNoroeste(datos) {
+    const costos = datos.costos.map(fila => [...fila]);
+    const oferta = [...datos.oferta];
+    const demanda = [...datos.demanda];
 
-    /*
-     * Copiamos los datos porque, si el problema
-     * no está balanceado, agregaremos un origen
-     * o destino ficticio.
-     */
+    const nombresOrigenes = oferta.map(
+        (_, i) => "Origen " + (i + 1)
+    );
 
-    const costos =
-        datosOriginales.costos.map(
-            fila => [...fila]
-        );
+    const nombresDestinos = demanda.map(
+        (_, j) => "Destino " + (j + 1)
+    );
 
-
-    const oferta =
-        [...datosOriginales.oferta];
-
-
-    const demanda =
-        [...datosOriginales.demanda];
-
-
-    const nombresOrigenes = [];
-
-
-    for (
-        let i = 0;
-        i < oferta.length;
-        i++
-    ) {
-
-        nombresOrigenes.push(
-            "Origen " + (i + 1)
-        );
-    }
-
-
-    const nombresDestinos = [];
-
-
-    for (
-        let j = 0;
-        j < demanda.length;
-        j++
-    ) {
-
-        nombresDestinos.push(
-            "Destino " + (j + 1)
-        );
-    }
-
-
+    const diferencia = datos.totalOferta - datos.totalDemanda;
     let balanceo = null;
 
-
-    const diferencia =
-        datosOriginales.totalOferta -
-        datosOriginales.totalDemanda;
-
-
-    // SOBRA OFERTA:
-    // agregar destino ficticio
-
-    if (
-        diferencia >
-        EPSILON_N
-    ) {
-
-        for (
-            let i = 0;
-            i < costos.length;
-            i++
-        ) {
-
-            costos[i].push(0);
-        }
-
-
-        demanda.push(
-            diferencia
-        );
-
-
-        nombresDestinos.push(
-            "Destino ficticio"
-        );
-
+    if (diferencia > EPSILON_N) {
+        // Sobra oferta: destino ficticio.
+        costos.forEach(fila => fila.push(0));
+        demanda.push(diferencia);
+        nombresDestinos.push("Destino ficticio");
 
         balanceo = {
             tipo: "destino",
             cantidad: diferencia
         };
-    }
-
-
-    // SOBRA DEMANDA:
-    // agregar origen ficticio
-
-    else if (
-        diferencia <
-        -EPSILON_N
-    ) {
-
-        const faltante =
-            Math.abs(diferencia);
-
-
-        costos.push(
-            Array(
-                demanda.length
-            ).fill(0)
-        );
-
-
-        oferta.push(
-            faltante
-        );
-
-
-        nombresOrigenes.push(
-            "Origen ficticio"
-        );
-
+    } else if (diferencia < -EPSILON_N) {
+        // Falta oferta: origen ficticio.
+        const faltante = -diferencia;
+        costos.push(Array(demanda.length).fill(0));
+        oferta.push(faltante);
+        nombresOrigenes.push("Origen ficticio");
 
         balanceo = {
             tipo: "origen",
@@ -670,1214 +313,422 @@ function ejecutarNoroeste(
         };
     }
 
+    const ofertaRestante = [...oferta];
+    const demandaRestante = [...demanda];
 
-    const ofertaRestante =
-        [...oferta];
-
-
-    const demandaRestante =
-        [...demanda];
-
-
-    const asignaciones =
-        Array.from(
-            {
-                length:
-                    oferta.length
-            },
-            () =>
-                Array(
-                    demanda.length
-                ).fill(0)
-        );
-
+    const asignaciones = Array.from(
+        { length: oferta.length },
+        () => Array(demanda.length).fill(0)
+    );
 
     const pasos = [];
 
-
     let i = 0;
     let j = 0;
-    let numeroPaso = 1;
 
+    while (i < oferta.length && j < demanda.length) {
+        const ofertaAntes = ofertaRestante[i];
+        const demandaAntes = demandaRestante[j];
 
-    while (
-        i < oferta.length &&
-        j < demanda.length
-    ) {
+        const cantidad = Math.min(ofertaAntes, demandaAntes);
+        const costoUnitario = costos[i][j];
+        const costoPaso = cantidad * costoUnitario;
 
-        const cantidad =
-            Math.min(
-                ofertaRestante[i],
-                demandaRestante[j]
-            );
+        asignaciones[i][j] = cantidad;
 
+        ofertaRestante[i] = Math.max(
+            0,
+            ofertaRestante[i] - cantidad
+        );
 
-        asignaciones[i][j] =
-            cantidad;
-
-
-        const costoUnitario =
-            costos[i][j];
-
-
-        const costoPaso =
-            cantidad *
-            costoUnitario;
-
+        demandaRestante[j] = Math.max(
+            0,
+            demandaRestante[j] - cantidad
+        );
 
         pasos.push({
-
-            numero: numeroPaso,
-
+            numero: pasos.length + 1,
             fila: i,
-
             columna: j,
-
-            origen:
-                nombresOrigenes[i],
-
-            destino:
-                nombresDestinos[j],
-
+            origen: nombresOrigenes[i],
+            destino: nombresDestinos[j],
             cantidad,
-
             costoUnitario,
-
             costoPaso,
-
-            ofertaAntes:
-                ofertaRestante[i],
-
-            demandaAntes:
-                demandaRestante[j]
-
+            ofertaAntes,
+            demandaAntes,
+            ofertaDespues: ofertaRestante[i],
+            demandaDespues: demandaRestante[j]
         });
 
+        const ofertaAgotada =
+            ofertaRestante[i] <= EPSILON_N;
 
-        ofertaRestante[i] -=
-            cantidad;
+        const demandaSatisfecha =
+            demandaRestante[j] <= EPSILON_N;
 
-
-        demandaRestante[j] -=
-            cantidad;
-
-
-        if (
-            Math.abs(
-                ofertaRestante[i]
-            ) <
-            EPSILON_N
-        ) {
-
-            ofertaRestante[i] = 0;
-        }
-
-
-        if (
-            Math.abs(
-                demandaRestante[j]
-            ) <
-            EPSILON_N
-        ) {
-
-            demandaRestante[j] = 0;
-        }
-
-
-        /*
-         * Si oferta y demanda se agotan al mismo
-         * tiempo avanzamos diagonalmente.
-         */
-
-        if (
-            ofertaRestante[i] === 0 &&
-            demandaRestante[j] === 0
-        ) {
-
+        if (ofertaAgotada && demandaSatisfecha) {
             i++;
             j++;
-        }
-
-
-        else if (
-            ofertaRestante[i] === 0
-        ) {
-
+        } else if (ofertaAgotada) {
             i++;
-        }
-
-
-        else {
-
+        } else if (demandaSatisfecha) {
             j++;
+        } else {
+            throw new Error(
+                "No se pudo avanzar en las asignaciones."
+            );
         }
-
-
-        numeroPaso++;
     }
-
 
     let costoTotal = 0;
 
-
-    for (
-        let fila = 0;
-        fila < asignaciones.length;
-        fila++
-    ) {
-
-        for (
-            let columna = 0;
-            columna <
-            asignaciones[fila].length;
-            columna++
-        ) {
-
+    for (let fila = 0; fila < oferta.length; fila++) {
+        for (let columna = 0; columna < demanda.length; columna++) {
             costoTotal +=
                 asignaciones[fila][columna] *
                 costos[fila][columna];
         }
     }
 
-
     return {
-
         costos,
         oferta,
         demanda,
-
         nombresOrigenes,
         nombresDestinos,
-
         asignaciones,
-
         pasos,
-
         costoTotal,
-
         balanceo
-
     };
 }
 
+// =====================================================
+// TABLA DE RESULTADOS
+// =====================================================
+
+function construirMatrizResultado(resultado) {
+    const envoltura = document.createElement("div");
+    envoltura.className = "tabla-responsive";
+
+    const tabla = document.createElement("table");
+    tabla.className = "tabla-simplex tabla-transporte";
+
+    const thead = document.createElement("thead");
+    const trHead = document.createElement("tr");
+
+    ["Origen / Destino", ...resultado.nombresDestinos, "Oferta"]
+        .forEach(texto => {
+            const th = document.createElement("th");
+            th.textContent = texto;
+            trHead.appendChild(th);
+        });
+
+    thead.appendChild(trHead);
+    tabla.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    resultado.oferta.forEach((oferta, i) => {
+        const tr = document.createElement("tr");
+
+        const nombre = document.createElement("th");
+        nombre.textContent = resultado.nombresOrigenes[i];
+        tr.appendChild(nombre);
+
+        resultado.demanda.forEach((_, j) => {
+            const td = document.createElement("td");
+            const asignado = resultado.asignaciones[i][j];
+            const costo = resultado.costos[i][j];
+
+            if (asignado > EPSILON_N) {
+                td.classList.add("noroeste-celda-asignada");
+            }
+
+            const cantidad = document.createElement("strong");
+            cantidad.textContent = formatoN(asignado);
+
+            const detalle = document.createElement("small");
+            detalle.textContent = "Costo: " + formatoN(costo);
+
+            td.appendChild(cantidad);
+            td.appendChild(document.createElement("br"));
+            td.appendChild(detalle);
+            tr.appendChild(td);
+        });
+
+        const total = document.createElement("td");
+        total.textContent = formatoN(oferta);
+        tr.appendChild(total);
+        tbody.appendChild(tr);
+    });
+
+    const filaDemanda = document.createElement("tr");
+    const etiqueta = document.createElement("th");
+    etiqueta.textContent = "Demanda";
+    filaDemanda.appendChild(etiqueta);
+
+    resultado.demanda.forEach(valor => {
+        const td = document.createElement("td");
+        td.textContent = formatoN(valor);
+        filaDemanda.appendChild(td);
+    });
+
+    const vacia = document.createElement("td");
+    vacia.textContent = "—";
+    filaDemanda.appendChild(vacia);
+
+    tbody.appendChild(filaDemanda);
+    tabla.appendChild(tbody);
+    envoltura.appendChild(tabla);
+
+    return envoltura;
+}
 
 // =====================================================
-// MOSTRAR RESULTADO
+// MOSTRAR PROCEDIMIENTO Y COSTO
 // =====================================================
 
-function mostrarResultadoNoroeste(
-    datos,
-    resultado
-) {
-
-    const contenedor =
-        document.getElementById(
-            "procedimientoNoroeste"
-        );
-
-
+function mostrarResultadoNoroeste(datos, resultado) {
+    const contenedor = elementoN("procedimientoNoroeste");
     contenedor.innerHTML = "";
 
+    const balance = document.createElement("div");
+    balance.className = resultado.balanceo
+        ? "balance-ajustado"
+        : "balance-correcto";
 
-    // BALANCE
+    const tituloBalance = document.createElement("h4");
+    tituloBalance.textContent = resultado.balanceo
+        ? "Problema balanceado automáticamente"
+        : "Problema balanceado";
 
-    const balance =
-        document.createElement(
-            "div"
-        );
+    balance.appendChild(tituloBalance);
 
+    const detalleBalance = document.createElement("p");
 
-    if (
-        resultado.balanceo === null
-    ) {
-
-        balance.className =
-            "balance-correcto";
-
-
-        balance.innerHTML = `
-
-            <strong>
-                ✓ Problema balanceado
-            </strong>
-
-            <p>
-                Oferta total =
-                ${formatearNoroeste(
-                    datos.totalOferta
-                )}
-
-                &nbsp; | &nbsp;
-
-                Demanda total =
-                ${formatearNoroeste(
-                    datos.totalDemanda
-                )}
-            </p>
-
-        `;
-
+    if (resultado.balanceo) {
+        detalleBalance.textContent =
+            "Se agregó un " +
+            resultado.balanceo.tipo +
+            " ficticio con cantidad " +
+            formatoN(resultado.balanceo.cantidad) +
+            " y costo unitario cero.";
     } else {
-
-        balance.className =
-            "balance-ajustado";
-
-
-        if (
-            resultado.balanceo.tipo ===
-            "destino"
-        ) {
-
-            balance.innerHTML = `
-
-                <strong>
-                    Problema balanceado automáticamente
-                </strong>
-
-                <p>
-                    La oferta era mayor que la demanda.
-                    Se agregó un
-
-                    <strong>
-                        destino ficticio
-                    </strong>
-
-                    con demanda de
-
-                    <strong>
-                        ${formatearNoroeste(
-                            resultado.balanceo
-                                .cantidad
-                        )}
-                    </strong>
-
-                    y costo cero.
-                </p>
-
-            `;
-
-        } else {
-
-            balance.innerHTML = `
-
-                <strong>
-                    Problema balanceado automáticamente
-                </strong>
-
-                <p>
-                    La demanda era mayor que la oferta.
-                    Se agregó un
-
-                    <strong>
-                        origen ficticio
-                    </strong>
-
-                    con oferta de
-
-                    <strong>
-                        ${formatearNoroeste(
-                            resultado.balanceo
-                                .cantidad
-                        )}
-                    </strong>
-
-                    y costo cero.
-                </p>
-
-            `;
-        }
+        detalleBalance.textContent =
+            "Oferta total: " + formatoN(datos.totalOferta) +
+            " | Demanda total: " + formatoN(datos.totalDemanda);
     }
 
+    balance.appendChild(detalleBalance);
+    contenedor.appendChild(balance);
+
+    const tituloPasos = document.createElement("h3");
+    tituloPasos.textContent = "Asignaciones paso a paso";
+    contenedor.appendChild(tituloPasos);
+
+    resultado.pasos.forEach(paso => {
+        const bloque = document.createElement("div");
+        bloque.className = "noroeste-paso";
+
+        const titulo = document.createElement("h4");
+        titulo.textContent =
+            "Paso " + paso.numero + ": " +
+            paso.origen + " → " + paso.destino;
+
+        const detalle = document.createElement("p");
+        detalle.textContent =
+            "Asignación: " + formatoN(paso.cantidad) +
+            " | Costo unitario: " +
+            formatoN(paso.costoUnitario) +
+            " | Costo parcial: " +
+            formatoN(paso.costoPaso);
+
+        const restantes = document.createElement("p");
+        restantes.textContent =
+            "Oferta restante: " +
+            formatoN(paso.ofertaDespues) +
+            " | Demanda restante: " +
+            formatoN(paso.demandaDespues);
+
+        bloque.appendChild(titulo);
+        bloque.appendChild(detalle);
+        bloque.appendChild(restantes);
+        contenedor.appendChild(bloque);
+    });
+
+    const tituloMatriz = document.createElement("h3");
+    tituloMatriz.textContent = "Matriz de asignaciones";
+    contenedor.appendChild(tituloMatriz);
 
     contenedor.appendChild(
-        balance
+        construirMatrizResultado(resultado)
     );
 
-
-    // PASOS
-
-    const titulo =
-        document.createElement(
-            "div"
-        );
-
-
-    titulo.className =
-        "subtitulo-procedimiento";
-
-
-    titulo.innerHTML = `
-
-        <h3>
-            Asignaciones paso a paso
-        </h3>
-
-        <p>
-            Se comienza en la celda ubicada
-            en la esquina superior izquierda.
-        </p>
-
-    `;
-
-
-    contenedor.appendChild(
-        titulo
-    );
-
-
-    resultado.pasos.forEach(
-        paso => {
-
-            const div =
-                document.createElement(
-                    "div"
-                );
-
-
-            div.className =
-                "paso-noroeste";
-
-
-            div.innerHTML = `
-
-                <div class="numero-paso-noroeste">
-                    ${paso.numero}
-                </div>
-
-
-                <div class="detalle-paso-noroeste">
-
-                    <h4>
-
-                        ${paso.origen}
-
-                        →
-
-                        ${paso.destino}
-
-                    </h4>
-
-
-                    <p>
-
-                        Oferta disponible:
-
-                        <strong>
-                            ${formatearNoroeste(
-                                paso.ofertaAntes
-                            )}
-                        </strong>
-
-                        &nbsp; | &nbsp;
-
-                        Demanda pendiente:
-
-                        <strong>
-                            ${formatearNoroeste(
-                                paso.demandaAntes
-                            )}
-                        </strong>
-
-                    </p>
-
-
-                    <p>
-
-                        Se asigna el menor valor:
-
-                        <strong>
-                            ${formatearNoroeste(
-                                paso.cantidad
-                            )}
-                        </strong>
-
-                    </p>
-
-
-                    <div class="calculo-costo">
-
-                        ${formatearNoroeste(
-                            paso.cantidad
-                        )}
-
-                        ×
-
-                        ${formatearNoroeste(
-                            paso.costoUnitario
-                        )}
-
-                        =
-
-                        <strong>
-
-                            ${formatearNoroeste(
-                                paso.costoPaso
-                            )}
-
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            `;
-
-
-            contenedor.appendChild(
-                div
-            );
-        }
-    );
-
-
-    // MATRIZ FINAL
-
-    const matrizFinal =
-        document.createElement(
-            "div"
-        );
-
-
-    matrizFinal.className =
-        "iteracion-simplex";
-
-
-    matrizFinal.innerHTML = `
-
-        <h4>
-            Matriz de asignaciones final
-        </h4>
-
-        <p class="texto-iteracion">
-            Los valores muestran cuántas unidades
-            deben enviarse desde cada origen hacia
-            cada destino.
-        </p>
-
-    `;
-
-
-    matrizFinal.appendChild(
-        construirMatrizResultado(
-            resultado
-        )
-    );
-
-
-    contenedor.appendChild(
-        matrizFinal
-    );
-
-
-    // COSTO
-
-    const final =
-        document.createElement(
-            "div"
-        );
-
-
-    final.className =
-        "resultado-final";
-
-
-    final.innerHTML = `
-
-        <div class="resultado-titulo">
-
-            <span>✓</span>
-
-            <div>
-
-                <h3>
-                    Solución inicial encontrada
-                </h3>
-
-                <p>
-                    El método de Esquina Noroeste
-                    terminó correctamente.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="variables-resultado">
-
-            <div
-                class="resultado-variable destacado">
-
-                <span>
-                    Costo total de transporte
-                </span>
-
-                <strong>
-                    ${formatearNoroeste(
-                        resultado.costoTotal
-                    )}
-                </strong>
-
-            </div>
-
-        </div>
-
-
-        <div class="interpretacion">
-
-            <h4>
-                Interpretación
-            </h4>
-
-            <p>
-                Utilizando el método de Esquina
-                Noroeste se obtuvo una solución
-                básica factible inicial con un costo
-                total de
-
-                <strong>
-                    ${formatearNoroeste(
-                        resultado.costoTotal
-                    )}
-                </strong>.
-
-                Este valor corresponde a la solución
-                inicial del problema de transporte y
-                no necesariamente representa el costo
-                mínimo posible.
-            </p>
-
-        </div>
-
-    `;
-
-
-    contenedor.appendChild(
-        final
-    );
-
-
-    document
-        .getElementById(
-            "panelResultadosNoroeste"
-        )
-        .classList.remove(
-            "oculto"
-        );
-
-
-    document
-        .getElementById(
-            "panelResultadosNoroeste"
-        )
-        .scrollIntoView({
-            behavior: "smooth"
-        });
+    const final = document.createElement("div");
+    final.className = "resultado-final";
+
+    const tituloFinal = document.createElement("h3");
+    tituloFinal.textContent = "Costo total de transporte";
+
+    const costoFinal = document.createElement("strong");
+    costoFinal.textContent = formatoN(resultado.costoTotal);
+
+    const nota = document.createElement("p");
+    nota.textContent =
+        "Este resultado es una solución inicial factible. " +
+        "El Método de la Esquina Noroeste no garantiza " +
+        "el costo mínimo.";
+
+    final.appendChild(tituloFinal);
+    final.appendChild(costoFinal);
+    final.appendChild(nota);
+    contenedor.appendChild(final);
+
+    elementoN("panelResultadosNoroeste")
+        .classList.remove("oculto");
 }
 
-
 // =====================================================
-// MATRIZ RESULTADO
+// RESOLVER
 // =====================================================
 
-function construirMatrizResultado(
-    resultado
-) {
-
-    const responsive =
-        document.createElement(
-            "div"
-        );
-
-
-    responsive.className =
-        "tabla-responsive";
-
-
-    const table =
-        document.createElement(
-            "table"
-        );
-
-
-    table.className =
-        "tabla-transporte";
-
-
-    let html = `
-
-        <thead>
-
-            <tr>
-
-                <th>
-                    Origen / Destino
-                </th>
-
-    `;
-
-
-    resultado.nombresDestinos.forEach(
-        nombre => {
-
-            html += `
-                <th>
-                    ${nombre}
-                </th>
-            `;
-        }
-    );
-
-
-    html += `
-
-                <th>
-                    Oferta
-                </th>
-
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-    `;
-
-
-    resultado.asignaciones.forEach(
-        (fila, i) => {
-
-            html += `
-
-                <tr>
-
-                    <th>
-                        ${resultado
-                            .nombresOrigenes[i]}
-                    </th>
-
-            `;
-
-
-            fila.forEach(
-                (valor, j) => {
-
-                    const clase =
-                        valor >
-                        EPSILON_N
-                            ? "asignacion-activa"
-                            : "";
-
-
-                    html += `
-
-                        <td class="${clase}">
-
-                            ${formatearNoroeste(
-                                valor
-                            )}
-
-                            ${
-                                valor >
-                                EPSILON_N
-                                    ? `
-                                    <small>
-                                        Costo:
-                                        ${formatearNoroeste(
-                                            resultado
-                                                .costos[i][j]
-                                        )}
-                                    </small>
-                                    `
-                                    : ""
-                            }
-
-                        </td>
-
-                    `;
-                }
-            );
-
-
-            html += `
-
-                    <td class="celda-oferta">
-                        ${formatearNoroeste(
-                            resultado.oferta[i]
-                        )}
-                    </td>
-
-                </tr>
-
-            `;
-        }
-    );
-
-
-    html += `
-
-        <tr class="fila-demanda">
-
-            <th>
-                Demanda
-            </th>
-
-    `;
-
-
-    resultado.demanda.forEach(
-        valor => {
-
-            html += `
-
-                <td>
-                    ${formatearNoroeste(
-                        valor
-                    )}
-                </td>
-
-            `;
-        }
-    );
-
-
-    html += `
-
-                <td>—</td>
-
-            </tr>
-
-        </tbody>
-
-    `;
-
-
-    table.innerHTML =
-        html;
-
-
-    responsive.appendChild(
-        table
-    );
-
-
-    return responsive;
+function resolverNoroeste() {
+    ocultarErrorNoroeste();
+
+    try {
+        const datos = obtenerDatosNoroeste();
+        const resultado = ejecutarNoroeste(datos);
+
+        mostrarResultadoNoroeste(datos, resultado);
+    } catch (error) {
+        elementoN("panelResultadosNoroeste")
+            .classList.add("oculto");
+
+        mostrarErrorNoroeste(error.message);
+    }
 }
 
-
 // =====================================================
-// BALANCE EN TIEMPO REAL
+// BALANCE VISUAL
 // =====================================================
 
 function actualizarBalanceVisual() {
+    const contenedor = elementoN("resumenBalance");
+    if (!contenedor) return;
 
-    const origenes =
-        parseInt(
-            document.getElementById(
-                "numOrigenes"
-            ).value
-        );
+    const origenes = Number(elementoN("numOrigenes").value);
+    const destinos = Number(elementoN("numDestinos").value);
 
-
-    const destinos =
-        parseInt(
-            document.getElementById(
-                "numDestinos"
-            ).value
-        );
-
-
-    let oferta = 0;
-    let demanda = 0;
+    let totalOferta = 0;
+    let totalDemanda = 0;
     let completo = true;
 
+    for (let i = 0; i < origenes; i++) {
+        const input = elementoN(`n_oferta_${i}`);
 
-    for (
-        let i = 0;
-        i < origenes;
-        i++
-    ) {
-
-        const input =
-            document.getElementById(
-                `n_oferta_${i}`
-            );
-
-
-        if (
-            !input ||
-            input.value.trim() === ""
-        ) {
-
+        if (!input || input.value.trim() === "") {
             completo = false;
             continue;
         }
 
+        const valor = Number(input.value);
 
-        const valor =
-            Number(input.value);
-
-
-        if (
-            Number.isFinite(valor)
-        ) {
-
-            oferta += valor;
+        if (!Number.isFinite(valor) || valor < 0) {
+            completo = false;
+        } else {
+            totalOferta += valor;
         }
     }
 
+    for (let j = 0; j < destinos; j++) {
+        const input = elementoN(`n_demanda_${j}`);
 
-    for (
-        let j = 0;
-        j < destinos;
-        j++
-    ) {
-
-        const input =
-            document.getElementById(
-                `n_demanda_${j}`
-            );
-
-
-        if (
-            !input ||
-            input.value.trim() === ""
-        ) {
-
+        if (!input || input.value.trim() === "") {
             completo = false;
             continue;
         }
 
+        const valor = Number(input.value);
 
-        const valor =
-            Number(input.value);
-
-
-        if (
-            Number.isFinite(valor)
-        ) {
-
-            demanda += valor;
+        if (!Number.isFinite(valor) || valor < 0) {
+            completo = false;
+        } else {
+            totalDemanda += valor;
         }
     }
-
-
-    const resumen =
-        document.getElementById(
-            "resumenBalance"
-        );
-
 
     if (!completo) {
-
-        resumen.innerHTML = "";
-
+        contenedor.textContent =
+            "Ingresa todas las ofertas y demandas " +
+            "para comprobar el balance.";
         return;
     }
 
+    const diferencia = totalOferta - totalDemanda;
 
-    const diferencia =
-        oferta - demanda;
-
-
-    if (
-        Math.abs(diferencia) <
-        EPSILON_N
-    ) {
-
-        resumen.className =
-            "balance-transporte balance-ok";
-
-
-        resumen.innerHTML = `
-
-            ✓ Problema balanceado:
-
-            Oferta =
-
-            <strong>
-                ${formatearNoroeste(
-                    oferta
-                )}
-            </strong>
-
-            |
-
-            Demanda =
-
-            <strong>
-                ${formatearNoroeste(
-                    demanda
-                )}
-            </strong>
-
-        `;
-
-    } else {
-
-        resumen.className =
-            "balance-transporte balance-pendiente";
-
-
-        resumen.innerHTML = `
-
-            ⚠ Problema no balanceado:
-
-            Oferta =
-
-            <strong>
-                ${formatearNoroeste(
-                    oferta
-                )}
-            </strong>
-
-            |
-
-            Demanda =
-
-            <strong>
-                ${formatearNoroeste(
-                    demanda
-                )}
-            </strong>
-
-            <br>
-
-            El simulador agregará automáticamente
-            ${
-                diferencia > 0
-                    ? "un destino ficticio"
-                    : "un origen ficticio"
-            }.
-
-        `;
-    }
+    contenedor.textContent =
+        "Oferta total: " + formatoN(totalOferta) +
+        " | Demanda total: " + formatoN(totalDemanda) +
+        (Math.abs(diferencia) <= EPSILON_N
+            ? " | Problema balanceado."
+            : " | Se agregará un origen o destino ficticio.");
 }
 
-
 // =====================================================
-// EJEMPLO AGUA SALVAVIDAS
+// EJEMPLO GREAT VALUE
 // =====================================================
 
 function cargarEjemploNoroeste() {
-
-    document.getElementById(
-        "numOrigenes"
-    ).value = 3;
-
-
-    document.getElementById(
-        "numDestinos"
-    ).value = 4;
-
+    elementoN("numOrigenes").value = 3;
+    elementoN("numDestinos").value = 4;
 
     generarMatrizNoroeste();
 
-
-    /*
-        Costos:
-
-                 D1   D2   D3   D4   Oferta
-
-        O1        8    6   10    9      35
-        O2        9   12   13    7      50
-        O3       14    9   16    5      40
-
-        Demanda  30   25   35   35
-
-        Oferta total  = 125
-        Demanda total = 125
-    */
-
-
     const costos = [
-
         [8, 6, 10, 9],
-
         [9, 12, 13, 7],
-
         [14, 9, 16, 5]
-
     ];
 
+    const oferta = [35, 50, 40];
+    const demanda = [30, 25, 35, 35];
 
-    const oferta =
-        [35, 50, 40];
+    costos.forEach((fila, i) => {
+        fila.forEach((valor, j) => {
+            elementoN(`n_costo_${i}_${j}`).value = valor;
+        });
+    });
 
+    oferta.forEach((valor, i) => {
+        elementoN(`n_oferta_${i}`).value = valor;
+    });
 
-    const demanda =
-        [30, 25, 35, 35];
-
-
-    for (
-        let i = 0;
-        i < costos.length;
-        i++
-    ) {
-
-        for (
-            let j = 0;
-            j < costos[i].length;
-            j++
-        ) {
-
-            document.getElementById(
-                `n_costo_${i}_${j}`
-            ).value =
-                costos[i][j];
-        }
-    }
-
-
-    oferta.forEach(
-        (valor, i) => {
-
-            document.getElementById(
-                `n_oferta_${i}`
-            ).value =
-                valor;
-        }
-    );
-
-
-    demanda.forEach(
-        (valor, j) => {
-
-            document.getElementById(
-                `n_demanda_${j}`
-            ).value =
-                valor;
-        }
-    );
-
+    demanda.forEach((valor, j) => {
+        elementoN(`n_demanda_${j}`).value = valor;
+    });
 
     actualizarBalanceVisual();
 }
-
 
 // =====================================================
 // LIMPIAR
 // =====================================================
 
 function limpiarNoroeste() {
+    document.querySelectorAll(
+        "#panelMatrizNoroeste .input-matriz"
+    ).forEach(input => {
+        input.value = "";
+        input.classList.remove("campo-invalido");
+    });
 
-    document
-        .querySelectorAll(
-            ".input-matriz"
-        )
-        .forEach(
-            input => {
+    elementoN("procedimientoNoroeste").innerHTML = "";
 
-                input.value = "";
-
-                input.classList.remove(
-                    "campo-invalido"
-                );
-            }
-        );
-
-
-    document.getElementById(
-        "resumenBalance"
-    ).innerHTML = "";
-
-
-    document
-        .getElementById(
-            "panelResultadosNoroeste"
-        )
-        .classList.add(
-            "oculto"
-        );
-
-
-    document.getElementById(
-        "procedimientoNoroeste"
-    ).innerHTML = "";
-
+    elementoN("panelResultadosNoroeste")
+        .classList.add("oculto");
 
     ocultarErrorNoroeste();
-}
-
-
-// =====================================================
-// FORMATEAR
-// =====================================================
-
-function formatearNoroeste(
-    numero
-) {
-
-    if (
-        Math.abs(numero) <
-        EPSILON_N
-    ) {
-
-        return "0";
-    }
-
-
-    if (
-        Math.abs(
-            numero -
-            Math.round(numero)
-        ) <
-        EPSILON_N
-    ) {
-
-        return String(
-            Math.round(numero)
-        );
-    }
-
-
-    return Number(
-        numero.toFixed(3)
-    ).toString();
-}
-
-
-// =====================================================
-// ERRORES
-// =====================================================
-
-function mostrarErrorNoroeste(
-    mensaje
-) {
-
-    const elemento =
-        document.getElementById(
-            "mensajeErrorNoroeste"
-        );
-
-
-    elemento.textContent =
-        "⚠ " + mensaje;
-
-
-    elemento.classList.remove(
-        "oculto"
-    );
-}
-
-
-function ocultarErrorNoroeste() {
-
-    const elemento =
-        document.getElementById(
-            "mensajeErrorNoroeste"
-        );
-
-
-    if (!elemento) {
-        return;
-    }
-
-
-    elemento.classList.add(
-        "oculto"
-    );
-
-
-    elemento.textContent = "";
+    actualizarBalanceVisual();
 }

@@ -1,16 +1,15 @@
 
 /*
- * AGUA SALVAVIDAS
+ * GREAT VALUE
  * Corrector y validación del Método Simplex
- *
- * Compatible con simplex.js original.
+ * Hasta 20 variables y 20 restricciones
  */
 
 (function () {
     "use strict";
 
     const EPS = 1e-8;
-    const LIMITE = 100;
+    const LIMITE = 1000;
 
     const generarOriginal = window.generarModeloSimplex;
     const ejemploOriginal = window.cargarEjemploSimplex;
@@ -32,13 +31,13 @@
             input.value.trim() === "" ||
             !Number.isInteger(valor) ||
             valor < 1 ||
-            valor > 10
+            valor > 20
         ) {
             input.classList.add("campo-invalido");
 
             throw new Error(
                 "Las cantidades deben ser números " +
-                "enteros entre 1 y 10."
+                "enteros entre 1 y 20."
             );
         }
 
@@ -53,9 +52,9 @@
         };
     }
 
-    /*
-     * GENERACIÓN SEGURA
-     */
+    // =====================================================
+    // GENERACIÓN SEGURA
+    // =====================================================
 
     window.generarModeloSimplex = function () {
         try {
@@ -77,9 +76,9 @@
         }
     };
 
-    /*
-     * EVITAR MODELOS DESACTUALIZADOS
-     */
+    // =====================================================
+    // EVITAR MODELOS DESACTUALIZADOS
+    // =====================================================
 
     function verificarModelo() {
         const { n, m } = dimensiones();
@@ -98,12 +97,10 @@
         return { n, m };
     }
 
-    /*
-     * MOTOR SIMPLEX REVISADO
-     *
-     * Restricciones:
-     * Ax <= b, b >= 0, x >= 0.
-     */
+    // =====================================================
+    // MOTOR SIMPLEX
+    // Restricciones: Ax <= b, b >= 0, x >= 0
+    // =====================================================
 
     window.ejecutarSimplex = function (datos) {
         const n = datos.numVariables;
@@ -133,6 +130,7 @@
             (_, i) => "S" + (i + 1)
         );
 
+        // Construir restricciones
         for (let i = 0; i < m; i++) {
             for (let j = 0; j < n; j++) {
                 tabla[i][j] = datos.restricciones[i][j];
@@ -142,6 +140,7 @@
             tabla[i][rhs] = datos.rhs[i];
         }
 
+        // Construir función objetivo
         for (let j = 0; j < n; j++) {
             const c = datos.tipo === "max"
                 ? datos.objetivo[j]
@@ -180,6 +179,7 @@
             let columna = -1;
             let menor = -EPS;
 
+            // Buscar columna entrante
             for (let j = 0; j < rhs; j++) {
                 if (tabla[m][j] < menor) {
                     menor = tabla[m][j];
@@ -196,6 +196,7 @@
             let mejorRazon = Infinity;
             const razones = [];
 
+            // Prueba de la razón mínima
             for (let i = 0; i < m; i++) {
                 const divisor = tabla[i][columna];
 
@@ -242,12 +243,12 @@
             pasoActual.filaPivote = filaPivote;
             pasoActual.columnaPivote = columna;
 
-            // Convertir el pivote en 1.
+            // Normalizar fila pivote
             for (let j = 0; j < ancho; j++) {
                 tabla[filaPivote][j] /= pivote;
             }
 
-            // Convertir el resto de la columna en 0.
+            // Hacer ceros en las demás filas
             for (let i = 0; i <= m; i++) {
                 if (i === filaPivote) continue;
 
@@ -269,8 +270,8 @@
             guardar(contador);
         }
 
-        // Si la última operación llegó al límite,
-        // todavía puede haber alcanzado el óptimo.
+        // Comprobar si el óptimo se alcanzó
+        // justamente en la última iteración
         if (estado === "limite_iteraciones") {
             const quedanNegativos =
                 tabla[m].slice(0, rhs).some(
@@ -282,6 +283,7 @@
             }
         }
 
+        // Recuperar variables de decisión
         const variables = Array(n).fill(0);
 
         for (let i = 0; i < m; i++) {
@@ -295,7 +297,7 @@
             }
         }
 
-        // Evaluar siempre la función original.
+        // Evaluar función objetivo original
         const valorObjetivo = variables.reduce(
             (total, x, j) => total + x * datos.objetivo[j],
             0
@@ -312,9 +314,9 @@
         };
     };
 
-    /*
-     * MOSTRAR RAZONES DE CADA ITERACIÓN
-     */
+    // =====================================================
+    // MOSTRAR RAZONES DE CADA ITERACIÓN
+    // =====================================================
 
     const mostrarOriginal = window.mostrarProcedimiento;
 
@@ -359,7 +361,8 @@
                 bloque.appendChild(contenedor);
             }
 
-            // Resaltado exacto según índices del algoritmo.
+            // Resaltar columna entrante,
+            // fila saliente y elemento pivote
             if (
                 iteracion.filaPivote !== undefined &&
                 iteracion.columnaPivote !== undefined
@@ -414,9 +417,9 @@
         });
     };
 
-    /*
-     * RESOLVER CON VALIDACIONES
-     */
+    // =====================================================
+    // RESOLVER CON VALIDACIONES
+    // =====================================================
 
     window.resolverSimplex = function () {
         window.ocultarErrorSimplex();
@@ -444,9 +447,9 @@
         }
     };
 
-    /*
-     * BOTONES EXISTENTES
-     */
+    // =====================================================
+    // BOTONES EXISTENTES
+    // =====================================================
 
     window.cargarEjemploSimplex = function () {
         ejemploOriginal();

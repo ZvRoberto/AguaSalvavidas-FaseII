@@ -1,20 +1,31 @@
 
 /*
- * AGUA SALVAVIDAS
+ * GREAT VALUE - FASE II
  * Módulo de Dualidad
  *
+ * Hasta 20 variables y 20 restricciones.
+ *
  * Convención:
- * Todas las variables del primal son >= 0.
+ * Las variables del primal son no negativas.
  * Las restricciones pueden ser <=, >= o =.
  *
- * El dual se construye automáticamente.
+ * Este módulo construye el dual y verifica
+ * soluciones propuestas. No ejecuta un
+ * algoritmo de optimización automáticamente.
  */
 
 "use strict";
 
 const DUAL_EPS = 1e-7;
+const DUAL_MAX = 20;
 
 let modeloDualidad = null;
+let problemaPrimal = null;
+let problemaDual = null;
+
+// =====================================================
+// UTILIDADES
+// =====================================================
 
 function dualElemento(id) {
     return document.getElementById(id);
@@ -58,10 +69,10 @@ function dualCantidad(id) {
     if (
         !Number.isInteger(valor) ||
         valor < 1 ||
-        valor > 6
+        valor > DUAL_MAX
     ) {
         throw new Error(
-            "Las dimensiones deben ser enteros entre 1 y 6."
+            "Las dimensiones deben ser enteros entre 1 y 20."
         );
     }
 
@@ -69,6 +80,10 @@ function dualCantidad(id) {
 }
 
 function dualFormato(numero) {
+    if (!Number.isFinite(numero)) {
+        return String(numero);
+    }
+
     const limpio = Math.abs(numero) < DUAL_EPS
         ? 0
         : numero;
@@ -78,18 +93,31 @@ function dualFormato(numero) {
 
 function dualCampo(id, valor = 0) {
     return `
-        <input type="number"
-               step="any"
-               id="${id}"
-               value="${valor}"
-               class="dual-input">
+        <input
+            type="number"
+            step="any"
+            id="${id}"
+            value="${valor}"
+            class="dual-input">
     `;
 }
 
-/*
- * PASO 1:
- * GENERAR FORMULARIO DINÁMICO
- */
+function dualSimbolo(signo) {
+    if (signo === "<=") return "≤";
+    if (signo === ">=") return "≥";
+    return "=";
+}
+
+function dualProductoPunto(a, b) {
+    return a.reduce(
+        (total, valor, i) => total + valor * b[i],
+        0
+    );
+}
+
+// =====================================================
+// GENERAR FORMULARIO
+// =====================================================
 
 function generarDualidad() {
     dualOcultarError();
@@ -99,12 +127,21 @@ function generarDualidad() {
         const m = dualCantidad("dualRestricciones");
         const tipo = dualElemento("dualTipo").value;
 
+        if (tipo !== "max" && tipo !== "min") {
+            throw new Error(
+                "Selecciona un tipo de optimización válido."
+            );
+        }
+
         modeloDualidad = { n, m, tipo };
+        problemaPrimal = null;
+        problemaDual = null;
 
         let html = `
             <h3>Función objetivo</h3>
             <p class="dual-ayuda">
-                Coeficientes de X1, X2, ... X${n}.
+                Ingresa los coeficientes de las
+                ${n} variables de decisión.
             </p>
             <div class="dual-fila">
         `;
@@ -120,12 +157,12 @@ function generarDualidad() {
 
         html += `
             </div>
-            <h3>Restricciones</h3>
+            <h3>Restricciones del primal</h3>
             <div class="dual-tabla-scroll">
-            <table class="dual-tabla">
-                <thead>
-                    <tr>
-                        <th>Restricción</th>
+                <table class="dual-tabla">
+                    <thead>
+                        <tr>
+                            <th>Restricción</th>
         `;
 
         for (let j = 0; j < n; j++) {
@@ -133,11 +170,11 @@ function generarDualidad() {
         }
 
         html += `
-                        <th>Signo</th>
-                        <th>Resultado</th>
-                    </tr>
-                </thead>
-                <tbody>
+                            <th>Signo</th>
+                            <th>Resultado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
         `;
 
         for (let i = 0; i < m; i++) {
@@ -146,7 +183,9 @@ function generarDualidad() {
             for (let j = 0; j < n; j++) {
                 html += `
                     <td>
-                        ${dualCampo("dualA" + i + "_" + j)}
+                        ${dualCampo(
+                            "dualA" + i + "_" + j
+                        )}
                     </td>
                 `;
             }
@@ -167,14 +206,14 @@ function generarDualidad() {
         }
 
         html += `
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
             </div>
 
             <p class="dual-ayuda">
-                Se considera X1, X2, ..., X${n} ≥ 0.
-                Los coeficientes pueden ser negativos,
-                cero o positivos.
+                Se supone que X1, X2, ..., X${n} ≥ 0.
+                Los coeficientes pueden ser positivos,
+                negativos o cero.
             </p>
         `;
 
@@ -191,10 +230,9 @@ function generarDualidad() {
     }
 }
 
-/*
- * PASO 2:
- * LEER LOS DATOS DEL PRIMAL
- */
+// =====================================================
+// LEER PROBLEMA PRIMAL
+// =====================================================
 
 function dualLeerDatos() {
     if (!modeloDualidad) {
@@ -236,37 +274,30 @@ function dualLeerDatos() {
 
         A.push(fila);
         b.push(dualNumero("dualB" + i));
-        signos.push(
-            dualElemento("dualSigno" + i).value
-        );
+
+        const signo = dualElemento(
+            "dualSigno" + i
+        ).value;
+
+        if (!["<=", ">=", "="].includes(signo)) {
+            throw new Error(
+                "Signo no válido en la restricción " +
+                (i + 1)
+            );
+        }
+
+        signos.push(signo);
     }
 
     return { n, m, tipo, c, A, b, signos };
 }
 
-/*
- * PASO 3:
- * CONSTRUIR EL PROBLEMA DUAL
- *
- * Si primal es MAX:
- *   dual es MIN
- *   restricciones duales >=
- *
- * Si primal es MIN:
- *   dual es MAX
- *   restricciones duales <=
- *
- * Cada restricción primal genera
- * una variable dual.
- *
- * Cada variable primal genera
- * una restricción dual.
- */
+// =====================================================
+// CONSTRUIR DUAL
+// =====================================================
 
 function dualConstruir(primal) {
-    const {
-        n, m, tipo, c, A, b, signos
-    } = primal;
+    const { n, m, tipo, c, A, b, signos } = primal;
 
     const tipoDual =
         tipo === "max" ? "min" : "max";
@@ -274,19 +305,24 @@ function dualConstruir(primal) {
     const signoDual =
         tipo === "max" ? ">=" : "<=";
 
+    // Signos de las variables duales.
     const signosVariables = signos.map(signo => {
         if (signo === "=") {
             return "libre";
         }
 
         if (tipo === "max") {
-            return signo === "<=" ? ">=0" : "<=0";
+            return signo === "<="
+                ? ">=0"
+                : "<=0";
         }
 
-        return signo === ">=" ? ">=0" : "<=0";
+        return signo === ">="
+            ? ">=0"
+            : "<=0";
     });
 
-    // Transpuesta de la matriz A.
+    // Transponer matriz A.
     const AT = [];
 
     for (let j = 0; j < n; j++) {
@@ -311,15 +347,9 @@ function dualConstruir(primal) {
     };
 }
 
-function dualSimbolo(signo) {
-    if (signo === "<=") return "≤";
-    if (signo === ">=") return "≥";
-    return "=";
-}
-
-/*
- * FORMATO DE EXPRESIONES
- */
+// =====================================================
+// FORMATEAR EXPRESIONES
+// =====================================================
 
 function dualExpresion(coeficientes, letra) {
     let texto = "";
@@ -332,11 +362,13 @@ function dualExpresion(coeficientes, letra) {
         const negativo = coeficiente < 0;
         const magnitud = Math.abs(coeficiente);
 
-        const numero = Math.abs(magnitud - 1) < DUAL_EPS
-            ? ""
-            : dualFormato(magnitud);
+        const numero =
+            Math.abs(magnitud - 1) < DUAL_EPS
+                ? ""
+                : dualFormato(magnitud);
 
-        const termino = numero + letra + (i + 1);
+        const termino =
+            numero + letra + (i + 1);
 
         if (texto === "") {
             texto = negativo
@@ -351,6 +383,10 @@ function dualExpresion(coeficientes, letra) {
 
     return texto || "0";
 }
+
+// =====================================================
+// MOSTRAR MODELO
+// =====================================================
 
 function dualMostrarModelo(modelo, letra) {
     const tipo = modelo.tipo === "max"
@@ -379,16 +415,23 @@ function dualMostrarModelo(modelo, letra) {
     html += `</div>`;
 
     if (modelo.signosVariables) {
-        html += `<p><strong>Signos de las variables:</strong></p>`;
+        html += `
+            <p>
+                <strong>Signos de las variables:</strong>
+            </p>
+        `;
 
         modelo.signosVariables.forEach((signo, i) => {
-            const descripcion = signo === "libre"
-                ? "libre (sin restricción de signo)"
-                : signo === ">=0"
-                    ? "≥ 0"
-                    : "≤ 0";
+            const descripcion =
+                signo === "libre"
+                    ? "libre (sin restricción de signo)"
+                    : signo === ">=0"
+                        ? "≥ 0"
+                        : "≤ 0";
 
-            html += `<p>Y${i + 1} ${descripcion}</p>`;
+            html += `
+                <p>Y${i + 1}: ${descripcion}</p>
+            `;
         });
     } else {
         html += `
@@ -401,11 +444,9 @@ function dualMostrarModelo(modelo, letra) {
     return html;
 }
 
-/*
- * PASO 4:
- * CREAR CAMPOS PARA COMPROBAR
- * SOLUCIONES PROPUESTAS
- */
+// =====================================================
+// FORMULARIO DE COMPROBACIÓN
+// =====================================================
 
 function dualFormularioVerificacion(primal, dual) {
     let html = `
@@ -413,10 +454,10 @@ function dualFormularioVerificacion(primal, dual) {
             <h3>Comprobar soluciones propuestas</h3>
 
             <p class="dual-ayuda">
-                Introduce valores para las variables
-                del primal y del dual. El simulador
-                comprobará su factibilidad y calculará
-                la brecha de dualidad.
+                Ingresa los valores de las variables
+                del primal y del dual. Se verificará
+                si cumplen las restricciones y
+                se calculará la brecha de dualidad.
             </p>
 
             <h4>Variables del primal</h4>
@@ -450,8 +491,10 @@ function dualFormularioVerificacion(primal, dual) {
     html += `
             </div>
 
-            <button class="dual-btn"
-                    onclick="dualVerificarSoluciones()">
+            <button
+                type="button"
+                class="dual-btn"
+                onclick="dualVerificarSoluciones()">
                 Comprobar soluciones
             </button>
 
@@ -462,62 +505,74 @@ function dualFormularioVerificacion(primal, dual) {
     return html;
 }
 
-/*
- * VERIFICAR RESTRICCIONES
- */
+// =====================================================
+// VERIFICAR FACTIBILIDAD
+// =====================================================
 
-function dualEsFactible(modelo, valores, dual = false) {
+function dualEsFactible(modelo, valores, esDual = false) {
+    if (
+        !Array.isArray(valores) ||
+        valores.length !== modelo.n
+    ) {
+        return false;
+    }
+
     for (let j = 0; j < valores.length; j++) {
-        const x = valores[j];
+        const valor = valores[j];
 
-        if (!dual && x < -DUAL_EPS) {
+        if (!Number.isFinite(valor)) {
             return false;
         }
 
-        if (dual) {
+        if (!esDual && valor < -DUAL_EPS) {
+            return false;
+        }
+
+        if (esDual) {
             const signo = modelo.signosVariables[j];
 
-            if (signo === ">=0" && x < -DUAL_EPS) {
+            if (signo === ">=0" && valor < -DUAL_EPS) {
                 return false;
             }
 
-            if (signo === "<=0" && x > DUAL_EPS) {
+            if (signo === "<=0" && valor > DUAL_EPS) {
                 return false;
             }
         }
     }
 
     for (let i = 0; i < modelo.m; i++) {
-        const izquierda = modelo.A[i].reduce(
-            (suma, a, j) => suma + a * valores[j],
-            0
+        const izquierda = dualProductoPunto(
+            modelo.A[i],
+            valores
         );
 
         const derecha = modelo.b[i];
 
-        const tolerancia = DUAL_EPS *
-            Math.max(
-                1,
-                Math.abs(izquierda),
-                Math.abs(derecha)
-            );
+        const tolerancia = DUAL_EPS * Math.max(
+            1,
+            Math.abs(izquierda),
+            Math.abs(derecha)
+        );
+
+        const signo = modelo.signos[i];
 
         if (
-            modelo.signos[i] === "<=" &&
+            signo === "<=" &&
             izquierda > derecha + tolerancia
         ) {
             return false;
         }
 
         if (
-            modelo.signos[i] === ">=" &&
+            signo === ">=" &&
             izquierda < derecha - tolerancia
         ) {
             return false;
         }
 
         if (
-            modelo.signos[i] === "=" &&
+            signo === "=" &&
             Math.abs(izquierda - derecha) > tolerancia
         ) {
             return false;
@@ -527,176 +582,197 @@ function dualEsFactible(modelo, valores, dual = false) {
     return true;
 }
 
-function dualEvaluar(c, valores) {
-    return c.reduce(
-        (suma, coeficiente, j) =>
-            suma + coeficiente * valores[j],
-        0
-    );
-}
-
-let dualPrimalActual = null;
-let dualModeloActual = null;
+// =====================================================
+// COMPROBAR SOLUCIONES
+// =====================================================
 
 function dualVerificarSoluciones() {
-    dualOcultarError();
+    const contenedor = dualElemento(
+        "dualComprobacion"
+    );
+
+    if (!problemaPrimal || !problemaDual) {
+        contenedor.textContent =
+            "Primero debes construir el problema dual.";
+        return;
+    }
 
     try {
-        const primal = dualPrimalActual;
-        const dual = dualModeloActual;
-
-        if (!primal || !dual) {
-            throw new Error(
-                "Primero debes construir el dual."
-            );
-        }
-
         const x = [];
         const y = [];
 
-        for (let j = 0; j < primal.n; j++) {
-            x.push(dualNumero("dualVerX" + j));
+        for (let j = 0; j < problemaPrimal.n; j++) {
+            x.push(
+                dualNumero("dualVerX" + j)
+            );
         }
 
-        for (let i = 0; i < dual.n; i++) {
-            y.push(dualNumero("dualVerY" + i));
+        for (let i = 0; i < problemaDual.n; i++) {
+            y.push(
+                dualNumero("dualVerY" + i)
+            );
         }
 
-        const factiblePrimal =
-            dualEsFactible(primal, x, false);
+        const primalFactible = dualEsFactible(
+            problemaPrimal,
+            x,
+            false
+        );
 
-        const factibleDual =
-            dualEsFactible(dual, y, true);
+        const dualFactible = dualEsFactible(
+            problemaDual,
+            y,
+            true
+        );
 
-        const zp = dualEvaluar(primal.c, x);
-        const zd = dualEvaluar(dual.c, y);
+        const valorPrimal = dualProductoPunto(
+            problemaPrimal.c,
+            x
+        );
 
-        const brecha = primal.tipo === "max"
-            ? zd - zp
-            : zp - zd;
+        const valorDual = dualProductoPunto(
+            problemaDual.c,
+            y
+        );
 
-        const tolerancia = DUAL_EPS *
-            Math.max(1, Math.abs(zp), Math.abs(zd));
+        const brecha = problemaPrimal.tipo === "max"
+            ? valorDual - valorPrimal
+            : valorPrimal - valorDual;
 
-        let mensaje = `
-            <p>Valor primal: <strong>${dualFormato(zp)}</strong></p>
-            <p>Valor dual: <strong>${dualFormato(zd)}</strong></p>
-            <p>Brecha: <strong>${dualFormato(brecha)}</strong></p>
-            <p>Primal factible:
-                <strong>${factiblePrimal ? "Sí" : "No"}</strong>
-            </p>
-            <p>Dual factible:
-                <strong>${factibleDual ? "Sí" : "No"}</strong>
-            </p>
+        const tolerancia = DUAL_EPS * Math.max(
+            1,
+            Math.abs(valorPrimal),
+            Math.abs(valorDual)
+        );
+
+        let conclusion = "";
+
+        if (!primalFactible || !dualFactible) {
+            conclusion =
+                "No se puede confirmar optimalidad porque " +
+                "una o ambas soluciones no son factibles.";
+        } else if (Math.abs(brecha) <= tolerancia) {
+            conclusion =
+                "Ambas soluciones son factibles y sus " +
+                "valores objetivos coinciden. Por dualidad " +
+                "fuerte, ambas son óptimas.";
+        } else {
+            conclusion =
+                "Ambas soluciones son factibles, pero " +
+                "sus valores objetivos son diferentes. " +
+                "La brecha indica que todavía no se " +
+                "ha demostrado optimalidad.";
+        }
+
+        contenedor.innerHTML = `
+            <div class="dual-resumen">
+                <h4>Resultado de la comprobación</h4>
+
+                <p>
+                    <strong>Primal factible:</strong>
+                    ${primalFactible ? "Sí" : "No"}
+                </p>
+
+                <p>
+                    <strong>Dual factible:</strong>
+                    ${dualFactible ? "Sí" : "No"}
+                </p>
+
+                <p>
+                    <strong>Valor del primal:</strong>
+                    ${dualFormato(valorPrimal)}
+                </p>
+
+                <p>
+                    <strong>Valor del dual:</strong>
+                    ${dualFormato(valorDual)}
+                </p>
+
+                <p>
+                    <strong>Brecha de dualidad:</strong>
+                    ${dualFormato(brecha)}
+                </p>
+
+                <p><strong>${conclusion}</strong></p>
+            </div>
         `;
 
-        if (!factiblePrimal || !factibleDual) {
-            mensaje += `
-                <p>
-                    Las soluciones propuestas no permiten
-                    certificar optimalidad porque alguna
-                    no cumple las restricciones.
-                </p>
-            `;
-        } else if (Math.abs(brecha) <= tolerancia) {
-            mensaje += `
-                <p class="dual-exito">
-                    ✓ Dualidad fuerte:
-                    ambas soluciones son óptimas.
-                    La brecha es cero.
-                </p>
-            `;
-        } else {
-            mensaje += `
-                <p>
-                    Las soluciones son factibles,
-                    pero la brecha no es cero.
-                    No se ha certificado optimalidad.
-                </p>
-            `;
-        }
-
-        dualElemento("dualComprobacion").innerHTML = mensaje;
-
     } catch (error) {
-        dualMostrarError(error.message);
+        contenedor.textContent = error.message;
     }
 }
 
-/*
- * PASO 5:
- * RESOLVER LA TRANSFORMACIÓN
- */
+// =====================================================
+// RESOLVER: CONSTRUIR EL DUAL
+// =====================================================
 
 function resolverDualidad() {
     dualOcultarError();
 
     try {
-        const primal = dualLeerDatos();
-        const dual = dualConstruir(primal);
+        problemaPrimal = dualLeerDatos();
+        problemaDual = dualConstruir(
+            problemaPrimal
+        );
 
-        dualPrimalActual = primal;
-        dualModeloActual = dual;
+        const contenedor = dualElemento(
+            "dualContenido"
+        );
 
-        let html = `
-            <div class="dual-resultado-grid">
+        contenedor.innerHTML = `
+            <div class="dual-modelos">
+
                 <div class="dual-modelo">
                     <h3>Problema primal</h3>
-                    ${dualMostrarModelo(primal, "X")}
+                    ${dualMostrarModelo(
+                        problemaPrimal,
+                        "X"
+                    )}
                 </div>
 
                 <div class="dual-modelo">
                     <h3>Problema dual</h3>
-                    ${dualMostrarModelo(dual, "Y")}
+                    ${dualMostrarModelo(
+                        problemaDual,
+                        "Y"
+                    )}
                 </div>
+
             </div>
 
-            <div class="dual-procedimiento">
-                <h3>Procedimiento de transformación</h3>
+            <div class="dual-explicacion">
+                <h3>Relación entre primal y dual</h3>
 
-                <ol>
-                    <li>
-                        Se cambia el tipo de optimización:
-                        ${primal.tipo === "max"
-                            ? "MAX → MIN"
-                            : "MIN → MAX"}.
-                    </li>
-                    <li>
-                        Las ${primal.m} restricciones
-                        del primal generan
-                        ${dual.n} variables duales.
-                    </li>
-                    <li>
-                        Las ${primal.n} variables
-                        del primal generan
-                        ${dual.m} restricciones duales.
-                    </li>
-                    <li>
-                        La matriz de coeficientes
-                        se transpone: A → Aᵀ.
-                    </li>
-                    <li>
-                        Los resultados del primal
-                        se convierten en coeficientes
-                        de la función objetivo dual.
-                    </li>
-                    <li>
-                        Los coeficientes de la función
-                        objetivo primal se convierten
-                        en resultados del dual.
-                    </li>
-                    <li>
-                        Los signos de las variables duales
-                        dependen de las restricciones
-                        originales.
-                    </li>
-                </ol>
+                <p>
+                    El problema primal tiene
+                    ${problemaPrimal.n} variables y
+                    ${problemaPrimal.m} restricciones.
+                    Su dual tiene
+                    ${problemaDual.n} variables y
+                    ${problemaDual.m} restricciones.
+                </p>
+
+                <p>
+                    La matriz de coeficientes del dual
+                    es la transpuesta de la matriz del
+                    primal. Los coeficientes de la
+                    función objetivo y los términos
+                    independientes intercambian sus
+                    posiciones.
+                </p>
+
+                <p>
+                    Si ambos problemas tienen soluciones
+                    óptimas finitas, sus valores objetivos
+                    son iguales.
+                </p>
             </div>
+
+            ${dualFormularioVerificacion(
+                problemaPrimal,
+                problemaDual
+            )}
         `;
-
-        html += dualFormularioVerificacion(primal, dual);
-
-        dualElemento("dualContenido").innerHTML = html;
 
         dualElemento("dualResultados")
             .classList.remove("oculto");
@@ -709,54 +785,46 @@ function resolverDualidad() {
     }
 }
 
-/*
- * EJEMPLO:
- *
- * Max Z = 3X1 + 5X2
- *
- * X1       <= 4
- *      2X2 <= 12
- * 3X1 + 2X2 <= 18
- *
- * Óptimo:
- * X1 = 2, X2 = 6, Z = 36
- */
+// =====================================================
+// CARGAR EJEMPLO
+// =====================================================
 
 function ejemploDualidad() {
     dualElemento("dualVariables").value = 2;
-    dualElemento("dualRestricciones").value = 3;
+    dualElemento("dualRestricciones").value = 2;
     dualElemento("dualTipo").value = "max";
 
     generarDualidad();
 
-    const c = [3, 5];
-    const A = [
-        [1, 0],
-        [0, 2],
-        [3, 2]
-    ];
-    const b = [4, 12, 18];
+    const valores = {
+        dualC0: 3,
+        dualC1: 5,
 
-    c.forEach((valor, j) => {
-        dualElemento("dualC" + j).value = valor;
+        dualA0_0: 1,
+        dualA0_1: 2,
+        dualB0: 8,
+
+        dualA1_0: 3,
+        dualA1_1: 2,
+        dualB1: 12
+    };
+
+    Object.entries(valores).forEach(([id, valor]) => {
+        dualElemento(id).value = valor;
     });
 
-    A.forEach((fila, i) => {
-        fila.forEach((valor, j) => {
-            dualElemento(
-                "dualA" + i + "_" + j
-            ).value = valor;
-        });
-
-        dualElemento("dualB" + i).value = b[i];
-        dualElemento("dualSigno" + i).value = "<=";
-    });
+    dualElemento("dualSigno0").value = "<=";
+    dualElemento("dualSigno1").value = "<=";
 }
+
+// =====================================================
+// LIMPIAR
+// =====================================================
 
 function limpiarDualidad() {
     modeloDualidad = null;
-    dualPrimalActual = null;
-    dualModeloActual = null;
+    problemaPrimal = null;
+    problemaDual = null;
 
     dualElemento("dualVariables").value = 2;
     dualElemento("dualRestricciones").value = 2;

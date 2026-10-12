@@ -1,61 +1,53 @@
 
 /*
- * AGUA SALVAVIDAS
- * FASE II - MÉTODO DE TRANSPORTE
+ * GREAT VALUE - FASE II
+ * MÉTODO DE COSTO MÍNIMO
  *
- * Solución básica factible inicial:
- * MÉTODO DEL COSTO MÍNIMO
- *
- * Incluye:
- * - Matriz dinámica
- * - Validaciones
- * - Balanceo automático
- * - Origen o destino ficticio
- * - Asignaciones paso a paso
- * - Cálculo y verificación del costo
- * - Detección de degeneración
- *
- * IMPORTANTE:
- * El Costo Mínimo no garantiza
- * la solución óptima global.
+ * Hasta 20 orígenes y 20 destinos.
+ * Balanceo automático con fila o columna ficticia.
+ * Muestra procedimiento, asignaciones y costo total.
  */
 
 "use strict";
 
 const TRA_EPS = 1e-8;
+const TRA_MAX = 20;
+
 let traDimensiones = null;
 
 function traEl(id) {
     return document.getElementById(id);
 }
 
-function traError(mensaje) {
-    traEl("traError").textContent = mensaje;
-    traEl("traError").classList.remove("oculto");
+function traFmt(valor) {
+    if (Math.abs(valor) < TRA_EPS) return "0";
+    return Number(valor.toFixed(6)).toString();
+}
+
+function traMostrarError(mensaje) {
+    const caja = traEl("traError");
+    caja.textContent = mensaje;
+    caja.classList.remove("oculto");
 }
 
 function traOcultarError() {
-    traEl("traError").textContent = "";
-    traEl("traError").classList.add("oculto");
+    const caja = traEl("traError");
+    caja.textContent = "";
+    caja.classList.add("oculto");
 }
 
 function traNumero(id) {
-    const campo = traEl(id);
+    const input = traEl(id);
 
-    if (!campo || campo.value.trim() === "") {
+    if (!input || input.value.trim() === "") {
         throw new Error("Completa todos los campos.");
     }
 
-    const valor = Number(campo.value);
+    const valor = Number(input.value);
 
-    if (!Number.isFinite(valor)) {
-        throw new Error("Ingresa números válidos.");
-    }
-
-    if (valor < 0) {
+    if (!Number.isFinite(valor) || valor < 0) {
         throw new Error(
-            "Los costos, ofertas y demandas " +
-            "deben ser no negativos."
+            "Los costos, ofertas y demandas deben ser números no negativos."
         );
     }
 
@@ -65,71 +57,66 @@ function traNumero(id) {
 function traCantidad(id) {
     const valor = traNumero(id);
 
-    if (!Number.isInteger(valor) ||
-        valor < 1 || valor > 10) {
+    if (
+        !Number.isInteger(valor) ||
+        valor < 1 ||
+        valor > TRA_MAX
+    ) {
         throw new Error(
-            "La cantidad de orígenes y destinos " +
-            "debe ser un entero entre 1 y 10."
+            "Debes ingresar entre 1 y 20 orígenes y destinos."
         );
     }
 
     return valor;
 }
 
-function traFmt(valor) {
-    if (Math.abs(valor) < TRA_EPS) {
-        return "0";
-    }
-
-    return Number(valor.toFixed(6)).toString();
-}
-
 function traInput(id, valor = 0) {
     return `
-        <input type="number"
-               step="any"
-               min="0"
-               id="${id}"
-               value="${valor}">
+        <input
+            type="number"
+            id="${id}"
+            min="0"
+            step="any"
+            value="${valor}">
     `;
 }
 
-/* ==========================================
-   GENERAR MATRIZ
-   ========================================== */
+// =====================================================
+// GENERAR MATRIZ
+// =====================================================
 
 function traGenerar() {
     traOcultarError();
 
     try {
-        const m = traCantidad("traOrigenes");
-        const n = traCantidad("traDestinos");
+        const origenes = traCantidad("traOrigenes");
+        const destinos = traCantidad("traDestinos");
 
-        traDimensiones = { m, n };
+        traDimensiones = { origenes, destinos };
 
         let html = `
             <div class="tra-tabla-scroll">
-            <table class="tra-tabla">
-                <thead>
-                    <tr>
-                        <th>Origen / Destino</th>
+                <table class="tra-tabla">
+                    <thead>
+                        <tr>
+                            <th>Origen / Destino</th>
         `;
 
-        for (let j = 0; j < n; j++) {
+        for (let j = 0; j < destinos; j++) {
             html += `<th>D${j + 1}</th>`;
         }
 
         html += `
-                        <th>Oferta</th>
-                    </tr>
-                </thead>
-                <tbody>
+                            <th>Oferta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
         `;
 
-        for (let i = 0; i < m; i++) {
+        for (let i = 0; i < origenes; i++) {
             html += `<tr><th>O${i + 1}</th>`;
 
-            for (let j = 0; j < n; j++) {
+            for (let j = 0; j < destinos; j++) {
                 html += `
                     <td>
                         ${traInput("traC" + i + "_" + j)}
@@ -141,71 +128,62 @@ function traGenerar() {
                 <td>
                     ${traInput("traO" + i)}
                 </td>
-            </tr>
+                </tr>
             `;
         }
 
-        html += `
-                <tr>
-                    <th>Demanda</th>
-        `;
+        html += `<tr><th>Demanda</th>`;
 
-        for (let j = 0; j < n; j++) {
+        for (let j = 0; j < destinos; j++) {
             html += `
-                <td>${traInput("traD" + j)}</td>
+                <td>
+                    ${traInput("traD" + j)}
+                </td>
             `;
         }
 
         html += `
-                    <td>—</td>
+                <td>—</td>
                 </tr>
                 </tbody>
-            </table>
+                </table>
             </div>
 
             <p class="tra-nota">
-                Los costos representan el gasto por
-                transportar una unidad desde un origen
-                hasta un destino. Si la oferta y la
-                demanda no coinciden, el sistema
-                agregará una fila o columna ficticia
-                con costo cero.
+                Si la oferta y la demanda totales son
+                diferentes, se agregará automáticamente
+                un origen o destino ficticio con costo cero.
             </p>
         `;
 
         traEl("traFormulario").innerHTML = html;
-
-        traEl("traPanelMatriz")
-            .classList.remove("oculto");
-
-        traEl("traPanelResultados")
-            .classList.add("oculto");
+        traEl("traPanelMatriz").classList.remove("oculto");
+        traEl("traPanelResultados").classList.add("oculto");
 
     } catch (error) {
-        traError(error.message);
+        traMostrarError(error.message);
     }
 }
 
-/* ==========================================
-   LEER MATRIZ
-   ========================================== */
+// =====================================================
+// LEER DATOS
+// =====================================================
 
-function traLeer() {
+function traLeerDatos() {
     if (!traDimensiones) {
         throw new Error(
             "Primero debes generar la matriz."
         );
     }
 
-    const { m, n } = traDimensiones;
+    const { origenes, destinos } = traDimensiones;
 
     if (
-        traCantidad("traOrigenes") !== m ||
-        traCantidad("traDestinos") !== n
+        traCantidad("traOrigenes") !== origenes ||
+        traCantidad("traDestinos") !== destinos
     ) {
         throw new Error(
-            "Cambiaste las dimensiones. " +
-            "Genera nuevamente la matriz."
+            "Cambiaste las dimensiones. Genera nuevamente la matriz."
         );
     }
 
@@ -213,10 +191,10 @@ function traLeer() {
     const oferta = [];
     const demanda = [];
 
-    for (let i = 0; i < m; i++) {
+    for (let i = 0; i < origenes; i++) {
         const fila = [];
 
-        for (let j = 0; j < n; j++) {
+        for (let j = 0; j < destinos; j++) {
             fila.push(
                 traNumero("traC" + i + "_" + j)
             );
@@ -226,7 +204,7 @@ function traLeer() {
         oferta.push(traNumero("traO" + i));
     }
 
-    for (let j = 0; j < n; j++) {
+    for (let j = 0; j < destinos; j++) {
         demanda.push(traNumero("traD" + j));
     }
 
@@ -239,19 +217,11 @@ function traLeer() {
     );
 
     if (
-        !Number.isFinite(totalOferta) ||
-        !Number.isFinite(totalDemanda)
+        totalOferta <= TRA_EPS ||
+        totalDemanda <= TRA_EPS
     ) {
         throw new Error(
-            "Los totales exceden el rango numérico permitido."
-        );
-    }
-
-    if (totalOferta <= TRA_EPS ||
-        totalDemanda <= TRA_EPS) {
-        throw new Error(
-            "La oferta y la demanda total " +
-            "deben ser mayores que cero."
+            "La oferta y la demanda totales deben ser mayores que cero."
         );
     }
 
@@ -259,14 +229,16 @@ function traLeer() {
         costos,
         oferta,
         demanda,
+        origenes,
+        destinos,
         totalOferta,
         totalDemanda
     };
 }
 
-/* ==========================================
-   BALANCEAR PROBLEMA
-   ========================================== */
+// =====================================================
+// BALANCEAR PROBLEMA
+// =====================================================
 
 function traBalancear(datos) {
     const costos = datos.costos.map(
@@ -276,57 +248,69 @@ function traBalancear(datos) {
     const oferta = [...datos.oferta];
     const demanda = [...datos.demanda];
 
+    const nombresOrigenes = oferta.map(
+        (_, i) => "O" + (i + 1)
+    );
+
+    const nombresDestinos = demanda.map(
+        (_, j) => "D" + (j + 1)
+    );
+
     let mensaje = "El problema ya está balanceado.";
-    let origenFicticio = false;
-    let destinoFicticio = false;
 
     const diferencia =
         datos.totalOferta - datos.totalDemanda;
 
-    if (diferencia > TRA_EPS) {
-        // Existe oferta sobrante.
+    const tolerancia = TRA_EPS * Math.max(
+        1,
+        datos.totalOferta,
+        datos.totalDemanda
+    );
+
+    if (diferencia > tolerancia) {
+        // Sobra oferta: agregar destino ficticio.
         demanda.push(diferencia);
+        nombresDestinos.push("Destino ficticio");
 
-        costos.forEach(fila => {
+        for (const fila of costos) {
             fila.push(0);
-        });
-
-        destinoFicticio = true;
+        }
 
         mensaje =
-            "Se agregó un destino ficticio con " +
+            "La oferta supera la demanda en " +
             traFmt(diferencia) +
-            " unidades de demanda y costo cero.";
+            ". Se agregó un destino ficticio.";
 
-    } else if (diferencia < -TRA_EPS) {
-        // Existe demanda sin cubrir.
-        oferta.push(-diferencia);
+    } else if (diferencia < -tolerancia) {
+        // Falta oferta: agregar origen ficticio.
+        const faltante = -diferencia;
+
+        oferta.push(faltante);
+        nombresOrigenes.push("Origen ficticio");
 
         costos.push(
             Array(demanda.length).fill(0)
         );
 
-        origenFicticio = true;
-
         mensaje =
-            "Se agregó un origen ficticio con " +
-            traFmt(-diferencia) +
-            " unidades de oferta y costo cero.";
+            "La demanda supera la oferta en " +
+            traFmt(faltante) +
+            ". Se agregó un origen ficticio.";
     }
 
     return {
         costos,
         oferta,
         demanda,
-        origenFicticio,
-        destinoFicticio,
+        nombresOrigenes,
+        nombresDestinos,
         mensaje
     };
 }
 
-/* ==========================================
-   MÉTODO DEL COSTO MÍNIMO
-   ========================================== */
+// =====================================================
+// MÉTODO DE COSTO MÍNIMO
+// =====================================================
 
 function traCostoMinimo(datos) {
     const balanceado = traBalancear(datos);
@@ -334,7 +318,9 @@ function traCostoMinimo(datos) {
     const {
         costos,
         oferta,
-        demanda
+        demanda,
+        nombresOrigenes,
+        nombresDestinos
     } = balanceado;
 
     const m = oferta.length;
@@ -349,24 +335,23 @@ function traCostoMinimo(datos) {
     );
 
     const pasos = [];
-    let numeroPaso = 0;
+    let costoTotal = 0;
 
     /*
-     * Mientras exista demanda pendiente,
-     * seleccionar la celda disponible
-     * de menor costo.
+     * Se selecciona la celda de menor costo
+     * entre las que todavía tienen oferta
+     * y demanda disponibles.
      *
-     * Empates: primero la fila menor
-     * y luego la columna menor.
+     * En empates, se elige la primera celda
+     * por orden de origen y destino.
      */
 
-    while (
-        restanteDemanda.some(
-            cantidad => cantidad > TRA_EPS
-        )
-    ) {
-        let mejorFila = -1;
-        let mejorColumna = -1;
+    let contador = 0;
+    const maxPasos = m + n + 5;
+
+    while (contador < maxPasos) {
+        let mejorI = -1;
+        let mejorJ = -1;
         let menorCosto = Infinity;
 
         for (let i = 0; i < m; i++) {
@@ -379,214 +364,199 @@ function traCostoMinimo(datos) {
                     continue;
                 }
 
-                if (
-                    costos[i][j] <
-                    menorCosto - TRA_EPS
-                ) {
-                    menorCosto = costos[i][j];
-                    mejorFila = i;
-                    mejorColumna = j;
+                const costo = costos[i][j];
+
+                if (costo < menorCosto - TRA_EPS) {
+                    menorCosto = costo;
+                    mejorI = i;
+                    mejorJ = j;
                 }
             }
         }
 
-        if (mejorFila === -1) {
-            throw new Error(
-                "No se pudo completar la distribución."
-            );
+        if (mejorI === -1 || mejorJ === -1) {
+            break;
         }
 
-        const i = mejorFila;
-        const j = mejorColumna;
-
         const cantidad = Math.min(
-            restanteOferta[i],
-            restanteDemanda[j]
+            restanteOferta[mejorI],
+            restanteDemanda[mejorJ]
         );
 
         if (cantidad <= TRA_EPS) {
-            throw new Error(
-                "Se detectó una asignación inválida."
-            );
+            break;
         }
 
-        asignaciones[i][j] += cantidad;
+        asignaciones[mejorI][mejorJ] += cantidad;
 
-        restanteOferta[i] -= cantidad;
-        restanteDemanda[j] -= cantidad;
+        const costoPaso =
+            cantidad * costos[mejorI][mejorJ];
 
-        if (Math.abs(restanteOferta[i]) < TRA_EPS) {
-            restanteOferta[i] = 0;
+        costoTotal += costoPaso;
+
+        restanteOferta[mejorI] -= cantidad;
+        restanteDemanda[mejorJ] -= cantidad;
+
+        if (
+            Math.abs(restanteOferta[mejorI]) < TRA_EPS
+        ) {
+            restanteOferta[mejorI] = 0;
         }
 
-        if (Math.abs(restanteDemanda[j]) < TRA_EPS) {
-            restanteDemanda[j] = 0;
+        if (
+            Math.abs(restanteDemanda[mejorJ]) < TRA_EPS
+        ) {
+            restanteDemanda[mejorJ] = 0;
         }
-
-        numeroPaso++;
 
         pasos.push({
-            numero: numeroPaso,
-            origen: i,
-            destino: j,
+            numero: contador + 1,
+            origen: nombresOrigenes[mejorI],
+            destino: nombresDestinos[mejorJ],
             cantidad,
-            costoUnitario: costos[i][j],
-            costoParcial:
-                cantidad * costos[i][j],
-            ofertaRestante: [...restanteOferta],
-            demandaRestante: [...restanteDemanda]
+            costoUnitario: costos[mejorI][mejorJ],
+            costoPaso,
+            costoAcumulado: costoTotal
         });
 
-        if (numeroPaso > m * n) {
+        contador++;
+    }
+
+    // Verificar que toda la oferta fue distribuida.
+    for (let i = 0; i < m; i++) {
+        if (restanteOferta[i] > TRA_EPS) {
             throw new Error(
-                "Se excedió el número esperado de asignaciones."
+                "No se logró distribuir toda la oferta."
             );
         }
     }
 
-    /*
-     * COMPROBAR OFERTA Y DEMANDA
-     */
+    // Verificar que toda la demanda fue satisfecha.
+    for (let j = 0; j < n; j++) {
+        if (restanteDemanda[j] > TRA_EPS) {
+            throw new Error(
+                "No se logró satisfacer toda la demanda."
+            );
+        }
+    }
+
+    // Comprobación independiente del costo.
+    let costoVerificado = 0;
 
     for (let i = 0; i < m; i++) {
-        const enviado = asignaciones[i].reduce(
-            (suma, valor) => suma + valor, 0
-        );
+        let sumaOrigen = 0;
+
+        for (let j = 0; j < n; j++) {
+            sumaOrigen += asignaciones[i][j];
+
+            costoVerificado +=
+                asignaciones[i][j] * costos[i][j];
+        }
 
         if (
-            Math.abs(enviado - oferta[i]) >
+            Math.abs(sumaOrigen - oferta[i]) >
             TRA_EPS * Math.max(1, oferta[i])
         ) {
             throw new Error(
-                "La oferta del origen " +
-                (i + 1) + " no coincide."
+                "La oferta de " + nombresOrigenes[i] +
+                " no coincide con sus asignaciones."
             );
         }
     }
 
     for (let j = 0; j < n; j++) {
-        let recibido = 0;
+        let sumaDestino = 0;
 
         for (let i = 0; i < m; i++) {
-            recibido += asignaciones[i][j];
+            sumaDestino += asignaciones[i][j];
         }
 
         if (
-            Math.abs(recibido - demanda[j]) >
+            Math.abs(sumaDestino - demanda[j]) >
             TRA_EPS * Math.max(1, demanda[j])
         ) {
             throw new Error(
-                "La demanda del destino " +
-                (j + 1) + " no coincide."
+                "La demanda de " + nombresDestinos[j] +
+                " no coincide con sus asignaciones."
             );
         }
     }
 
-    /*
-     * CALCULAR COSTO TOTAL
-     */
-
-    let costoTotal = 0;
-    let asignacionesPositivas = 0;
-
-    for (let i = 0; i < m; i++) {
-        for (let j = 0; j < n; j++) {
-            const cantidad = asignaciones[i][j];
-
-            costoTotal +=
-                cantidad * costos[i][j];
-
-            if (cantidad > TRA_EPS) {
-                asignacionesPositivas++;
-            }
-        }
+    if (
+        Math.abs(costoVerificado - costoTotal) >
+        TRA_EPS * Math.max(1, Math.abs(costoTotal))
+    ) {
+        throw new Error(
+            "El costo total calculado no coincide."
+        );
     }
 
-    const basicasNecesarias = m + n - 1;
+    const asignacionesPositivas =
+        asignaciones.flat().filter(
+            cantidad => cantidad > TRA_EPS
+        ).length;
 
     return {
         ...balanceado,
         asignaciones,
         pasos,
-        costoTotal,
+        costoTotal: costoVerificado,
         asignacionesPositivas,
-        basicasNecesarias,
-        degenerada:
-            asignacionesPositivas < basicasNecesarias
+        basicasRequeridas: m + n - 1
     };
 }
 
-/* ==========================================
-   MOSTRAR RESULTADOS
-   ========================================== */
+// =====================================================
+// MOSTRAR MATRIZ DE ASIGNACIONES
+// =====================================================
 
-function traMostrar(resultado) {
+function traTablaResultado(resultado) {
     const {
+        asignaciones,
         costos,
         oferta,
         demanda,
-        asignaciones,
-        pasos
+        nombresOrigenes,
+        nombresDestinos
     } = resultado;
 
-    const m = oferta.length;
-    const n = demanda.length;
-
     let html = `
-        <div class="tra-resumen">
-            <div>
-                <small>Costo total de distribución</small>
-                <strong>${traFmt(resultado.costoTotal)}</strong>
-            </div>
-            <div>
-                <small>Asignaciones realizadas</small>
-                <strong>${pasos.length}</strong>
-            </div>
-        </div>
-
-        <div class="tra-informacion">
-            <h3>Balance del problema</h3>
-            <p>${resultado.mensaje}</p>
-        </div>
-
-        <h3>Matriz de asignaciones</h3>
-
         <div class="tra-tabla-scroll">
-        <table class="tra-tabla">
-            <thead>
-                <tr>
-                    <th>Origen / Destino</th>
+            <table class="tra-tabla">
+                <thead>
+                    <tr>
+                        <th>Origen / Destino</th>
     `;
 
-    for (let j = 0; j < n; j++) {
-        const nombre =
-            resultado.destinoFicticio && j === n - 1
-                ? "Destino ficticio"
-                : "D" + (j + 1);
-
+    nombresDestinos.forEach(nombre => {
         html += `<th>${nombre}</th>`;
-    }
+    });
 
-    html += `<th>Oferta</th></tr></thead><tbody>`;
+    html += `
+                        <th>Oferta</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
 
-    for (let i = 0; i < m; i++) {
-        const nombre =
-            resultado.origenFicticio && i === m - 1
-                ? "Origen ficticio"
-                : "O" + (i + 1);
+    for (let i = 0; i < oferta.length; i++) {
+        html += `<tr><th>${nombresOrigenes[i]}</th>`;
 
-        html += `<tr><th>${nombre}</th>`;
-
-        for (let j = 0; j < n; j++) {
+        for (let j = 0; j < demanda.length; j++) {
             const cantidad = asignaciones[i][j];
+            const costo = costos[i][j];
+
+            const clase = cantidad > TRA_EPS
+                ? ' class="tra-asignada"'
+                : "";
 
             html += `
-                <td class="${cantidad > TRA_EPS
-                    ? "tra-asignada"
-                    : ""}">
-                    <strong>${traFmt(cantidad)}</strong>
+                <td${clase}>
+                    <strong>
+                        ${traFmt(cantidad)}
+                    </strong>
                     <small>
-                        Costo: ${traFmt(costos[i][j])}
+                        Costo: ${traFmt(costo)}
                     </small>
                 </td>
             `;
@@ -605,135 +575,179 @@ function traMostrar(resultado) {
     });
 
     html += `
-            <td>—</td>
-            </tr></tbody>
-        </table>
+                <td>—</td>
+            </tr>
+            </tbody>
+            </table>
         </div>
-
-        <h3>Procedimiento paso a paso</h3>
-        <p class="tra-nota">
-            En cada paso se selecciona la celda
-            disponible con el costo unitario menor
-            y se asigna la máxima cantidad posible.
-        </p>
     `;
 
-    pasos.forEach(paso => {
-        const origen =
-            resultado.origenFicticio &&
-            paso.origen === m - 1
-                ? "Origen ficticio"
-                : "O" + (paso.origen + 1);
+    return html;
+}
 
-        const destino =
-            resultado.destinoFicticio &&
-            paso.destino === n - 1
-                ? "Destino ficticio"
-                : "D" + (paso.destino + 1);
+// =====================================================
+// MOSTRAR PROCEDIMIENTO
+// =====================================================
 
+function traMostrarResultado(resultado) {
+    let html = `
+        <div class="tra-resumen">
+            <h3>Resultado del Método de Costo Mínimo</h3>
+
+            <p>${resultado.mensaje}</p>
+
+            <p>
+                <strong>Costo total de transporte:</strong>
+                ${traFmt(resultado.costoTotal)}
+            </p>
+
+            <p>
+                <strong>Asignaciones realizadas:</strong>
+                ${resultado.pasos.length}
+            </p>
+        </div>
+
+        <h3>Matriz final de asignaciones</h3>
+        ${traTablaResultado(resultado)}
+
+        <h3>Procedimiento paso a paso</h3>
+
+        <div class="tra-tabla-scroll">
+            <table class="tra-tabla">
+                <thead>
+                    <tr>
+                        <th>Paso</th>
+                        <th>Origen</th>
+                        <th>Destino</th>
+                        <th>Cantidad</th>
+                        <th>Costo unitario</th>
+                        <th>Costo del paso</th>
+                        <th>Acumulado</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    resultado.pasos.forEach(paso => {
         html += `
-            <div class="tra-paso">
-                <h4>Paso ${paso.numero}</h4>
-
-                <p>
-                    Se selecciona
-                    <strong>${origen} → ${destino}</strong>
-                    porque tiene el menor costo
-                    disponible según el criterio
-                    de desempate.
-                </p>
-
-                <p>
-                    Cantidad asignada:
-                    <strong>${traFmt(paso.cantidad)}</strong>
-                </p>
-
-                <p>
-                    Costo parcial:
-                    ${traFmt(paso.cantidad)}
-                    × ${traFmt(paso.costoUnitario)}
-                    =
-                    <strong>${traFmt(paso.costoParcial)}</strong>
-                </p>
-            </div>
+            <tr>
+                <td>${paso.numero}</td>
+                <td>${paso.origen}</td>
+                <td>${paso.destino}</td>
+                <td>${traFmt(paso.cantidad)}</td>
+                <td>${traFmt(paso.costoUnitario)}</td>
+                <td>${traFmt(paso.costoPaso)}</td>
+                <td>${traFmt(paso.costoAcumulado)}</td>
+            </tr>
         `;
     });
 
     html += `
-        <div class="tra-informacion">
-            <h3>Verificación matemática</h3>
-            <p>
-                Todas las ofertas y demandas
-                quedaron satisfechas después
-                del balanceo.
-            </p>
-            <p>
-                Asignaciones positivas:
-                <strong>
-                    ${resultado.asignacionesPositivas}
-                </strong>
-            </p>
-            <p>
-                Variables básicas necesarias:
-                <strong>
-                    ${resultado.basicasNecesarias}
-                </strong>
-            </p>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Comprobación del costo</h3>
+        <p>
+            El costo total se obtiene multiplicando
+            cada cantidad asignada por su costo
+            unitario y sumando todos los productos.
+        </p>
     `;
 
-    if (resultado.degenerada) {
+    const terminos = [];
+
+    for (
+        let i = 0;
+        i < resultado.oferta.length;
+        i++
+    ) {
+        for (
+            let j = 0;
+            j < resultado.demanda.length;
+            j++
+        ) {
+            const cantidad =
+                resultado.asignaciones[i][j];
+
+            if (cantidad > TRA_EPS) {
+                terminos.push(
+                    "(" + traFmt(cantidad) +
+                    " × " +
+                    traFmt(resultado.costos[i][j]) +
+                    ")"
+                );
+            }
+        }
+    }
+
+    html += `
+        <p class="tra-formula">
+            Z = ${terminos.join(" + ") || "0"}
+        </p>
+
+        <p>
+            <strong>
+                Z = ${traFmt(resultado.costoTotal)}
+            </strong>
+        </p>
+    `;
+
+    if (
+        resultado.asignacionesPositivas <
+        resultado.basicasRequeridas
+    ) {
         html += `
-            <p class="tra-advertencia">
-                Se detectó degeneración.
-                Para aplicar MODI será necesario
-                completar una base independiente
-                con variables básicas de valor cero.
+            <p class="tra-nota">
+                La solución presenta menos asignaciones
+                positivas que m + n - 1. Si se utiliza
+                posteriormente el método MODI, puede
+                ser necesario incorporar variables
+                básicas de valor cero para completar
+                una base válida.
             </p>
         `;
     }
 
     html += `
-            <p>
-                <strong>Interpretación:</strong>
-                esta distribución satisface
-                la oferta y la demanda,
-                con un costo inicial de
-                ${traFmt(resultado.costoTotal)}.
-                Para comprobar si es óptima
-                debe aplicarse MODI.
-            </p>
-        </div>
+        <p class="tra-nota">
+            El Método de Costo Mínimo proporciona
+            una solución inicial factible. Para
+            determinar si es óptima, se puede
+            aplicar el método MODI.
+        </p>
     `;
 
     traEl("traResultados").innerHTML = html;
+
     traEl("traPanelResultados")
         .classList.remove("oculto");
 }
 
-/* ==========================================
-   RESOLVER
-   ========================================== */
+// =====================================================
+// RESOLVER
+// =====================================================
 
 function traResolver() {
     traOcultarError();
 
-    traEl("traPanelResultados")
-        .classList.add("oculto");
-
     try {
-        const datos = traLeer();
+        const datos = traLeerDatos();
         const resultado = traCostoMinimo(datos);
 
-        traMostrar(resultado);
+        traMostrarResultado(resultado);
 
     } catch (error) {
-        traError(error.message);
+        traEl("traPanelResultados")
+            .classList.add("oculto");
+
+        traMostrarError(error.message);
     }
 }
 
-/* ==========================================
-   EJEMPLO DE PRUEBA
-   ========================================== */
+// =====================================================
+// EJEMPLO
+// =====================================================
 
 function traEjemplo() {
     traEl("traOrigenes").value = 3;
@@ -747,8 +761,8 @@ function traEjemplo() {
         [14, 9, 16, 5]
     ];
 
-    const oferta = [35, 50, 40];
-    const demanda = [30, 25, 35, 35];
+    const oferta = [20, 30, 25];
+    const demanda = [10, 25, 20, 20];
 
     costos.forEach((fila, i) => {
         fila.forEach((valor, j) => {
@@ -763,9 +777,9 @@ function traEjemplo() {
     });
 }
 
-/* ==========================================
-   LIMPIAR
-   ========================================== */
+// =====================================================
+// LIMPIAR
+// =====================================================
 
 function traLimpiar() {
     traDimensiones = null;
@@ -776,11 +790,8 @@ function traLimpiar() {
     traEl("traFormulario").innerHTML = "";
     traEl("traResultados").innerHTML = "";
 
-    traEl("traPanelMatriz")
-        .classList.add("oculto");
-
-    traEl("traPanelResultados")
-        .classList.add("oculto");
+    traEl("traPanelMatriz").classList.add("oculto");
+    traEl("traPanelResultados").classList.add("oculto");
 
     traOcultarError();
 }

@@ -1,419 +1,369 @@
 
 /*
- * AGUA SALVAVIDAS
- * Método M Grande - Motor simbólico
+ * GREAT VALUE - FASE II
+ * Método M Grande: corrector simbólico
+ * Capacidad: 20 variables y 20 restricciones
  *
- * Representa los coeficientes como:
- * aM + b
- *
- * Evita sustituir M por un número fijo.
+ * Expresiones: aM + b
  */
 
 (function () {
     "use strict";
 
     const EPS = 1e-9;
-    const MAX_ITERACIONES = 300;
+    const MAX_ITER = 1000;
 
-    // Representa una expresión aM + b.
     function par(m = 0, c = 0) {
         return { m, c };
     }
 
-    // Resta dos expresiones simbólicas.
-    function restar(a, b) {
+    function resta(a, b) {
         return par(a.m - b.m, a.c - b.c);
     }
 
-    // Multiplica una expresión por un número.
-    function multiplicar(a, numero) {
+    function producto(a, numero) {
         return par(a.m * numero, a.c * numero);
     }
 
-    // Compara expresiones dando prioridad a M.
     function comparar(a, b) {
         if (Math.abs(a.m - b.m) > EPS) {
-            return Math.sign(a.m - b.m);
+            return a.m < b.m ? -1 : 1;
         }
 
         if (Math.abs(a.c - b.c) > EPS) {
-            return Math.sign(a.c - b.c);
+            return a.c < b.c ? -1 : 1;
         }
 
         return 0;
     }
 
-    // Copia una tabla sin compartir sus objetos.
-    function copiarTabla(tabla) {
-        return tabla.map(fila =>
-            fila.map(valor =>
-                typeof valor === "number"
-                    ? valor
-                    : par(valor.m, valor.c)
-            )
-        );
-    }
-
-    // Elimina errores numéricos muy pequeños.
-    function limpiarNumero(numero) {
+    function limpiar(numero) {
         return Math.abs(numero) < EPS ? 0 : numero;
     }
 
-    /*
-     * RESOLUCIÓN DEL MÉTODO M GRANDE
-     */
-    window.ejecutarMGrande = function (datos) {
+    function copiarTabla(tabla, z) {
+        return [
+            ...tabla.map(fila => [...fila]),
+            z.map(valor => ({ ...valor }))
+        ];
+    }
 
+    // =================================================
+    // ALGORITMO M GRANDE
+    // =================================================
+
+    window.ejecutarMGrande = function (datos) {
         const { n, m } = datos;
+
+        if (
+            !Number.isInteger(n) || n < 1 || n > 20 ||
+            !Number.isInteger(m) || m < 1 || m > 20
+        ) {
+            throw new Error(
+                "Se permiten entre 1 y 20 variables y restricciones."
+            );
+        }
 
         const nombres = Array.from(
             { length: n },
-            (_, j) => "X" + (j + 1)
+            (_, i) => "X" + (i + 1)
         );
 
         const extras = [];
         const base = [];
-        const artificiales = [];
+        const artificiales = new Set();
 
-        const filas = datos.restricciones.map(r => ({
-            a: [...r.coeficientes],
-            signo: r.signo,
-            rhs: r.rhs
-        }));
+        let s = 0;
+        let e = 0;
+        let a = 0;
 
-        let contadorS = 0;
-        let contadorE = 0;
-        let contadorA = 0;
-
-        /*
-         * AGREGAR VARIABLES AUXILIARES
-         *
-         * <= : holgura
-         * >= : exceso y artificial
-         *  = : artificial
-         */
-
-        filas.forEach((restriccion, i) => {
-
-            if (restriccion.signo === "<=") {
-
+        // Crear variables de holgura, exceso y artificiales.
+        datos.restricciones.forEach((r, i) => {
+            if (r.signo === "<=") {
                 extras.push({
-                    nombre: "S" + (++contadorS),
+                    nombre: "S" + (++s),
                     fila: i,
                     valor: 1,
-                    basica: true
+                    basica: true,
+                    artificial: false
                 });
-
-            } else if (restriccion.signo === ">=") {
-
+            } else if (r.signo === ">=") {
                 extras.push({
-                    nombre: "E" + (++contadorE),
+                    nombre: "E" + (++e),
                     fila: i,
                     valor: -1,
-                    basica: false
+                    basica: false,
+                    artificial: false
                 });
 
                 extras.push({
-                    nombre: "A" + (++contadorA),
+                    nombre: "A" + (++a),
                     fila: i,
                     valor: 1,
                     basica: true,
                     artificial: true
                 });
-
-            } else if (restriccion.signo === "=") {
-
+            } else if (r.signo === "=") {
                 extras.push({
-                    nombre: "A" + (++contadorA),
+                    nombre: "A" + (++a),
                     fila: i,
                     valor: 1,
                     basica: true,
                     artificial: true
                 });
-
             } else {
                 throw new Error(
-                    "Signo de restricción no válido."
+                    "Se encontró un signo de restricción no válido."
                 );
             }
         });
 
-        extras.forEach(variable => {
-            nombres.push(variable.nombre);
+        extras.forEach(extra => {
+            nombres.push(extra.nombre);
+
+            if (extra.artificial) {
+                artificiales.add(extra.nombre);
+            }
         });
 
         const N = nombres.length;
         const RHS = N;
 
-        /*
-         * CONSTRUIR TABLA INICIAL
-         */
+        // =================================================
+        // TABLA INICIAL
+        // =================================================
 
-        const tabla = filas.map((restriccion, i) => {
-
+        const tabla = datos.restricciones.map((r, i) => {
             const fila = Array(N + 1).fill(0);
 
-            restriccion.a.forEach((valor, j) => {
+            r.coeficientes.forEach((valor, j) => {
                 fila[j] = valor;
             });
 
-            extras.forEach((variable, k) => {
-
-                if (variable.fila === i) {
-                    fila[n + k] = variable.valor;
+            extras.forEach((extra, k) => {
+                if (extra.fila === i) {
+                    fila[n + k] = extra.valor;
                 }
             });
 
-            fila[RHS] = restriccion.rhs;
+            fila[RHS] = r.rhs;
 
-            const variableBasica = extras.find(
-                variable =>
-                    variable.fila === i &&
-                    variable.basica
+            const basica = extras.find(
+                extra => extra.fila === i && extra.basica
             );
 
-            base.push(variableBasica.nombre);
+            if (!basica) {
+                throw new Error(
+                    "No fue posible construir la base inicial."
+                );
+            }
+
+            base.push(basica.nombre);
 
             return fila;
         });
 
-        extras.forEach((variable, k) => {
+        // =================================================
+        // FUNCIÓN OBJETIVO SIMBÓLICA
+        //
+        // Max: penalización -M por artificial.
+        // Min: transformar a maximización de -Z.
+        // =================================================
 
-            if (variable.artificial) {
-                artificiales.push(n + k);
+        const coeficientes = nombres.map((nombre, j) => {
+            if (j < n) {
+                const c = datos.tipo === "max"
+                    ? datos.objetivo[j]
+                    : -datos.objetivo[j];
+
+                return par(0, c);
             }
+
+            return artificiales.has(nombre)
+                ? par(-1, 0)
+                : par(0, 0);
         });
 
-        /*
-         * CONSTRUIR FILA Z
-         *
-         * Las variables artificiales reciben
-         * penalización simbólica M.
-         */
-
-        const z = Array.from(
-            { length: N + 1 },
-            (_, j) => {
-
-                if (j < n) {
-
-                    const coeficiente =
-                        datos.tipo === "max"
-                            ? datos.objetivo[j]
-                            : -datos.objetivo[j];
-
-                    return par(0, -coeficiente);
-                }
-
-                return par(0, 0);
-            }
+        // Fila Z = -C.
+        const z = coeficientes.map(valor =>
+            par(-valor.m, -valor.c)
         );
 
-        artificiales.forEach(j => {
-            z[j] = par(1, 0);
-        });
+        z.push(par());
 
-        /*
-         * CANONIZAR LA FILA Z
-         */
-
+        // Canonizar la fila Z usando las variables básicas.
         for (let i = 0; i < m; i++) {
+            const indice = nombres.indexOf(base[i]);
+            const costoBasico = coeficientes[indice];
 
-            if (base[i].startsWith("A")) {
-
-                for (let j = 0; j <= RHS; j++) {
-
-                    z[j] = restar(
-                        z[j],
-                        par(tabla[i][j], 0)
-                    );
-                }
+            for (let j = 0; j <= RHS; j++) {
+                z[j] = resta(
+                    z[j],
+                    producto(costoBasico, -tabla[i][j])
+                );
             }
         }
 
-        /*
-         * GUARDAR ITERACIONES
-         */
+        const iteraciones = [];
 
-        function guardarIteracion(
-            numero,
-            entrante = null,
-            saliente = null,
-            pivote = null
-        ) {
-            return {
+        function guardar(numero) {
+            const paso = {
                 numero,
-                tabla: copiarTabla([...tabla, z]),
+                tabla: copiarTabla(tabla, z),
                 base: [...base],
-                entrante,
-                saliente,
-                pivote
+                entrante: null,
+                saliente: null,
+                pivote: null,
+                filaPivote: null,
+                columnaPivote: null,
+                razones: []
             };
+
+            iteraciones.push(paso);
+            return paso;
         }
 
-        const iteraciones = [guardarIteracion(0)];
+        guardar(0);
 
-        let estado = "optimo";
+        let estado = "limite_iteraciones";
         let contador = 0;
 
-        /*
-         * ALGORITMO SIMPLEX CON M SIMBÓLICA
-         */
+        // =================================================
+        // ITERACIONES SIMPLEX CON M SIMBÓLICA
+        // =================================================
 
-        while (contador < MAX_ITERACIONES) {
-
+        while (contador < MAX_ITER) {
             let columna = -1;
 
-            // Elegir columna entrante.
+            // Regla de Bland: elegir la primera columna
+            // elegible para reducir problemas de ciclaje.
             for (let j = 0; j < N; j++) {
-
                 if (
-                    comparar(z[j], par()) < 0 &&
-                    (
-                        columna < 0 ||
-                        comparar(z[j], z[columna]) < 0
-                    )
+                    !artificiales.has(nombres[j]) &&
+                    comparar(z[j], par()) < 0
                 ) {
                     columna = j;
+                    break;
                 }
             }
 
-            // Si no hay coeficientes negativos,
-            // se alcanzó la condición de optimalidad.
-            if (columna < 0) {
+            if (columna === -1) {
+                estado = "optimo";
                 break;
             }
 
             let filaPivote = -1;
-            let menorRatio = Infinity;
-
-            /*
-             * PRUEBA DE RAZONES
-             */
+            let mejorRazon = Infinity;
+            const razones = [];
 
             for (let i = 0; i < m; i++) {
+                const divisor = tabla[i][columna];
 
-                const valor = tabla[i][columna];
+                if (divisor > EPS) {
+                    const razon = tabla[i][RHS] / divisor;
 
-                if (valor > EPS) {
-
-                    const ratio =
-                        tabla[i][RHS] / valor;
+                    razones.push({
+                        variable: base[i],
+                        razon
+                    });
 
                     if (
-                        ratio < menorRatio - EPS ||
+                        razon < mejorRazon - EPS ||
                         (
-                            Math.abs(
-                                ratio - menorRatio
-                            ) < EPS &&
-                            filaPivote >= 0 &&
-                            base[i].startsWith("A") &&
-                            !base[filaPivote].startsWith("A")
+                            Math.abs(razon - mejorRazon) <= EPS &&
+                            (
+                                filaPivote === -1 ||
+                                nombres.indexOf(base[i]) <
+                                nombres.indexOf(base[filaPivote])
+                            )
                         )
                     ) {
-                        menorRatio = ratio;
+                        mejorRazon = razon;
                         filaPivote = i;
                     }
+                } else {
+                    razones.push({
+                        variable: base[i],
+                        razon: null
+                    });
                 }
             }
 
-            // No existe fila saliente.
-            if (filaPivote < 0) {
+            const actual = iteraciones[iteraciones.length - 1];
+            actual.entrante = nombres[columna];
+            actual.razones = razones;
+
+            if (filaPivote === -1) {
                 estado = "no_acotado";
                 break;
             }
 
-            const entrante = nombres[columna];
-            const saliente = base[filaPivote];
+            const pivote = tabla[filaPivote][columna];
+            const factorZ = { ...z[columna] };
 
-            const pivote =
-                tabla[filaPivote][columna];
+            actual.saliente = base[filaPivote];
+            actual.pivote = pivote;
+            actual.filaPivote = filaPivote;
+            actual.columnaPivote = columna;
 
-            const factorZ = par(
-                z[columna].m,
-                z[columna].c
-            );
-
-            /*
-             * NORMALIZAR FILA PIVOTE
-             */
-
+            // Normalizar fila pivote.
             for (let j = 0; j <= RHS; j++) {
-
-                tabla[filaPivote][j] =
-                    limpiarNumero(
-                        tabla[filaPivote][j] / pivote
-                    );
+                tabla[filaPivote][j] = limpiar(
+                    tabla[filaPivote][j] / pivote
+                );
             }
 
-            /*
-             * HACER CEROS EN LAS OTRAS FILAS
-             */
-
+            // Eliminar la columna entrante de las demás filas.
             for (let i = 0; i < m; i++) {
-
-                if (i === filaPivote) {
-                    continue;
-                }
+                if (i === filaPivote) continue;
 
                 const factor = tabla[i][columna];
 
                 for (let j = 0; j <= RHS; j++) {
-
-                    tabla[i][j] = limpiarNumero(
+                    tabla[i][j] = limpiar(
                         tabla[i][j] -
                         factor * tabla[filaPivote][j]
                     );
                 }
             }
 
-            /*
-             * ACTUALIZAR FILA Z SIMBÓLICA
-             */
-
+            // Actualizar fila Z simbólica.
             for (let j = 0; j <= RHS; j++) {
-
-                z[j] = restar(
+                z[j] = resta(
                     z[j],
-                    multiplicar(
-                        factorZ,
-                        tabla[filaPivote][j]
-                    )
+                    producto(factorZ, tabla[filaPivote][j])
                 );
+
+                z[j].m = limpiar(z[j].m);
+                z[j].c = limpiar(z[j].c);
             }
 
-            base[filaPivote] = entrante;
-
+            base[filaPivote] = nombres[columna];
             contador++;
 
-            const anterior =
-                iteraciones[iteraciones.length - 1];
-
-            anterior.entrante = entrante;
-            anterior.saliente = saliente;
-            anterior.pivote = pivote;
-
-            iteraciones.push(
-                guardarIteracion(contador)
-            );
+            guardar(contador);
         }
 
-        /*
-         * VERIFICAR ESTADO FINAL
-         */
+        // =================================================
+        // ESTADO FINAL
+        // =================================================
 
-        if (
-            contador >= MAX_ITERACIONES &&
-            estado === "optimo"
-        ) {
-            estado = "limite";
+        if (estado === "limite_iteraciones") {
+            const hayNegativos = z.slice(0, N).some(
+                (valor, j) =>
+                    !artificiales.has(nombres[j]) &&
+                    comparar(valor, par()) < 0
+            );
+
+            if (!hayNegativos) {
+                estado = "optimo";
+            }
         }
 
         if (estado === "optimo") {
-
             const artificialPositiva = base.some(
                 (nombre, i) =>
-                    nombre.startsWith("A") &&
+                    artificiales.has(nombre) &&
                     tabla[i][RHS] > 1e-7
             );
 
@@ -422,26 +372,19 @@
             }
         }
 
-        /*
-         * OBTENER VARIABLES ORIGINALES
-         */
+        // =================================================
+        // RECUPERAR SOLUCIÓN
+        // =================================================
 
         const variables = Array(n).fill(0);
 
         for (let i = 0; i < m; i++) {
-
             const indice = nombres.indexOf(base[i]);
 
             if (indice >= 0 && indice < n) {
-
-                variables[indice] =
-                    limpiarNumero(tabla[i][RHS]);
+                variables[indice] = limpiar(tabla[i][RHS]);
             }
         }
-
-        /*
-         * EVALUAR FUNCIÓN OBJETIVO ORIGINAL
-         */
 
         const valorZ = variables.reduce(
             (total, valor, j) =>
@@ -455,133 +398,108 @@
             iteraciones,
             variables,
             valorZ,
-            artificiales: artificiales.map(
-                j => nombres[j]
-            )
+            artificiales: [...artificiales],
+            baseFinal: [...base]
         };
     };
 
-
-    /*
-     * MOSTRAR EXPRESIONES CON M
-     */
+    // =================================================
+    // FORMATO SIMBÓLICO
+    // =================================================
 
     window.formatearM = function (valor) {
-
-        function formato(numero) {
-            return Number(
-                limpiarNumero(numero).toFixed(6)
-            ).toString();
+        function numero(x) {
+            if (Math.abs(x) < EPS) return "0";
+            return Number(x.toFixed(6)).toString();
         }
 
         if (typeof valor === "number") {
-            return formato(valor);
+            return numero(valor);
         }
 
-        if (!valor || typeof valor.m !== "number") {
+        if (!valor || typeof valor !== "object") {
             return String(valor);
         }
 
-        const m = limpiarNumero(valor.m);
-        const c = limpiarNumero(valor.c);
+        const m = limpiar(valor.m || 0);
+        const c = limpiar(valor.c || 0);
 
         if (m === 0) {
-            return formato(c);
+            return numero(c);
         }
 
-        const magnitud =
-            Math.abs(Math.abs(m) - 1) < EPS
-                ? ""
-                : formato(Math.abs(m));
+        let resultado = "";
 
-        const terminoM =
-            (m < 0 ? "-" : "") +
-            magnitud + "M";
-
-        if (c === 0) {
-            return terminoM;
+        if (m === 1) {
+            resultado = "M";
+        } else if (m === -1) {
+            resultado = "-M";
+        } else {
+            resultado = numero(m) + "M";
         }
 
-        return terminoM +
-            (c < 0 ? " - " : " + ") +
-            formato(Math.abs(c));
+        if (c > 0) {
+            resultado += " + " + numero(c);
+        } else if (c < 0) {
+            resultado += " - " + numero(-c);
+        }
+
+        return resultado;
     };
 
+    // =================================================
+    // VALIDAR DIMENSIONES DEL MODELO
+    // =================================================
 
-    /*
-     * VALIDAR DIMENSIONES DEL MODELO
-     */
-
-    const generarOriginal =
-        window.generarModeloMGrande;
+    const generarOriginal = window.generarModeloMGrande;
 
     window.generarModeloMGrande = function () {
-
         const n = Number(
-            document.getElementById(
-                "numVariablesM"
-            ).value
+            document.getElementById("numVariablesM").value
         );
 
         const m = Number(
-            document.getElementById(
-                "numRestriccionesM"
-            ).value
+            document.getElementById("numRestriccionesM").value
         );
 
         if (
-            !Number.isInteger(n) ||
-            !Number.isInteger(m) ||
-            n < 1 || m < 1 ||
-            n > 10 || m > 10
+            !Number.isInteger(n) || n < 1 || n > 20 ||
+            !Number.isInteger(m) || m < 1 || m > 20
         ) {
-
             window.mostrarErrorM(
-                "Las cantidades deben ser números " +
-                "enteros entre 1 y 10."
+                "Ingresa entre 1 y 20 variables y restricciones."
             );
-
             return;
         }
 
         generarOriginal();
 
-        document.getElementById(
-            "panelModeloM"
-        ).dataset.dim = n + "," + m;
+        const panel = document.getElementById("panelModeloM");
+
+        if (!panel.classList.contains("oculto")) {
+            panel.dataset.dimension = n + "," + m;
+        }
     };
 
+    // =================================================
+    // VALIDAR ANTES DE RESOLVER
+    // =================================================
 
-    /*
-     * EVITAR RESOLVER UN MODELO DESACTUALIZADO
-     */
-
-    const resolverOriginal =
-        window.resolverMGrande;
+    const resolverOriginal = window.resolverMGrande;
 
     window.resolverMGrande = function () {
+        const n = document.getElementById("numVariablesM").value;
+        const m = document.getElementById("numRestriccionesM").value;
 
-        const panel = document.getElementById(
-            "panelModeloM"
-        );
-
-        const actual =
-            document.getElementById(
-                "numVariablesM"
-            ).value +
-            "," +
-            document.getElementById(
-                "numRestriccionesM"
-            ).value;
+        const panel = document.getElementById("panelModeloM");
 
         if (
             panel.classList.contains("oculto") ||
-            panel.dataset.dim !== actual
+            panel.dataset.dimension !== n + "," + m
         ) {
-
             window.mostrarErrorM(
-                "La configuración cambió. " +
-                "Pulsa Generar modelo nuevamente."
+                "Cambiaste la cantidad de variables o restricciones. " +
+                "Presiona Generar modelo nuevamente."
             );
 
             return;

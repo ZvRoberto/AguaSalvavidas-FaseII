@@ -1,6 +1,6 @@
 
 /*
- * AGUA SALVAVIDAS
+ * GREAT VALUE
  * NAVEGACIÓN PRINCIPAL
  * FASE II - 2026
  */
@@ -40,12 +40,11 @@ function abrirMetodo(metodo) {
             window.location.href =
                 "paginas/sensibilidad.html";
             break;
-            
+
         case "modi":
             window.location.href =
-               "paginas/modi.html";
+                "paginas/modi.html";
             break;
-  
 
         case "transporte":
             window.location.href =

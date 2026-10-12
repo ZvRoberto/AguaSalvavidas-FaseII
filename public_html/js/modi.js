@@ -1,6 +1,6 @@
 
 /*
- * AGUA SALVAVIDAS - FASE II
+ * GREAT VALUE - FASE II
  * MÉTODO MODI (U-V)
  *
  * 1. Balanceo de oferta y demanda
@@ -18,8 +18,13 @@
 
 const MODI_EPS = 1e-8;
 const MODI_MAX_ITER = 500;
+const MODI_MAX_DIM = 20;
 
 let modiDimensiones = null;
+
+// =====================================================
+// UTILIDADES
+// =====================================================
 
 function modiEl(id) {
     return document.getElementById(id);
@@ -27,6 +32,7 @@ function modiEl(id) {
 
 function modiFmt(x) {
     if (!Number.isFinite(x)) return String(x);
+
     return Number(
         (Math.abs(x) < MODI_EPS ? 0 : x).toFixed(6)
     ).toString();
@@ -63,10 +69,13 @@ function modiNumero(id) {
 function modiDimension(id) {
     const valor = modiNumero(id);
 
-    if (!Number.isInteger(valor) ||
-        valor < 1 || valor > 10) {
+    if (
+        !Number.isInteger(valor) ||
+        valor < 1 ||
+        valor > MODI_MAX_DIM
+    ) {
         throw new Error(
-            "Las dimensiones deben ser enteros entre 1 y 10."
+            "Las dimensiones deben ser enteros entre 1 y 20."
         );
     }
 
@@ -74,13 +83,23 @@ function modiDimension(id) {
 }
 
 function modiInput(id) {
-    return `<input id="${id}" type="number"
-                   min="0" step="any" value="0">`;
+    return `
+        <input id="${id}" type="number"
+               min="0" step="any" value="0">
+    `;
 }
 
-/* =========================================
-   FORMULARIO
-   ========================================= */
+function modiClave(i, j) {
+    return i + "," + j;
+}
+
+function modiSeparar(clave) {
+    return clave.split(",").map(Number);
+}
+
+// =====================================================
+// GENERAR FORMULARIO
+// =====================================================
 
 function modiGenerar() {
     modiOcultarError();
@@ -93,49 +112,78 @@ function modiGenerar() {
 
         let html = `
             <div class="modi-tabla-scroll">
-            <table class="modi-tabla">
-                <thead><tr><th>Origen / Destino</th>
+                <table class="modi-tabla">
+                    <thead>
+                        <tr>
+                            <th>Origen / Destino</th>
         `;
 
         for (let j = 0; j < n; j++) {
             html += `<th>D${j + 1}</th>`;
         }
 
-        html += `<th>Oferta</th></tr></thead><tbody>`;
+        html += `
+                            <th>Oferta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
 
         for (let i = 0; i < m; i++) {
             html += `<tr><th>O${i + 1}</th>`;
 
             for (let j = 0; j < n; j++) {
-                html += `<td>${modiInput("modiC" + i + "_" + j)}</td>`;
+                html += `
+                    <td>
+                        ${modiInput("modiC" + i + "_" + j)}
+                    </td>
+                `;
             }
 
-            html += `<td>${modiInput("modiO" + i)}</td></tr>`;
+            html += `
+                <td>${modiInput("modiO" + i)}</td>
+                </tr>
+            `;
         }
 
         html += `<tr><th>Demanda</th>`;
 
         for (let j = 0; j < n; j++) {
-            html += `<td>${modiInput("modiD" + j)}</td>`;
+            html += `
+                <td>${modiInput("modiD" + j)}</td>
+            `;
         }
 
         html += `
-            <td>—</td></tr></tbody></table></div>
+                <td>—</td>
+                </tr>
+                </tbody>
+                </table>
+            </div>
+
             <p class="modi-nota">
-                Si oferta y demanda no coinciden,
+                Si la oferta y la demanda no coinciden,
                 se agrega automáticamente un origen
                 o destino ficticio con costo cero.
             </p>
         `;
 
         modiEl("modiFormulario").innerHTML = html;
-        modiEl("modiPanelDatos").classList.remove("oculto");
-        modiEl("modiPanelResultados").classList.add("oculto");
 
-    } catch (e) {
-        modiMostrarError(e.message);
+        modiEl("modiPanelDatos")
+            .classList.remove("oculto");
+
+        modiEl("modiPanelResultados")
+            .classList.add("oculto");
+
+    } catch (error) {
+        modiMostrarError(error.message);
     }
 }
+
+// =====================================================
+// LEER DATOS
+// =====================================================
 
 function modiLeer() {
     if (!modiDimensiones) {
@@ -144,8 +192,10 @@ function modiLeer() {
 
     const { m, n } = modiDimensiones;
 
-    if (modiDimension("modiOrigenes") !== m ||
-        modiDimension("modiDestinos") !== n) {
+    if (
+        modiDimension("modiOrigenes") !== m ||
+        modiDimension("modiDestinos") !== n
+    ) {
         throw new Error(
             "Cambiaste las dimensiones. Genera nuevamente la matriz."
         );
@@ -159,7 +209,9 @@ function modiLeer() {
         const fila = [];
 
         for (let j = 0; j < n; j++) {
-            fila.push(modiNumero("modiC" + i + "_" + j));
+            fila.push(
+                modiNumero("modiC" + i + "_" + j)
+            );
         }
 
         costos.push(fila);
@@ -170,50 +222,74 @@ function modiLeer() {
         demanda.push(modiNumero("modiD" + j));
     }
 
-    const totalO = oferta.reduce((a, b) => a + b, 0);
-    const totalD = demanda.reduce((a, b) => a + b, 0);
+    const totalO = oferta.reduce(
+        (a, b) => a + b, 0
+    );
 
-    if (!Number.isFinite(totalO) ||
+    const totalD = demanda.reduce(
+        (a, b) => a + b, 0
+    );
+
+    if (
+        !Number.isFinite(totalO) ||
         !Number.isFinite(totalD) ||
         totalO <= MODI_EPS ||
-        totalD <= MODI_EPS) {
+        totalD <= MODI_EPS
+    ) {
         throw new Error(
-            "La oferta y demanda totales deben ser positivas y finitas."
+            "La oferta y demanda totales deben ser positivas."
         );
     }
 
     return { costos, oferta, demanda };
 }
 
-/* =========================================
-   BALANCEO
-   ========================================= */
+// =====================================================
+// BALANCEO
+// =====================================================
 
 function modiBalancear(datos) {
-    const costos = datos.costos.map(fila => [...fila]);
+    const costos = datos.costos.map(
+        fila => [...fila]
+    );
+
     const oferta = [...datos.oferta];
     const demanda = [...datos.demanda];
 
-    const totalO = oferta.reduce((a, b) => a + b, 0);
-    const totalD = demanda.reduce((a, b) => a + b, 0);
+    const totalO = oferta.reduce(
+        (a, b) => a + b, 0
+    );
+
+    const totalD = demanda.reduce(
+        (a, b) => a + b, 0
+    );
 
     let mensaje = "El problema está balanceado.";
     let origenFicticio = false;
     let destinoFicticio = false;
 
-    if (totalO > totalD + MODI_EPS) {
+    const tolerancia = MODI_EPS * Math.max(
+        1, totalO, totalD
+    );
+
+    if (totalO > totalD + tolerancia) {
         const sobrante = totalO - totalD;
+
         demanda.push(sobrante);
         costos.forEach(fila => fila.push(0));
+
         destinoFicticio = true;
 
         mensaje =
             "Se agregó un destino ficticio con demanda " +
             modiFmt(sobrante) + ".";
-    } else if (totalD > totalO + MODI_EPS) {
+
+    } else if (totalD > totalO + tolerancia) {
         const faltante = totalD - totalO;
+
         oferta.push(faltante);
         costos.push(Array(demanda.length).fill(0));
+
         origenFicticio = true;
 
         mensaje =
@@ -231,27 +307,14 @@ function modiBalancear(datos) {
     };
 }
 
-/* =========================================
-   ESTRUCTURA DE BASE
-   ========================================= */
-
-function modiClave(i, j) {
-    return i + "," + j;
-}
-
-function modiSeparar(clave) {
-    return clave.split(",").map(Number);
-}
-
-/*
- * Una base de transporte corresponde a
- * un árbol bipartito con m+n-1 aristas.
- * Union-Find evita ciclos al completarla.
- */
+// =====================================================
+// UNION-FIND PARA EVITAR CICLOS EN LA BASE
+// =====================================================
 
 function modiUnionFind(total) {
     const padre = Array.from(
-        { length: total }, (_, i) => i
+        { length: total },
+        (_, i) => i
     );
 
     function buscar(x) {
@@ -259,6 +322,7 @@ function modiUnionFind(total) {
             padre[x] = padre[padre[x]];
             x = padre[x];
         }
+
         return x;
     }
 
@@ -275,11 +339,14 @@ function modiUnionFind(total) {
     return { unir };
 }
 
+// =====================================================
+// COMPLETAR BASE DE TRANSPORTE
+// =====================================================
+
 function modiCompletarBase(base, costos, m, n) {
     const uf = modiUnionFind(m + n);
     const nueva = new Set();
 
-    // Conservar las celdas básicas existentes.
     for (const clave of base) {
         const [i, j] = modiSeparar(clave);
 
@@ -292,44 +359,53 @@ function modiCompletarBase(base, costos, m, n) {
         nueva.add(clave);
     }
 
-    // Añadir celdas de valor cero sin formar ciclos.
     const candidatas = [];
 
     for (let i = 0; i < m; i++) {
         for (let j = 0; j < n; j++) {
             if (!nueva.has(modiClave(i, j))) {
-                candidatas.push({ i, j, costo: costos[i][j] });
+                candidatas.push({
+                    i,
+                    j,
+                    costo: costos[i][j]
+                });
             }
         }
     }
 
-    candidatas.sort((a, b) =>
-        a.costo - b.costo ||
-        a.i - b.i ||
-        a.j - b.j
+    candidatas.sort(
+        (a, b) =>
+            a.costo - b.costo ||
+            a.i - b.i ||
+            a.j - b.j
     );
 
     for (const celda of candidatas) {
         if (nueva.size === m + n - 1) break;
 
         if (uf.unir(celda.i, m + celda.j)) {
-            nueva.add(modiClave(celda.i, celda.j));
+            nueva.add(
+                modiClave(celda.i, celda.j)
+            );
         }
     }
 
     if (nueva.size !== m + n - 1) {
-        throw new Error("No se pudo completar la base.");
+        throw new Error(
+            "No se pudo completar la base."
+        );
     }
 
     return nueva;
 }
 
-/* =========================================
-   SOLUCIÓN INICIAL - COSTO MÍNIMO
-   ========================================= */
+// =====================================================
+// SOLUCIÓN INICIAL POR COSTO MÍNIMO
+// =====================================================
 
 function modiInicial(datos) {
     const { costos, oferta, demanda } = datos;
+
     const m = oferta.length;
     const n = demanda.length;
 
@@ -337,13 +413,16 @@ function modiInicial(datos) {
     const restanteD = [...demanda];
 
     const x = Array.from(
-        { length: m }, () => Array(n).fill(0)
+        { length: m },
+        () => Array(n).fill(0)
     );
 
     const base = new Set();
     const pasos = [];
 
-    while (restanteD.some(v => v > MODI_EPS)) {
+    while (
+        restanteD.some(valor => valor > MODI_EPS)
+    ) {
         let mejor = null;
 
         for (let i = 0; i < m; i++) {
@@ -352,9 +431,16 @@ function modiInicial(datos) {
             for (let j = 0; j < n; j++) {
                 if (restanteD[j] <= MODI_EPS) continue;
 
-                if (!mejor ||
-                    costos[i][j] < mejor.costo - MODI_EPS) {
-                    mejor = { i, j, costo: costos[i][j] };
+                if (
+                    !mejor ||
+                    costos[i][j] <
+                    mejor.costo - MODI_EPS
+                ) {
+                    mejor = {
+                        i,
+                        j,
+                        costo: costos[i][j]
+                    };
                 }
             }
         }
@@ -366,46 +452,55 @@ function modiInicial(datos) {
         }
 
         const { i, j } = mejor;
+
         const cantidad = Math.min(
-            restanteO[i], restanteD[j]
+            restanteO[i],
+            restanteD[j]
         );
 
-        x[i][j] = cantidad;
+        x[i][j] += cantidad;
         base.add(modiClave(i, j));
 
         restanteO[i] -= cantidad;
         restanteD[j] -= cantidad;
 
-        if (Math.abs(restanteO[i]) < MODI_EPS) {
+        if (
+            Math.abs(restanteO[i]) < MODI_EPS
+        ) {
             restanteO[i] = 0;
         }
 
-        if (Math.abs(restanteD[j]) < MODI_EPS) {
+        if (
+            Math.abs(restanteD[j]) < MODI_EPS
+        ) {
             restanteD[j] = 0;
         }
 
         pasos.push({
-            i, j, cantidad,
+            i,
+            j,
+            cantidad,
             costo: costos[i][j]
         });
     }
 
     return {
         x,
-        base: modiCompletarBase(base, costos, m, n),
+        base: modiCompletarBase(
+            base, costos, m, n
+        ),
         pasos
     };
 }
 
-/* =========================================
-   POTENCIALES U Y V
-   ========================================= */
+// =====================================================
+// POTENCIALES U Y V
+// =====================================================
 
 function modiPotenciales(base, costos, m, n) {
     const u = Array(m).fill(null);
     const v = Array(n).fill(null);
 
-    // Fijamos U1 = 0.
     u[0] = 0;
 
     let cambios = true;
@@ -416,20 +511,27 @@ function modiPotenciales(base, costos, m, n) {
         for (const clave of base) {
             const [i, j] = modiSeparar(clave);
 
-            // En cada celda básica:
-            // Ui + Vj = Cij.
-            if (u[i] !== null && v[j] === null) {
+            if (
+                u[i] !== null &&
+                v[j] === null
+            ) {
                 v[j] = costos[i][j] - u[i];
                 cambios = true;
-            } else if (v[j] !== null && u[i] === null) {
+
+            } else if (
+                v[j] !== null &&
+                u[i] === null
+            ) {
                 u[i] = costos[i][j] - v[j];
                 cambios = true;
             }
         }
     }
 
-    if (u.some(x => x === null) ||
-        v.some(x => x === null)) {
+    if (
+        u.some(valor => valor === null) ||
+        v.some(valor => valor === null)
+    ) {
         throw new Error(
             "No se pudieron calcular los potenciales."
         );
@@ -438,34 +540,44 @@ function modiPotenciales(base, costos, m, n) {
     return { u, v };
 }
 
-/* =========================================
-   COSTOS DE OPORTUNIDAD
-   ========================================= */
+// =====================================================
+// COSTOS DE OPORTUNIDAD
+// =====================================================
 
 function modiOportunidades(base, costos, u, v) {
     const m = costos.length;
     const n = costos[0].length;
 
     const delta = Array.from(
-        { length: m }, () => Array(n).fill(null)
+        { length: m },
+        () => Array(n).fill(null)
     );
 
     let entrante = null;
 
     for (let i = 0; i < m; i++) {
         for (let j = 0; j < n; j++) {
-            if (base.has(modiClave(i, j))) continue;
+            if (base.has(modiClave(i, j))) {
+                continue;
+            }
 
-            // Para minimización:
-            // Delta = Cij - Ui - Vj.
-            const valor = costos[i][j] - u[i] - v[j];
+            const valor =
+                costos[i][j] - u[i] - v[j];
 
             delta[i][j] = valor;
 
-            if (valor < -MODI_EPS &&
-                (!entrante ||
-                 valor < entrante.delta - MODI_EPS)) {
-                entrante = { i, j, delta: valor };
+            if (
+                valor < -MODI_EPS &&
+                (
+                    !entrante ||
+                    valor < entrante.delta - MODI_EPS
+                )
+            ) {
+                entrante = {
+                    i,
+                    j,
+                    delta: valor
+                };
             }
         }
     }
@@ -473,24 +585,16 @@ function modiOportunidades(base, costos, u, v) {
     return { delta, entrante };
 }
 
-/* =========================================
-   CICLO CERRADO
-   ========================================= */
-
-/*
- * Las celdas básicas forman un árbol.
- * Al introducir una celda no básica
- * aparece un único ciclo.
- *
- * Encontramos el camino entre su fila
- * y su columna en ese árbol.
- */
+// =====================================================
+// ENCONTRAR CICLO CERRADO
+// =====================================================
 
 function modiCiclo(base, entrada, m, n) {
     const total = m + n;
 
     const vecinos = Array.from(
-        { length: total }, () => []
+        { length: total },
+        () => []
     );
 
     for (const clave of base) {
@@ -520,7 +624,9 @@ function modiCiclo(base, entrada, m, n) {
         if (actual === final) break;
 
         for (const vecino of vecinos[actual]) {
-            if (visitados.has(vecino.nodo)) continue;
+            if (visitados.has(vecino.nodo)) {
+                continue;
+            }
 
             visitados.add(vecino.nodo);
 
@@ -544,23 +650,22 @@ function modiCiclo(base, entrada, m, n) {
 
     while (actual !== inicio) {
         const paso = anterior[actual];
+
         camino.push(paso.celda);
         actual = paso.nodo;
     }
 
     camino.reverse();
 
-    // El ciclo inicia en la celda entrante (+).
-    // Después alterna -, +, -, ...
     return [
         [entrada.i, entrada.j],
         ...camino
     ];
 }
 
-/* =========================================
-   COSTO Y VERIFICACIÓN
-   ========================================= */
+// =====================================================
+// COSTO TOTAL
+// =====================================================
 
 function modiCosto(x, costos) {
     let total = 0;
@@ -574,17 +679,26 @@ function modiCosto(x, costos) {
     return total;
 }
 
+// =====================================================
+// VERIFICAR OFERTA Y DEMANDA
+// =====================================================
+
 function modiVerificar(x, oferta, demanda) {
     const m = oferta.length;
     const n = demanda.length;
 
     for (let i = 0; i < m; i++) {
-        const suma = x[i].reduce((a, b) => a + b, 0);
+        const suma = x[i].reduce(
+            (a, b) => a + b, 0
+        );
 
-        if (Math.abs(suma - oferta[i]) >
-            MODI_EPS * Math.max(1, oferta[i])) {
+        if (
+            Math.abs(suma - oferta[i]) >
+            MODI_EPS * Math.max(1, oferta[i])
+        ) {
             throw new Error(
-                "La solución no satisface la oferta O" + (i + 1)
+                "La solución no satisface la oferta O" +
+                (i + 1)
             );
         }
     }
@@ -602,24 +716,29 @@ function modiVerificar(x, oferta, demanda) {
             }
         }
 
-        if (Math.abs(suma - demanda[j]) >
-            MODI_EPS * Math.max(1, demanda[j])) {
+        if (
+            Math.abs(suma - demanda[j]) >
+            MODI_EPS * Math.max(1, demanda[j])
+        ) {
             throw new Error(
-                "La solución no satisface la demanda D" + (j + 1)
+                "La solución no satisface la demanda D" +
+                (j + 1)
             );
         }
     }
 }
 
-/* =========================================
-   ALGORITMO MODI
-   ========================================= */
+// =====================================================
+// ALGORITMO MODI
+// =====================================================
 
 function modiOptimizar(datos) {
     const balanceado = modiBalancear(datos);
 
     const {
-        costos, oferta, demanda
+        costos,
+        oferta,
+        demanda
     } = balanceado;
 
     const m = oferta.length;
@@ -627,8 +746,8 @@ function modiOptimizar(datos) {
 
     const inicial = modiInicial(balanceado);
 
-    let x = inicial.x;
-    let base = inicial.base;
+    const x = inicial.x;
+    const base = inicial.base;
 
     modiVerificar(x, oferta, demanda);
 
@@ -636,9 +755,14 @@ function modiOptimizar(datos) {
     const iteraciones = [];
 
     let estado = "limite";
+
     const basesVisitadas = new Set();
 
-    for (let numero = 0; numero < MODI_MAX_ITER; numero++) {
+    for (
+        let numero = 0;
+        numero < MODI_MAX_ITER;
+        numero++
+    ) {
         const firma = [...base].sort().join("|");
 
         if (basesVisitadas.has(firma)) {
@@ -648,11 +772,14 @@ function modiOptimizar(datos) {
 
         basesVisitadas.add(firma);
 
-        const { u, v } =
-            modiPotenciales(base, costos, m, n);
+        const { u, v } = modiPotenciales(
+            base, costos, m, n
+        );
 
         const { delta, entrante } =
-            modiOportunidades(base, costos, u, v);
+            modiOportunidades(
+                base, costos, u, v
+            );
 
         const registro = {
             numero: numero + 1,
@@ -669,7 +796,9 @@ function modiOptimizar(datos) {
         };
 
         if (!entrante) {
-            registro.costoDespues = registro.costoAntes;
+            registro.costoDespues =
+                registro.costoAntes;
+
             iteraciones.push(registro);
             estado = "optimo";
             break;
@@ -679,58 +808,75 @@ function modiOptimizar(datos) {
             base, entrante, m, n
         );
 
-        /*
-         * Posiciones del ciclo:
-         * 0 = +
-         * 1 = -
-         * 2 = +
-         * 3 = -
-         */
-
         let theta = Infinity;
         let saliente = null;
 
-        for (let k = 1; k < ciclo.length; k += 2) {
+        for (
+            let k = 1;
+            k < ciclo.length;
+            k += 2
+        ) {
             const [i, j] = ciclo[k];
             const cantidad = x[i][j];
 
-            if (cantidad < theta - MODI_EPS) {
+            if (
+                cantidad < theta - MODI_EPS
+            ) {
                 theta = cantidad;
                 saliente = [i, j];
             }
         }
 
-        if (!Number.isFinite(theta) || !saliente) {
+        if (
+            !Number.isFinite(theta) ||
+            !saliente
+        ) {
             throw new Error(
                 "No se pudo determinar el ajuste del ciclo."
             );
         }
 
-        // Aplicar signos alternados.
         for (let k = 0; k < ciclo.length; k++) {
             const [i, j] = ciclo[k];
 
-            x[i][j] +=
-                k % 2 === 0 ? theta : -theta;
+            x[i][j] += (
+                k % 2 === 0
+                    ? theta
+                    : -theta
+            );
 
-            if (Math.abs(x[i][j]) < MODI_EPS) {
+            if (
+                Math.abs(x[i][j]) < MODI_EPS
+            ) {
                 x[i][j] = 0;
             }
         }
 
-        base.add(modiClave(entrante.i, entrante.j));
-        base.delete(modiClave(saliente[0], saliente[1]));
+        base.add(
+            modiClave(entrante.i, entrante.j)
+        );
+
+        base.delete(
+            modiClave(saliente[0], saliente[1])
+        );
 
         modiVerificar(x, oferta, demanda);
 
         registro.ciclo = ciclo;
         registro.theta = theta;
         registro.saliente = saliente;
-        registro.costoDespues = modiCosto(x, costos);
+        registro.costoDespues =
+            modiCosto(x, costos);
 
-        if (registro.costoDespues >
-            registro.costoAntes +
-            MODI_EPS * Math.max(1, registro.costoAntes)) {
+        const tolerancia = MODI_EPS * Math.max(
+            1,
+            Math.abs(registro.costoAntes)
+        );
+
+        if (
+            registro.costoDespues >
+            registro.costoAntes + tolerancia
+        ) {
             throw new Error(
                 "El costo aumentó durante la optimización."
             );
@@ -751,97 +897,197 @@ function modiOptimizar(datos) {
     };
 }
 
-/* =========================================
-   TABLAS DE RESULTADOS
-   ========================================= */
+// =====================================================
+// NOMBRES DE ORÍGENES Y DESTINOS
+// =====================================================
 
 function modiNombreOrigen(i, resultado) {
-    return resultado.origenFicticio &&
-           i === resultado.oferta.length - 1
+    return (
+        resultado.origenFicticio &&
+        i === resultado.oferta.length - 1
+    )
         ? "Origen ficticio"
         : "O" + (i + 1);
 }
 
 function modiNombreDestino(j, resultado) {
-    return resultado.destinoFicticio &&
-           j === resultado.demanda.length - 1
+    return (
+        resultado.destinoFicticio &&
+        j === resultado.demanda.length - 1
+    )
         ? "Destino ficticio"
         : "D" + (j + 1);
 }
 
-function modiTablaAsignaciones(x, resultado, base = null) {
+// =====================================================
+// TABLA DE ASIGNACIONES
+// =====================================================
+
+function modiTablaAsignaciones(
+    x,
+    resultado,
+    base = null
+) {
     let html = `
         <div class="modi-tabla-scroll">
-        <table class="modi-tabla">
-        <thead><tr><th>Origen / Destino</th>
+            <table class="modi-tabla">
+                <thead>
+                    <tr>
+                        <th>Origen / Destino</th>
     `;
 
-    for (let j = 0; j < resultado.demanda.length; j++) {
-        html += `<th>${modiNombreDestino(j, resultado)}</th>`;
+    for (
+        let j = 0;
+        j < resultado.demanda.length;
+        j++
+    ) {
+        html += `
+            <th>
+                ${modiNombreDestino(j, resultado)}
+            </th>
+        `;
     }
 
-    html += `<th>Oferta</th></tr></thead><tbody>`;
+    html += `
+                        <th>Oferta</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
 
-    for (let i = 0; i < resultado.oferta.length; i++) {
-        html += `<tr><th>${modiNombreOrigen(i, resultado)}</th>`;
+    for (
+        let i = 0;
+        i < resultado.oferta.length;
+        i++
+    ) {
+        html += `
+            <tr>
+                <th>
+                    ${modiNombreOrigen(i, resultado)}
+                </th>
+        `;
 
-        for (let j = 0; j < resultado.demanda.length; j++) {
+        for (
+            let j = 0;
+            j < resultado.demanda.length;
+            j++
+        ) {
             const valor = x[i][j];
-            const basica = base && base.includes(modiClave(i, j));
+
+            const basica = base &&
+                base.includes(modiClave(i, j));
 
             html += `
-                <td class="${valor > MODI_EPS ? "modi-activa" : ""}">
+                <td class="${
+                    valor > MODI_EPS
+                        ? "modi-activa"
+                        : ""
+                }">
                     <strong>${modiFmt(valor)}</strong>
-                    ${basica && valor <= MODI_EPS
-                        ? "<small>Básica de valor 0</small>"
-                        : ""}
+
+                    ${
+                        basica && valor <= MODI_EPS
+                            ? "<small>Básica de valor 0</small>"
+                            : ""
+                    }
+
                     <small>
-                        Costo: ${modiFmt(resultado.costos[i][j])}
+                        Costo:
+                        ${modiFmt(resultado.costos[i][j])}
                     </small>
                 </td>
             `;
         }
 
-        html += `<td>${modiFmt(resultado.oferta[i])}</td></tr>`;
+        html += `
+                <td>
+                    ${modiFmt(resultado.oferta[i])}
+                </td>
+            </tr>
+        `;
     }
 
     html += `<tr><th>Demanda</th>`;
 
-    resultado.demanda.forEach(d => {
-        html += `<td>${modiFmt(d)}</td>`;
+    resultado.demanda.forEach(valor => {
+        html += `<td>${modiFmt(valor)}</td>`;
     });
 
-    html += `<td>—</td></tr></tbody></table></div>`;
+    html += `
+                <td>—</td>
+            </tr>
+            </tbody>
+            </table>
+        </div>
+    `;
 
     return html;
 }
 
+// =====================================================
+// TABLA DE COSTOS DE OPORTUNIDAD
+// =====================================================
+
 function modiTablaDelta(iteracion, resultado) {
     let html = `
         <div class="modi-tabla-scroll">
-        <table class="modi-tabla">
-        <thead><tr><th>Origen / Destino</th>
+            <table class="modi-tabla">
+                <thead>
+                    <tr>
+                        <th>Origen / Destino</th>
     `;
 
-    for (let j = 0; j < resultado.demanda.length; j++) {
-        html += `<th>${modiNombreDestino(j, resultado)}</th>`;
+    for (
+        let j = 0;
+        j < resultado.demanda.length;
+        j++
+    ) {
+        html += `
+            <th>
+                ${modiNombreDestino(j, resultado)}
+            </th>
+        `;
     }
 
-    html += `</tr></thead><tbody>`;
+    html += `
+                    </tr>
+                </thead>
+                <tbody>
+    `;
 
-    for (let i = 0; i < resultado.oferta.length; i++) {
-        html += `<tr><th>${modiNombreOrigen(i, resultado)}</th>`;
+    for (
+        let i = 0;
+        i < resultado.oferta.length;
+        i++
+    ) {
+        html += `
+            <tr>
+                <th>
+                    ${modiNombreOrigen(i, resultado)}
+                </th>
+        `;
 
-        for (let j = 0; j < resultado.demanda.length; j++) {
+        for (
+            let j = 0;
+            j < resultado.demanda.length;
+            j++
+        ) {
             const valor = iteracion.delta[i][j];
 
+            const clase = (
+                valor !== null &&
+                valor < -MODI_EPS
+            )
+                ? "modi-negativa"
+                : "";
+
             html += `
-                <td class="${valor !== null && valor < -MODI_EPS
-                    ? "modi-negativa"
-                    : ""}">
-                    ${valor === null
-                        ? "Básica"
-                        : modiFmt(valor)}
+                <td class="${clase}">
+                    ${
+                        valor === null
+                            ? "Básica"
+                            : modiFmt(valor)
+                    }
                 </td>
             `;
         }
@@ -849,33 +1095,46 @@ function modiTablaDelta(iteracion, resultado) {
         html += "</tr>";
     }
 
-    html += `</tbody></table></div>`;
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
     return html;
 }
 
-/* =========================================
-   PRESENTAR RESULTADOS
-   ========================================= */
+// =====================================================
+// MOSTRAR RESULTADOS
+// =====================================================
 
 function modiMostrar(resultado) {
+    const ahorro =
+        resultado.costoInicial -
+        resultado.costoFinal;
+
     let html = `
         <div class="modi-resumen">
+
             <div>
                 <small>Costo inicial</small>
-                <strong>${modiFmt(resultado.costoInicial)}</strong>
-            </div>
-            <div>
-                <small>Costo final</small>
-                <strong>${modiFmt(resultado.costoFinal)}</strong>
-            </div>
-            <div>
-                <small>Ahorro</small>
                 <strong>
-                    ${modiFmt(
-                        resultado.costoInicial - resultado.costoFinal
-                    )}
+                    ${modiFmt(resultado.costoInicial)}
                 </strong>
             </div>
+
+            <div>
+                <small>Costo final</small>
+                <strong>
+                    ${modiFmt(resultado.costoFinal)}
+                </strong>
+            </div>
+
+            <div>
+                <small>Ahorro</small>
+                <strong>${modiFmt(ahorro)}</strong>
+            </div>
+
         </div>
 
         <div class="modi-info">
@@ -884,40 +1143,54 @@ function modiMostrar(resultado) {
         </div>
 
         <h3>Solución inicial por Costo Mínimo</h3>
+
         <p class="modi-nota">
-            Se asignan primero las rutas con menor costo.
-            En caso de degeneración se completan
-            las variables básicas con valor cero.
+            Se asignan primero las rutas con menor
+            costo. Si la solución es degenerada,
+            se completan las variables básicas
+            con asignaciones de valor cero.
         </p>
     `;
 
-    resultado.pasosIniciales.forEach((paso, k) => {
-        html += `
-            <p class="modi-paso-inicial">
-                <strong>Paso ${k + 1}:</strong>
-                ${modiNombreOrigen(paso.i, resultado)}
-                →
-                ${modiNombreDestino(paso.j, resultado)}.
-                Se asignan ${modiFmt(paso.cantidad)}
-                unidades a costo ${modiFmt(paso.costo)}
-                por unidad.
-            </p>
-        `;
-    });
+    resultado.pasosIniciales.forEach(
+        (paso, indice) => {
+            html += `
+                <p class="modi-paso-inicial">
+                    <strong>
+                        Paso ${indice + 1}:
+                    </strong>
+
+                    ${modiNombreOrigen(paso.i, resultado)}
+                    →
+                    ${modiNombreDestino(paso.j, resultado)}.
+
+                    Se asignan
+                    ${modiFmt(paso.cantidad)}
+                    unidades a costo
+                    ${modiFmt(paso.costo)}
+                    por unidad.
+                </p>
+            `;
+        }
+    );
 
     html += `<h3>Iteraciones MODI</h3>`;
 
     resultado.iteraciones.forEach(iter => {
         html += `
             <div class="modi-iteracion">
+
                 <h3>Iteración ${iter.numero}</h3>
 
                 <p>
                     Costo al inicio:
-                    <strong>${modiFmt(iter.costoAntes)}</strong>
+                    <strong>
+                        ${modiFmt(iter.costoAntes)}
+                    </strong>
                 </p>
 
                 <h4>Asignaciones actuales</h4>
+
                 ${modiTablaAsignaciones(
                     iter.xAntes,
                     resultado,
@@ -925,24 +1198,29 @@ function modiMostrar(resultado) {
                 )}
 
                 <h4>Potenciales U y V</h4>
+
                 <p>
                     ${iter.u.map(
                         (valor, i) =>
-                            "U" + (i + 1) + " = " + modiFmt(valor)
+                            "U" + (i + 1) +
+                            " = " + modiFmt(valor)
                     ).join(" · ")}
                 </p>
+
                 <p>
                     ${iter.v.map(
                         (valor, j) =>
-                            "V" + (j + 1) + " = " + modiFmt(valor)
+                            "V" + (j + 1) +
+                            " = " + modiFmt(valor)
                     ).join(" · ")}
                 </p>
 
                 <h4>Costos de oportunidad</h4>
+
                 <p class="modi-nota">
                     Δij = Cij − Ui − Vj.
                     Los valores negativos indican
-                    rutas que pueden mejorar el costo.
+                    rutas que pueden reducir el costo.
                 </p>
 
                 ${modiTablaDelta(iter, resultado)}
@@ -950,13 +1228,23 @@ function modiMostrar(resultado) {
 
         if (iter.entrante) {
             const ruta =
-                modiNombreOrigen(iter.entrante.i, resultado) +
+                modiNombreOrigen(
+                    iter.entrante.i,
+                    resultado
+                ) +
                 " → " +
-                modiNombreDestino(iter.entrante.j, resultado);
+                modiNombreDestino(
+                    iter.entrante.j,
+                    resultado
+                );
 
             const cicloTexto = iter.ciclo.map(
                 ([i, j], k) =>
-                    (k % 2 === 0 ? "(+) " : "(−) ") +
+                    (
+                        k % 2 === 0
+                            ? "(+) "
+                            : "(−) "
+                    ) +
                     modiNombreOrigen(i, resultado) +
                     "-" +
                     modiNombreDestino(j, resultado)
@@ -964,6 +1252,7 @@ function modiMostrar(resultado) {
 
             html += `
                 <h4>Ruta entrante</h4>
+
                 <p>
                     <strong>${ruta}</strong>,
                     con Δ =
@@ -971,25 +1260,32 @@ function modiMostrar(resultado) {
                 </p>
 
                 <h4>Ciclo de ajuste</h4>
+
                 <p>${cicloTexto}</p>
 
                 <p>
                     Ajuste θ =
-                    <strong>${modiFmt(iter.theta)}</strong>
+                    <strong>
+                        ${modiFmt(iter.theta)}
+                    </strong>
                 </p>
 
                 <p>
                     Costo después del ajuste:
-                    <strong>${modiFmt(iter.costoDespues)}</strong>
+                    <strong>
+                        ${modiFmt(iter.costoDespues)}
+                    </strong>
                 </p>
             `;
+
         } else {
             html += `
                 <p class="modi-exito">
                     Todos los costos de oportunidad
-                    no básicos son mayores o iguales
-                    que cero. Se cumple la condición
-                    de optimalidad.
+                    de las celdas no básicas son
+                    mayores o iguales que cero.
+                    Se cumple la condición de
+                    optimalidad.
                 </p>
             `;
         }
@@ -999,6 +1295,7 @@ function modiMostrar(resultado) {
 
     html += `
         <h3>Distribución final</h3>
+
         ${modiTablaAsignaciones(
             resultado.x,
             resultado,
@@ -1009,50 +1306,62 @@ function modiMostrar(resultado) {
     if (resultado.estado === "optimo") {
         html += `
             <div class="modi-exito">
-                <h3>Solución óptima verificada</h3>
+                <h3>Solución óptima</h3>
+
                 <p>
                     El costo mínimo es
-                    <strong>${modiFmt(resultado.costoFinal)}</strong>.
-                    Se satisfacen todas las ofertas
-                    y demandas del modelo balanceado.
+                    <strong>
+                        ${modiFmt(resultado.costoFinal)}
+                    </strong>.
+
+                    Se satisfacen las ofertas
+                    y demandas del modelo
+                    balanceado.
                 </p>
             </div>
         `;
+
     } else {
         html += `
             <div class="modi-error">
                 No se pudo certificar el óptimo.
                 Estado: ${resultado.estado}.
-                Revisa las iteraciones antes de
-                utilizar este resultado.
+                Revisa las iteraciones antes
+                de utilizar este resultado.
             </div>
         `;
     }
 
     modiEl("modiResultados").innerHTML = html;
-    modiEl("modiPanelResultados").classList.remove("oculto");
+
+    modiEl("modiPanelResultados")
+        .classList.remove("oculto");
 }
 
-/* =========================================
-   RESOLVER
-   ========================================= */
+// =====================================================
+// RESOLVER
+// =====================================================
 
 function modiResolver() {
     modiOcultarError();
-    modiEl("modiPanelResultados").classList.add("oculto");
+
+    modiEl("modiPanelResultados")
+        .classList.add("oculto");
 
     try {
         const datos = modiLeer();
         const resultado = modiOptimizar(datos);
+
         modiMostrar(resultado);
-    } catch (e) {
-        modiMostrarError(e.message);
+
+    } catch (error) {
+        modiMostrarError(error.message);
     }
 }
 
-/* =========================================
-   EJEMPLO
-   ========================================= */
+// =====================================================
+// CARGAR EJEMPLO
+// =====================================================
 
 function modiEjemplo() {
     modiEl("modiOrigenes").value = 3;
@@ -1071,7 +1380,9 @@ function modiEjemplo() {
 
     costos.forEach((fila, i) => {
         fila.forEach((valor, j) => {
-            modiEl("modiC" + i + "_" + j).value = valor;
+            modiEl(
+                "modiC" + i + "_" + j
+            ).value = valor;
         });
 
         modiEl("modiO" + i).value = oferta[i];
@@ -1082,9 +1393,9 @@ function modiEjemplo() {
     });
 }
 
-/* =========================================
-   LIMPIAR
-   ========================================= */
+// =====================================================
+// LIMPIAR
+// =====================================================
 
 function modiLimpiar() {
     modiDimensiones = null;
@@ -1095,8 +1406,11 @@ function modiLimpiar() {
     modiEl("modiFormulario").innerHTML = "";
     modiEl("modiResultados").innerHTML = "";
 
-    modiEl("modiPanelDatos").classList.add("oculto");
-    modiEl("modiPanelResultados").classList.add("oculto");
+    modiEl("modiPanelDatos")
+        .classList.add("oculto");
+
+    modiEl("modiPanelResultados")
+        .classList.add("oculto");
 
     modiOcultarError();
 }

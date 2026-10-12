@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
-    <title>Transporte | Great Values</title>
+    <title>Transporte | Great Value</title>
     <link rel="stylesheet" href="../css/estilos.css">
 </head>
 
@@ -21,11 +21,12 @@
 
         <section class="tra-hero">
             <span>INVESTIGACIÓN DE OPERACIONES</span>
-            <h1>Método de Transporte</h1>
+            <h1>Método de Costo Mínimo</h1>
             <p>
                 Distribuye productos entre diferentes
                 orígenes y destinos, considerando los
-                costos, la oferta y la demanda.
+                costos unitarios, la oferta disponible
+                y la demanda de cada destino.
             </p>
         </section>
 
@@ -34,43 +35,72 @@
                 <span class="tra-numero">01</span>
                 <div>
                     <h2>Configurar el problema</h2>
-                    <p>Indica cuántos orígenes y destinos existen.</p>
+                    <p>
+                        Indica cuántos orígenes y destinos
+                        tendrá la matriz de transporte.
+                    </p>
                 </div>
             </div>
 
             <div class="tra-config">
                 <label>
                     Cantidad de orígenes
-                    <input id="traOrigenes" type="number"
-                           min="1" max="10" step="1" value="3">
+                    <input
+                        id="traOrigenes"
+                        type="number"
+                        min="1"
+                        max="20"
+                        step="1"
+                        value="3">
                 </label>
 
                 <label>
                     Cantidad de destinos
-                    <input id="traDestinos" type="number"
-                           min="1" max="10" step="1" value="4">
+                    <input
+                        id="traDestinos"
+                        type="number"
+                        min="1"
+                        max="20"
+                        step="1"
+                        value="4">
                 </label>
             </div>
 
             <div class="tra-botones">
-                <button onclick="traGenerar()">Generar matriz</button>
-                <button class="tra-secundario"
-                        onclick="traEjemplo()">Cargar ejemplo</button>
-                <button class="tra-secundario"
-                        onclick="traLimpiar()">Limpiar</button>
+                <button
+                    type="button"
+                    onclick="traGenerar()">
+                    Generar matriz
+                </button>
+
+                <button
+                    type="button"
+                    class="tra-secundario"
+                    onclick="traEjemplo()">
+                    Cargar ejemplo
+                </button>
+
+                <button
+                    type="button"
+                    class="tra-secundario"
+                    onclick="traLimpiar()">
+                    Limpiar
+                </button>
             </div>
         </section>
 
-        <section id="traPanelMatriz"
-                 class="tra-panel oculto">
+        <section
+            id="traPanelMatriz"
+            class="tra-panel oculto">
 
             <div class="tra-titulo">
                 <span class="tra-numero">02</span>
                 <div>
                     <h2>Matriz de transporte</h2>
                     <p>
-                        Ingresa los costos unitarios,
-                        la oferta y la demanda.
+                        Ingresa los costos de transporte
+                        por unidad, la oferta de cada origen
+                        y la demanda de cada destino.
                     </p>
                 </div>
             </div>
@@ -78,25 +108,32 @@
             <div id="traFormulario"></div>
 
             <div class="tra-botones">
-                <button onclick="traResolver()">
+                <button
+                    type="button"
+                    onclick="traResolver()">
                     Calcular distribución →
                 </button>
             </div>
         </section>
 
-        <div id="traError" class="tra-error oculto"
-             role="alert"></div>
+        <div
+            id="traError"
+            class="tra-error oculto"
+            role="alert">
+        </div>
 
-        <section id="traPanelResultados"
-                 class="tra-panel oculto">
+        <section
+            id="traPanelResultados"
+            class="tra-panel oculto">
 
             <div class="tra-titulo">
                 <span class="tra-numero">03</span>
                 <div>
                     <h2>Resultados y procedimiento</h2>
                     <p>
-                        Asignaciones, costo total
-                        y explicación de cada paso.
+                        Consulta las asignaciones realizadas,
+                        el costo total de transporte y
+                        la explicación del procedimiento.
                     </p>
                 </div>
             </div>
@@ -104,8 +141,10 @@
             <div id="traResultados"></div>
 
             <div class="tra-botones">
-                <button class="tra-secundario"
-                        onclick="window.print()">
+                <button
+                    type="button"
+                    class="tra-secundario"
+                    onclick="window.print()">
                     Imprimir resultados
                 </button>
             </div>
@@ -119,5 +158,6 @@
     </footer>
 
     <script src="../js/transporte.js"></script>
+
 </body>
 </html>

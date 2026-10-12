@@ -1,20 +1,20 @@
-/* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/javascript.js to edit this template
- */
-
-
 
 /*
- * Agua Salvavidas
- * Mejoras visuales del método Simplex
+ * GREAT VALUE - FASE II
+ * Mejoras visuales del Método Simplex
+ * Compatible con hasta 20 variables y 20 restricciones
  */
 
 (function () {
+    "use strict";
 
-    const originalGenerar = generarModeloSimplex;
-    const originalResolver = resolverSimplex;
-    const originalLimpiar = limpiarSimplex;
+    const originalGenerar = window.generarModeloSimplex;
+    const originalResolver = window.resolverSimplex;
+    const originalLimpiar = window.limpiarSimplex;
+
+    // =====================================================
+    // ACTUALIZAR ETAPAS DEL PROCEDIMIENTO
+    // =====================================================
 
     function actualizarEtapas(etapa) {
 
@@ -24,7 +24,9 @@
                 "etapaSimplex" + i
             );
 
-            if (!elemento) continue;
+            if (!elemento) {
+                continue;
+            }
 
             elemento.classList.remove(
                 "activa",
@@ -41,8 +43,11 @@
         }
     }
 
+    // =====================================================
+    // GENERAR MODELO
+    // =====================================================
 
-    generarModeloSimplex = function () {
+    window.generarModeloSimplex = function () {
 
         originalGenerar();
 
@@ -50,13 +55,19 @@
             "panelModelo"
         );
 
-        if (!panel.classList.contains("oculto")) {
+        if (
+            panel &&
+            !panel.classList.contains("oculto")
+        ) {
             actualizarEtapas(2);
         }
     };
 
+    // =====================================================
+    // RESOLVER SIMPLEX
+    // =====================================================
 
-    resolverSimplex = function () {
+    window.resolverSimplex = function () {
 
         originalResolver();
 
@@ -64,22 +75,29 @@
             "panelResultados"
         );
 
-        if (!panel.classList.contains("oculto")) {
-
+        if (
+            panel &&
+            !panel.classList.contains("oculto")
+        ) {
             actualizarEtapas(3);
-
             resaltarTablasSimplex();
         }
     };
 
+    // =====================================================
+    // LIMPIAR MODELO
+    // =====================================================
 
-    limpiarSimplex = function () {
+    window.limpiarSimplex = function () {
 
         originalLimpiar();
 
         actualizarEtapas(2);
     };
 
+    // =====================================================
+    // RESALTAR TABLAS DEL MÉTODO SIMPLEX
+    // =====================================================
 
     function resaltarTablasSimplex() {
 
@@ -97,7 +115,9 @@
                 ".tabla-simplex"
             );
 
-            if (!descripcion || !tabla) return;
+            if (!descripcion || !tabla) {
+                return;
+            }
 
             const texto = descripcion.textContent;
 
@@ -109,7 +129,9 @@
                 /Variable saliente:\s*(X\d+|S\d+)/i
             );
 
-            if (!entrante || !saliente) return;
+            if (!entrante || !saliente) {
+                return;
+            }
 
             const encabezados = Array.from(
                 tabla.querySelectorAll("thead th")
@@ -123,21 +145,24 @@
                 tabla.querySelectorAll("tbody tr")
             );
 
-            const filaSaliente = filas.find(
-                tr => {
-                    const primeraCelda = tr.querySelector("td");
+            const filaSaliente = filas.find(tr => {
 
-                    return primeraCelda &&
-                        primeraCelda.textContent.trim() === saliente[1];
-                }
-            );
+                const primeraCelda = tr.querySelector("td");
 
-            if (indiceColumna < 0 || !filaSaliente) return;
+                return primeraCelda &&
+                    primeraCelda.textContent.trim() === saliente[1];
+            });
 
+            if (indiceColumna < 0 || !filaSaliente) {
+                return;
+            }
+
+            // Resaltar encabezado de variable entrante
             encabezados[indiceColumna].classList.add(
                 "simplex-encabezado-entrante"
             );
 
+            // Resaltar columna entrante
             filas.forEach(fila => {
 
                 const celdas = fila.querySelectorAll("td");
@@ -149,16 +174,17 @@
                 }
             });
 
+            // Resaltar fila saliente
             filaSaliente.classList.add(
                 "simplex-fila-saliente"
             );
 
+            // Resaltar elemento pivote
             const celdasPivote = filaSaliente.querySelectorAll(
                 "td"
             );
 
             if (celdasPivote[indiceColumna]) {
-
                 celdasPivote[indiceColumna].classList.add(
                     "simplex-celda-pivote"
                 );

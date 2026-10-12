@@ -3,10 +3,14 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
     <title>Método MODI | Great Value</title>
+
     <link rel="stylesheet" href="../css/estilos.css">
 </head>
+
 <body class="pagina-modi">
 
 <header class="modi-nav">
@@ -19,7 +23,9 @@
 
     <section class="modi-hero">
         <span>OPTIMIZACIÓN DE TRANSPORTE</span>
+
         <h1>Método MODI</h1>
+
         <p>
             Mejora una solución inicial de transporte
             mediante potenciales, costos de oportunidad
@@ -29,43 +35,89 @@
     </section>
 
     <section class="modi-panel">
+
         <div class="modi-titulo">
             <span>01</span>
+
             <div>
                 <h2>Configurar problema</h2>
-                <p>Selecciona el número de orígenes y destinos.</p>
+
+                <p>
+                    Selecciona el número de orígenes
+                    y destinos.
+                </p>
             </div>
         </div>
 
         <div class="modi-config">
-            <label>Orígenes
-                <input id="modiOrigenes" type="number"
-                       min="1" max="10" step="1" value="3">
+
+            <label>
+                Orígenes
+
+                <input
+                    id="modiOrigenes"
+                    type="number"
+                    min="1"
+                    max="20"
+                    step="1"
+                    value="3">
             </label>
-            <label>Destinos
-                <input id="modiDestinos" type="number"
-                       min="1" max="10" step="1" value="4">
+
+            <label>
+                Destinos
+
+                <input
+                    id="modiDestinos"
+                    type="number"
+                    min="1"
+                    max="20"
+                    step="1"
+                    value="4">
             </label>
+
         </div>
 
         <div class="modi-botones">
-            <button onclick="modiGenerar()">Generar matriz</button>
-            <button class="modi-secundario"
-                    onclick="modiEjemplo()">Cargar ejemplo</button>
-            <button class="modi-secundario"
-                    onclick="modiLimpiar()">Limpiar</button>
+
+            <button
+                type="button"
+                onclick="modiGenerar()">
+                Generar matriz
+            </button>
+
+            <button
+                type="button"
+                class="modi-secundario"
+                onclick="modiEjemplo()">
+                Cargar ejemplo
+            </button>
+
+            <button
+                type="button"
+                class="modi-secundario"
+                onclick="modiLimpiar()">
+                Limpiar
+            </button>
+
         </div>
+
     </section>
 
-    <section id="modiPanelDatos" class="modi-panel oculto">
+    <section
+        id="modiPanelDatos"
+        class="modi-panel oculto">
+
         <div class="modi-titulo">
             <span>02</span>
+
             <div>
                 <h2>Matriz de transporte</h2>
+
                 <p>
-                    Introduce costos unitarios, oferta
-                    y demanda. MODI construirá primero
-                    una solución inicial por Costo Mínimo.
+                    Introduce los costos unitarios,
+                    la oferta y la demanda. MODI
+                    construirá primero una solución
+                    inicial por el Método de Costo Mínimo.
                 </p>
             </div>
         </div>
@@ -73,40 +125,64 @@
         <div id="modiFormulario"></div>
 
         <div class="modi-botones">
-            <button onclick="modiResolver()">
+
+            <button
+                type="button"
+                onclick="modiResolver()">
                 Resolver con MODI →
             </button>
+
         </div>
+
     </section>
 
-    <div id="modiError" class="modi-error oculto"
-         role="alert"></div>
+    <div
+        id="modiError"
+        class="modi-error oculto"
+        role="alert">
+    </div>
 
-    <section id="modiPanelResultados"
-             class="modi-panel oculto">
+    <section
+        id="modiPanelResultados"
+        class="modi-panel oculto">
+
         <div class="modi-titulo">
             <span>03</span>
+
             <div>
                 <h2>Resultados y procedimiento</h2>
-                <p>Consulta las iteraciones y el costo óptimo.</p>
+
+                <p>
+                    Consulta las iteraciones,
+                    las mejoras de asignación
+                    y el costo óptimo obtenido.
+                </p>
             </div>
         </div>
 
         <div id="modiResultados"></div>
 
         <div class="modi-botones">
-            <button class="modi-secundario"
-                    onclick="window.print()">
+
+            <button
+                type="button"
+                class="modi-secundario"
+                onclick="window.print()">
                 Imprimir resultados
             </button>
+
         </div>
+
     </section>
+
 </main>
 
 <footer class="modi-footer">
-    Great Value · Investigación de Operaciones · 2026
+    Great Value · Investigación de Operaciones
+    · Fase II · 2026
 </footer>
 
 <script src="../js/modi.js"></script>
+
 </body>
 </html>

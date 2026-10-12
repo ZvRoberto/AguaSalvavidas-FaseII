@@ -1,28 +1,19 @@
 
 /*
- * AGUA SALVAVIDAS
- * FASE II - ANÁLISIS DE SENSIBILIDAD
+ * GREAT VALUE - FASE II
+ * ANÁLISIS DE SENSIBILIDAD
  *
- * Modelo:
  * Maximizar Z = c'x
- * Sujeto a Ax <= b
- * x >= 0, b >= 0
+ * Sujeto a Ax <= b, x >= 0, b >= 0
  *
- * Funcionalidades:
- * 1. Generación del modelo
- * 2. Validación de datos
- * 3. Resolución por Simplex
- * 4. Precios sombra
- * 5. Rangos de recursos
- * 6. Rangos de coeficientes objetivo
- * 7. Simulación de escenarios
- * 8. Procedimiento paso a paso
+ * Hasta 20 variables y 20 restricciones.
  */
 
 "use strict";
 
 const SEN_EPS = 1e-8;
-const SEN_MAX_ITER = 300;
+const SEN_MAX_ITER = 1000;
+const SEN_LIMITE = 20;
 
 let senDimension = null;
 let senModeloActual = null;
@@ -31,10 +22,6 @@ let senSolucionActual = null;
 function senEl(id) {
     return document.getElementById(id);
 }
-
-/* ==========================================
-   VALIDACIONES
-   ========================================== */
 
 function senError(mensaje) {
     const caja = senEl("senError");
@@ -70,10 +57,10 @@ function senCantidad(id) {
     if (
         !Number.isInteger(valor) ||
         valor < 1 ||
-        valor > 6
+        valor > SEN_LIMITE
     ) {
         throw new Error(
-            "Las dimensiones deben ser enteros entre 1 y 6."
+            "Las dimensiones deben estar entre 1 y 20."
         );
     }
 
@@ -84,10 +71,13 @@ function senFmt(valor) {
     if (valor === Infinity) return "+∞";
     if (valor === -Infinity) return "-∞";
 
-    const limpio =
-        Math.abs(valor) < SEN_EPS ? 0 : valor;
+    if (!Number.isFinite(valor)) {
+        return String(valor);
+    }
 
-    return Number(limpio.toFixed(5)).toString();
+    if (Math.abs(valor) < SEN_EPS) return "0";
+
+    return Number(valor.toFixed(6)).toString();
 }
 
 function senInput(id, valor = 0) {
@@ -96,14 +86,13 @@ function senInput(id, valor = 0) {
             type="number"
             step="any"
             id="${id}"
-            value="${valor}"
-        >
+            value="${valor}">
     `;
 }
 
-/* ==========================================
-   GENERAR MODELO
-   ========================================== */
+// =====================================================
+// GENERAR FORMULARIO
+// =====================================================
 
 function senGenerar() {
     senOcultarError();
@@ -132,9 +121,7 @@ function senGenerar() {
 
         html += `
             </div>
-
             <h3>Restricciones (≤)</h3>
-
             <div class="sen-tabla-scroll">
                 <table class="sen-tabla">
                     <thead>
@@ -176,16 +163,14 @@ function senGenerar() {
                     </tbody>
                 </table>
             </div>
-
             <p class="sen-nota">
-                Todas las variables son no negativas.
-                Los recursos disponibles deben ser
+                Todas las variables son no negativas
+                y los recursos disponibles deben ser
                 mayores o iguales que cero.
             </p>
         `;
 
         senEl("senFormulario").innerHTML = html;
-
         senEl("senModelo").classList.remove("oculto");
         senEl("senResultados").classList.add("oculto");
 
@@ -194,15 +179,13 @@ function senGenerar() {
     }
 }
 
-/* ==========================================
-   LEER DATOS
-   ========================================== */
+// =====================================================
+// LEER MODELO
+// =====================================================
 
 function senLeer() {
     if (!senDimension) {
-        throw new Error(
-            "Primero debes generar el modelo."
-        );
+        throw new Error("Primero debes generar el modelo.");
     }
 
     const { n, m } = senDimension;
@@ -212,8 +195,7 @@ function senLeer() {
         senCantidad("senM") !== m
     ) {
         throw new Error(
-            "Cambiaste las dimensiones. " +
-            "Genera nuevamente el modelo."
+            "Cambiaste las dimensiones. Genera nuevamente el modelo."
         );
     }
 
@@ -239,7 +221,7 @@ function senLeer() {
         if (recurso < 0) {
             throw new Error(
                 "El recurso R" + (i + 1) +
-                " debe ser no negativo."
+                " no puede ser negativo."
             );
         }
 
@@ -250,13 +232,12 @@ function senLeer() {
     return { n, m, c, A, b };
 }
 
-/* ==========================================
-   MÉTODO SIMPLEX
-   ========================================== */
+// =====================================================
+// SIMPLEX
+// =====================================================
 
 function senSimplex(modelo) {
     const { n, m, c, A, b } = modelo;
-
     const columnas = n + m;
     const rhs = columnas;
 
@@ -267,7 +248,6 @@ function senSimplex(modelo) {
 
     const base = [];
 
-    // Construcción del tableau inicial.
     for (let i = 0; i < m; i++) {
         for (let j = 0; j < n; j++) {
             T[i][j] = A[i][j];
@@ -275,11 +255,9 @@ function senSimplex(modelo) {
 
         T[i][n + i] = 1;
         T[i][rhs] = b[i];
-
         base.push(n + i);
     }
 
-    // Función objetivo.
     for (let j = 0; j < n; j++) {
         T[m][j] = -c[j];
     }
@@ -294,15 +272,12 @@ function senSimplex(modelo) {
         });
     }
 
-    guardar(
-        "Tabla inicial con variables de holgura."
-    );
+    guardar("Tabla inicial con variables de holgura.");
 
-    let estado = "limite";
+    let estado = "limite_iteraciones";
     let iteraciones = 0;
 
     while (iteraciones < SEN_MAX_ITER) {
-
         let entrante = -1;
 
         // Regla de Bland.
@@ -313,7 +288,6 @@ function senSimplex(modelo) {
             }
         }
 
-        // Si no hay negativos, alcanzamos el óptimo.
         if (entrante === -1) {
             estado = "optimo";
             break;
@@ -322,13 +296,10 @@ function senSimplex(modelo) {
         let saliente = -1;
         let mejorRazon = Infinity;
 
-        // Prueba de razones.
         for (let i = 0; i < m; i++) {
             const divisor = T[i][entrante];
 
-            if (divisor <= SEN_EPS) {
-                continue;
-            }
+            if (divisor <= SEN_EPS) continue;
 
             const razon = T[i][rhs] / divisor;
 
@@ -352,36 +323,25 @@ function senSimplex(modelo) {
             break;
         }
 
-        const nombreVariable = indice => {
-            return indice < n
-                ? "X" + (indice + 1)
-                : "S" + (indice - n + 1);
-        };
+        const nombre = indice => indice < n
+            ? "X" + (indice + 1)
+            : "S" + (indice - n + 1);
 
-        const variableEntrante =
-            nombreVariable(entrante);
-
-        const variableSaliente =
-            nombreVariable(base[saliente]);
-
+        const entra = nombre(entrante);
+        const sale = nombre(base[saliente]);
         const pivote = T[saliente][entrante];
 
-        // Normalizar fila pivote.
         for (let j = 0; j <= rhs; j++) {
             T[saliente][j] /= pivote;
         }
 
-        // Eliminar columna pivote.
         for (let i = 0; i <= m; i++) {
-            if (i === saliente) {
-                continue;
-            }
+            if (i === saliente) continue;
 
             const factor = T[i][entrante];
 
             for (let j = 0; j <= rhs; j++) {
-                T[i][j] -=
-                    factor * T[saliente][j];
+                T[i][j] -= factor * T[saliente][j];
 
                 if (Math.abs(T[i][j]) < SEN_EPS) {
                     T[i][j] = 0;
@@ -394,24 +354,20 @@ function senSimplex(modelo) {
 
         guardar(
             "Iteración " + iteraciones +
-            ": entra " + variableEntrante +
-            ", sale " + variableSaliente +
+            ": entra " + entra +
+            ", sale " + sale +
             ". Pivote = " + senFmt(pivote)
         );
     }
 
-    // Comprobar optimalidad al alcanzar el límite.
-    if (estado === "limite") {
-        const existenNegativos = T[m]
+    if (estado === "limite_iteraciones") {
+        const negativos = T[m]
             .slice(0, columnas)
             .some(valor => valor < -SEN_EPS);
 
-        if (!existenNegativos) {
-            estado = "optimo";
-        }
+        if (!negativos) estado = "optimo";
     }
 
-    // Obtener valores de las variables originales.
     const x = Array(n).fill(0);
 
     for (let i = 0; i < m; i++) {
@@ -420,10 +376,8 @@ function senSimplex(modelo) {
         }
     }
 
-    // Evaluar la función objetivo original.
     const z = x.reduce(
-        (total, valor, j) =>
-            total + valor * c[j],
+        (total, valor, j) => total + valor * c[j],
         0
     );
 
@@ -438,38 +392,32 @@ function senSimplex(modelo) {
     };
 }
 
-/* ==========================================
-   PRECIOS SOMBRA Y RANGOS DE RECURSOS
-   ========================================== */
+// =====================================================
+// RANGOS DE RECURSOS
+// =====================================================
 
 function senRangosRHS(modelo, sol) {
     const { n, m, b } = modelo;
-
     const rhs = n + m;
     const rangos = [];
 
     for (let k = 0; k < m; k++) {
-
         let inferior = -Infinity;
         let superior = Infinity;
 
         for (let i = 0; i < m; i++) {
+            const basica = sol.T[i][rhs];
+            const coef = sol.T[i][n + k];
 
-            const xBasica = sol.T[i][rhs];
-
-            // Columna de B^-1 correspondiente
-            // al recurso que se modifica.
-            const direccion = sol.T[i][n + k];
-
-            if (direccion > SEN_EPS) {
+            if (coef > SEN_EPS) {
                 inferior = Math.max(
                     inferior,
-                    -xBasica / direccion
+                    -basica / coef
                 );
-            } else if (direccion < -SEN_EPS) {
+            } else if (coef < -SEN_EPS) {
                 superior = Math.min(
                     superior,
-                    -xBasica / direccion
+                    -basica / coef
                 );
             }
         }
@@ -477,185 +425,99 @@ function senRangosRHS(modelo, sol) {
         rangos.push({
             recurso: k + 1,
             actual: b[k],
-
-            deltaMin: inferior,
-            deltaMax: superior,
-
+            precioSombra: sol.T[m][n + k],
             minimo: b[k] + inferior,
-            maximo: b[k] + superior,
-
-            precioSombra: sol.T[m][n + k]
+            maximo: b[k] + superior
         });
     }
 
     return rangos;
 }
 
-/* ==========================================
-   RANGOS DE COEFICIENTES OBJETIVO
-   FUNCIÓN CORREGIDA
-   ========================================== */
+// =====================================================
+// RANGOS DE COEFICIENTES OBJETIVO
+// =====================================================
 
 function senRangosObjetivo(modelo, sol) {
-
     const { n, m, c } = modelo;
-
     const columnas = n + m;
-    const resultados = [];
+    const rangos = [];
 
-    // Analizar cada variable de decisión.
-    for (let variable = 0; variable < n; variable++) {
-
+    for (let k = 0; k < n; k++) {
         let inferior = -Infinity;
         let superior = Infinity;
 
-        // Determinar si pertenece a la base.
-        const posicionBasica =
-            sol.base.indexOf(variable);
+        const filaBasica = sol.base.indexOf(k);
 
-        // Analizar las columnas no básicas.
-        for (let j = 0; j < columnas; j++) {
+        if (filaBasica === -1) {
+            // Variable no básica.
+            // Su costo reducido es c - z.
+            superior = sol.T[m][k];
+        } else {
+            // Variable básica.
+            // La base permanece óptima si todos
+            // los costos reducidos siguen >= 0.
+            for (let j = 0; j < columnas; j++) {
+                if (sol.base.includes(j)) continue;
 
-            if (sol.base.includes(j)) {
-                continue;
-            }
+                const coef = sol.T[filaBasica][j];
+                const reducido = sol.T[m][j];
 
-            /*
-             * Tableau final:
-             *
-             * T[m][j] = Zj - Cj
-             *
-             * En maximización:
-             *
-             * Zj - Cj >= 0
-             */
-
-            const actual = sol.T[m][j];
-
-            let pendiente = 0;
-
-            if (posicionBasica >= 0) {
-
-                /*
-                 * VARIABLE BÁSICA
-                 *
-                 * Cambiar su coeficiente
-                 * modifica los costos reducidos
-                 * según la fila correspondiente.
-                 *
-                 * CORRECCIÓN:
-                 * La pendiente es positiva.
-                 */
-
-                pendiente =
-                    sol.T[posicionBasica][j];
-
-            } else {
-
-                /*
-                 * VARIABLE NO BÁSICA
-                 *
-                 * Solo cambia directamente
-                 * su propio costo reducido.
-                 */
-
-                pendiente =
-                    j === variable ? -1 : 0;
-            }
-
-            /*
-             * Condición:
-             *
-             * actual + pendiente * delta >= 0
-             */
-
-            if (pendiente > SEN_EPS) {
-
-                inferior = Math.max(
-                    inferior,
-                    -actual / pendiente
-                );
-
-            } else if (pendiente < -SEN_EPS) {
-
-                superior = Math.min(
-                    superior,
-                    -actual / pendiente
-                );
-
-            } else if (actual < -SEN_EPS) {
-
-                throw new Error(
-                    "La base actual no cumple " +
-                    "las condiciones de optimalidad."
-                );
+                if (coef > SEN_EPS) {
+                    inferior = Math.max(
+                        inferior,
+                        -reducido / coef
+                    );
+                } else if (coef < -SEN_EPS) {
+                    superior = Math.min(
+                        superior,
+                        -reducido / coef
+                    );
+                }
             }
         }
 
-        if (inferior > superior + SEN_EPS) {
-            throw new Error(
-                "No se pudo determinar un rango " +
-                "válido para X" + (variable + 1)
-            );
-        }
-
-        resultados.push({
-
-            variable: variable + 1,
-
-            actual: c[variable],
-
-            minimo: c[variable] + inferior,
-
-            maximo: c[variable] + superior,
-
-            disminucionPermitida:
-                inferior === -Infinity
-                    ? Infinity
-                    : Math.max(0, -inferior),
-
-            aumentoPermitido:
-                superior === Infinity
-                    ? Infinity
-                    : Math.max(0, superior)
+        rangos.push({
+            variable: k + 1,
+            actual: c[k],
+            minimo: c[k] + inferior,
+            maximo: c[k] + superior
         });
     }
 
-    return resultados;
+    return rangos;
 }
 
-/* ==========================================
-   NOMBRES DE COLUMNAS
-   ========================================== */
-
-function senNombreColumna(indice, n, m) {
-    if (indice < n) {
-        return "X" + (indice + 1);
-    }
-
-    if (indice < n + m) {
-        return "S" + (indice - n + 1);
-    }
-
-    return "RHS";
-}
-
-/* ==========================================
-   MOSTRAR PROCEDIMIENTO SIMPLEX
-   ========================================== */
+// =====================================================
+// TABLAS DEL PROCEDIMIENTO
+// =====================================================
 
 function senMostrarPasos(modelo, solucion) {
     const { n, m } = modelo;
 
+    const nombres = [
+        ...Array.from(
+            { length: n },
+            (_, j) => "X" + (j + 1)
+        ),
+        ...Array.from(
+            { length: m },
+            (_, i) => "S" + (i + 1)
+        ),
+        "RHS"
+    ];
+
+    const nombreBase = indice => indice < n
+        ? "X" + (indice + 1)
+        : "S" + (indice - n + 1);
+
     let html = "";
 
     solucion.pasos.forEach((paso, indice) => {
-
         html += `
             <div class="sen-iteracion">
                 <h4>Tabla ${indice}</h4>
                 <p>${paso.descripcion}</p>
-
                 <div class="sen-tabla-scroll">
                     <table class="sen-tabla">
                         <thead>
@@ -663,13 +525,9 @@ function senMostrarPasos(modelo, solucion) {
                                 <th>Base</th>
         `;
 
-        for (let j = 0; j <= n + m; j++) {
-            html += `
-                <th>
-                    ${senNombreColumna(j, n, m)}
-                </th>
-            `;
-        }
+        nombres.forEach(nombre => {
+            html += `<th>${nombre}</th>`;
+        });
 
         html += `
                             </tr>
@@ -678,19 +536,14 @@ function senMostrarPasos(modelo, solucion) {
         `;
 
         paso.tabla.forEach((fila, i) => {
-
-            const nombre = i < m
-                ? senNombreColumna(
-                    paso.base[i], n, m
-                )
+            const base = i < m
+                ? nombreBase(paso.base[i])
                 : "Z";
 
-            html += `<tr><th>${nombre}</th>`;
+            html += `<tr><th>${base}</th>`;
 
             fila.forEach(valor => {
-                html += `
-                    <td>${senFmt(valor)}</td>
-                `;
+                html += `<td>${senFmt(valor)}</td>`;
             });
 
             html += "</tr>";
@@ -707,104 +560,67 @@ function senMostrarPasos(modelo, solucion) {
     return html;
 }
 
-/* ==========================================
-   RESOLVER MODELO Y MOSTRAR RESULTADOS
-   ========================================== */
+// =====================================================
+// RESOLVER Y MOSTRAR RESULTADOS
+// =====================================================
 
 function senResolver() {
     senOcultarError();
-
-    senEl("senResultados").classList.add("oculto");
-
-    // Invalidar análisis anterior hasta resolver
-    // correctamente el modelo actual.
-    senModeloActual = null;
-    senSolucionActual = null;
 
     try {
         const modelo = senLeer();
         const solucion = senSimplex(modelo);
 
         if (solucion.estado !== "optimo") {
-
-            if (solucion.estado === "no_acotado") {
-                throw new Error(
-                    "El problema es no acotado. " +
-                    "No existe una solución óptima finita."
-                );
-            }
-
             throw new Error(
-                "No se alcanzó el óptimo dentro " +
-                "del límite de iteraciones."
+                solucion.estado === "no_acotado"
+                    ? "El modelo no tiene un óptimo finito."
+                    : "Se alcanzó el límite de iteraciones."
             );
         }
-
-        const rangosRHS =
-            senRangosRHS(modelo, solucion);
-
-        const rangosObjetivo =
-            senRangosObjetivo(modelo, solucion);
 
         senModeloActual = modelo;
         senSolucionActual = solucion;
 
+        const rangosRHS = senRangosRHS(
+            modelo,
+            solucion
+        );
+
+        const rangosObjetivo = senRangosObjetivo(
+            modelo,
+            solucion
+        );
+
         let html = `
             <div class="sen-resumen">
-
-                <div>
-                    <small>Valor óptimo</small>
-                    <strong>
-                        Z = ${senFmt(solucion.z)}
-                    </strong>
-                </div>
-
-                <div>
-                    <small>Iteraciones</small>
-                    <strong>
-                        ${solucion.iteraciones}
-                    </strong>
-                </div>
-
-            </div>
-
-            <h3>Solución óptima</h3>
-
-            <div class="sen-tabla-scroll">
-                <table class="sen-tabla">
-                    <thead>
-                        <tr>
-                            <th>Variable</th>
-                            <th>Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <h3>Solución óptima</h3>
+                <p>
+                    <strong>Valor óptimo:</strong>
+                    Z = ${senFmt(solucion.z)}
+                </p>
+                <p>
+                    <strong>Iteraciones:</strong>
+                    ${solucion.iteraciones}
+                </p>
         `;
 
         solucion.x.forEach((valor, j) => {
             html += `
-                <tr>
-                    <td>X${j + 1}</td>
-                    <td>${senFmt(valor)}</td>
-                </tr>
+                <p>
+                    X${j + 1} = ${senFmt(valor)}
+                </p>
             `;
         });
 
         html += `
-                    </tbody>
-                </table>
             </div>
 
             <h3>Precios sombra y rangos de recursos</h3>
-
             <p class="sen-nota">
-                El precio sombra representa el cambio
-                marginal del valor óptimo al aumentar
-                una unidad de recurso, siempre que
-                se mantenga la base óptima.
-
-                Los rangos se calculan modificando
-                un recurso a la vez.
+                Los rangos muestran cuánto puede variar
+                un recurso manteniendo factible la base
+                actual. Se modifica un recurso a la vez.
             </p>
 
             <div class="sen-tabla-scroll">
@@ -839,14 +655,10 @@ function senResolver() {
             </div>
 
             <h3>Rangos de coeficientes objetivo</h3>
-
             <p class="sen-nota">
-                Los siguientes intervalos indican
-                cuánto puede cambiar cada coeficiente
-                de la función objetivo manteniendo
-                óptima la base actual.
-
-                Se modifica un coeficiente a la vez.
+                Estos intervalos mantienen óptima
+                la base actual al cambiar un
+                coeficiente a la vez.
             </p>
 
             <div class="sen-tabla-scroll">
@@ -879,29 +691,21 @@ function senResolver() {
             </div>
 
             <div class="sen-escenario">
-
                 <h3>Simular un cambio</h3>
-
                 <p>
-                    Modifica un recurso disponible
-                    o un beneficio unitario.
-                    El simulador resolverá nuevamente
-                    el problema.
+                    Modifica un recurso o beneficio
+                    y vuelve a calcular el óptimo.
                 </p>
 
                 <div class="sen-config">
-
                     <label>
                         Cambiar
-
                         <select
                             id="senCambioTipo"
-                            onchange="senActualizarOpciones()"
-                        >
+                            onchange="senActualizarOpciones()">
                             <option value="b">
                                 Recurso disponible
                             </option>
-
                             <option value="c">
                                 Beneficio unitario
                             </option>
@@ -910,24 +714,20 @@ function senResolver() {
 
                     <label>
                         Elemento
-
                         <select
                             id="senCambioIndice"
-                            onchange="senActualizarValor()"
-                        ></select>
+                            onchange="senActualizarValor()">
+                        </select>
                     </label>
 
                     <label>
                         Nuevo valor
-
                         <input
                             type="number"
                             step="any"
                             id="senCambioValor"
-                            value="0"
-                        >
+                            value="0">
                     </label>
-
                 </div>
 
                 <button onclick="senSimularCambio()">
@@ -935,43 +735,32 @@ function senResolver() {
                 </button>
 
                 <div id="senComparacion"></div>
-
             </div>
 
             <h3>Procedimiento Simplex</h3>
-
-            <p class="sen-nota">
-                Las tablas muestran las iteraciones
-                realizadas para encontrar la solución
-                óptima del problema original.
-            </p>
 
             ${senMostrarPasos(modelo, solucion)}
         `;
 
         senEl("senContenido").innerHTML = html;
-
-        senEl("senResultados")
-            .classList.remove("oculto");
+        senEl("senResultados").classList.remove("oculto");
 
         senActualizarOpciones();
 
     } catch (error) {
+        senEl("senResultados").classList.add("oculto");
         senError(error.message);
     }
 }
 
-/* ==========================================
-   ACTUALIZAR OPCIONES DE ESCENARIO
-   ========================================== */
+// =====================================================
+// OPCIONES DE SIMULACIÓN
+// =====================================================
 
 function senActualizarOpciones() {
-    if (!senModeloActual) {
-        return;
-    }
+    if (!senModeloActual) return;
 
     const tipo = senEl("senCambioTipo").value;
-
     const cantidad = tipo === "b"
         ? senModeloActual.m
         : senModeloActual.n;
@@ -979,7 +768,6 @@ function senActualizarOpciones() {
     let html = "";
 
     for (let i = 0; i < cantidad; i++) {
-
         const nombre = tipo === "b"
             ? "Recurso R" + (i + 1)
             : "Variable X" + (i + 1);
@@ -992,21 +780,13 @@ function senActualizarOpciones() {
     }
 
     senEl("senCambioIndice").innerHTML = html;
-
     senActualizarValor();
 }
 
-/* ==========================================
-   ACTUALIZAR VALOR DEL ESCENARIO
-   ========================================== */
-
 function senActualizarValor() {
-    if (!senModeloActual) {
-        return;
-    }
+    if (!senModeloActual) return;
 
     const tipo = senEl("senCambioTipo").value;
-
     const indice = Number(
         senEl("senCambioIndice").value
     );
@@ -1018,144 +798,111 @@ function senActualizarValor() {
     senEl("senCambioValor").value = valor;
 }
 
-/* ==========================================
-   SIMULAR CAMBIO
-   ========================================== */
+// =====================================================
+// SIMULACIÓN DE ESCENARIOS
+// =====================================================
 
 function senSimularCambio() {
     senOcultarError();
 
     try {
-        if (
-            !senModeloActual ||
-            !senSolucionActual
-        ) {
+        if (!senModeloActual || !senSolucionActual) {
             throw new Error(
                 "Primero debes resolver el modelo."
             );
         }
 
-        const tipo =
-            senEl("senCambioTipo").value;
-
+        const tipo = senEl("senCambioTipo").value;
         const indice = Number(
             senEl("senCambioIndice").value
         );
 
-        const nuevoValor =
-            senNumero("senCambioValor");
+        const nuevoValor = senNumero("senCambioValor");
+
+        if (tipo !== "b" && tipo !== "c") {
+            throw new Error("Tipo de cambio inválido.");
+        }
+
+        const limite = tipo === "b"
+            ? senModeloActual.m
+            : senModeloActual.n;
 
         if (
-            tipo === "b" &&
-            nuevoValor < 0
+            !Number.isInteger(indice) ||
+            indice < 0 ||
+            indice >= limite
         ) {
+            throw new Error("Selecciona un elemento válido.");
+        }
+
+        if (tipo === "b" && nuevoValor < 0) {
             throw new Error(
-                "El recurso disponible " +
-                "debe ser no negativo."
+                "El recurso disponible debe ser no negativo."
             );
         }
 
-        const original = senModeloActual;
-
-        // Crear una copia independiente.
         const modificado = {
-            n: original.n,
-            m: original.m,
-
-            c: [...original.c],
-
-            A: original.A.map(
-                fila => [...fila]
-            ),
-
-            b: [...original.b]
+            n: senModeloActual.n,
+            m: senModeloActual.m,
+            c: [...senModeloActual.c],
+            A: senModeloActual.A.map(fila => [...fila]),
+            b: [...senModeloActual.b]
         };
 
-        // Aplicar modificación.
-        if (tipo === "b") {
-            modificado.b[indice] = nuevoValor;
-        } else {
-            modificado.c[indice] = nuevoValor;
+        modificado[tipo][indice] = nuevoValor;
+
+        const nueva = senSimplex(modificado);
+        const contenedor = senEl("senComparacion");
+
+        if (nueva.estado !== "optimo") {
+            contenedor.textContent =
+                "El escenario no produjo un óptimo finito. " +
+                "Estado: " + nueva.estado;
+            return;
         }
 
-        // Resolver nuevamente.
-        const nuevaSolucion =
-            senSimplex(modificado);
+        const variacion =
+            nueva.z - senSolucionActual.z;
 
-        let html = "";
+        const variables = nueva.x.map(
+            (valor, j) =>
+                "X" + (j + 1) + " = " + senFmt(valor)
+        ).join(", ");
 
-        if (nuevaSolucion.estado !== "optimo") {
-
-            html = `
-                <p class="sen-advertencia">
-                    El nuevo escenario no produjo
-                    un óptimo finito verificable.
-
-                    Estado:
-                    ${nuevaSolucion.estado}
+        contenedor.innerHTML = `
+            <div class="sen-comparacion">
+                <h4>Comparación de escenarios</h4>
+                <p>
+                    Valor original:
+                    <strong>
+                        Z = ${senFmt(senSolucionActual.z)}
+                    </strong>
                 </p>
-            `;
-
-        } else {
-
-            const variacion =
-                nuevaSolucion.z -
-                senSolucionActual.z;
-
-            const nuevasVariables =
-                nuevaSolucion.x.map(
-                    (valor, j) =>
-                        "X" + (j + 1) +
-                        " = " + senFmt(valor)
-                ).join(", ");
-
-            html = `
-                <div class="sen-comparacion">
-
-                    <h4>Comparación de escenarios</h4>
-
-                    <p>
-                        Valor original:
-                        <strong>
-                            Z = ${senFmt(senSolucionActual.z)}
-                        </strong>
-                    </p>
-
-                    <p>
-                        Nuevo valor:
-                        <strong>
-                            Z = ${senFmt(nuevaSolucion.z)}
-                        </strong>
-                    </p>
-
-                    <p>
-                        Variación:
-                        <strong>
-                            ${senFmt(variacion)}
-                        </strong>
-                    </p>
-
-                    <p>
-                        Nueva solución:
-                        <strong>
-                            ${nuevasVariables}
-                        </strong>
-                    </p>
-
-                </div>
-            `;
-        }
-
-        senEl("senComparacion").innerHTML = html;
+                <p>
+                    Nuevo valor:
+                    <strong>
+                        Z = ${senFmt(nueva.z)}
+                    </strong>
+                </p>
+                <p>
+                    Variación:
+                    <strong>${senFmt(variacion)}</strong>
+                </p>
+                <p>
+                    Nueva solución:
+                    <strong>${variables}</strong>
+                </p>
+            </div>
+        `;
 
     } catch (error) {
         senError(error.message);
     }
 }
 
-/* ==========================================
-   CARGAR EJEMPLO
-   ========================================== */
+// =====================================================
+// EJEMPLO GREAT VALUE
+// =====================================================
 
 function senEjemplo() {
     senEl("senN").value = 2;
@@ -1178,20 +925,17 @@ function senEjemplo() {
     });
 
     A.forEach((fila, i) => {
-
         fila.forEach((valor, j) => {
-            senEl(
-                "senA" + i + "_" + j
-            ).value = valor;
+            senEl("senA" + i + "_" + j).value = valor;
         });
 
         senEl("senB" + i).value = b[i];
     });
 }
 
-/* ==========================================
-   LIMPIAR FORMULARIO
-   ========================================== */
+// =====================================================
+// LIMPIAR
+// =====================================================
 
 function senLimpiar() {
     senDimension = null;
@@ -1205,7 +949,6 @@ function senLimpiar() {
     senEl("senContenido").innerHTML = "";
 
     senEl("senModelo").classList.add("oculto");
-
     senEl("senResultados").classList.add("oculto");
 
     senOcultarError();
