@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Transporte | Great Value</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+
+<body class="pagina-transporte">
+
+    <header class="tra-nav">
+        <a href="../index.html">← Volver al menú</a>
+        <strong>💧 Great Value</strong>
+        <span>FASE II · TRANSPORTE</span>
+    </header>
+
+    <main class="tra-contenedor">
+
+        <section class="tra-hero">
+            <span>INVESTIGACIÓN DE OPERACIONES</span>
+            <h1>Método de Costo Mínimo</h1>
+            <p>
+                Distribuye productos entre diferentes
+                orígenes y destinos, considerando los
+                costos unitarios, la oferta disponible
+                y la demanda de cada destino.
+            </p>
+        </section>
+
+        <section class="tra-panel">
+            <div class="tra-titulo">
+                <span class="tra-numero">01</span>
+                <div>
+                    <h2>Configurar el problema</h2>
+                    <p>
+                        Indica cuántos orígenes y destinos
+                        tendrá la matriz de transporte.
+                    </p>
+                </div>
+            </div>
+
+            <div class="tra-config">
+                <label>
+                    Cantidad de orígenes
+                    <input
+                        id="traOrigenes"
+                        type="number"
+                        min="1"
+                        max="20"
+                        step="1"
+                        value="3">
+                </label>
+
+                <label>
+                    Cantidad de destinos
+                    <input
+                        id="traDestinos"
+                        type="number"
+                        min="1"
+                        max="20"
+                        step="1"
+                        value="4">
+                </label>
+            </div>
+
+            <div class="tra-botones">
+                <button
+                    type="button"
+                    onclick="traGenerar()">
+                    Generar matriz
+                </button>
+
+                <button
+                    type="button"
+                    class="tra-secundario"
+                    onclick="traEjemplo()">
+                    Cargar ejemplo
+                </button>
+
+                <button
+                    type="button"
+                    class="tra-secundario"
+                    onclick="traLimpiar()">
+                    Limpiar
+                </button>
+            </div>
+        </section>
+
+        <section
+            id="traPanelMatriz"
+            class="tra-panel oculto">
+
+            <div class="tra-titulo">
+                <span class="tra-numero">02</span>
+                <div>
+                    <h2>Matriz de transporte</h2>
+                    <p>
+                        Ingresa los costos de transporte
+                        por unidad, la oferta de cada origen
+                        y la demanda de cada destino.
+                    </p>
+                </div>
+            </div>
+
+            <div id="traFormulario"></div>
+
+            <div class="tra-botones">
+                <button
+                    type="button"
+                    onclick="traResolver()">
+                    Calcular distribución →
+                </button>
+            </div>
+        </section>
+
+        <div
+            id="traError"
+            class="tra-error oculto"
+            role="alert">
+        </div>
+
+        <section
+            id="traPanelResultados"
+            class="tra-panel oculto">
+
+            <div class="tra-titulo">
+                <span class="tra-numero">03</span>
+                <div>
+                    <h2>Resultados y procedimiento</h2>
+                    <p>
+                        Consulta las asignaciones realizadas,
+                        el costo total de transporte y
+                        la explicación del procedimiento.
+                    </p>
+                </div>
+            </div>
+
+            <div id="traResultados"></div>
+
+            <div class="tra-botones">
+                <button
+                    type="button"
+                    class="tra-secundario"
+                    onclick="window.print()">
+                    Imprimir resultados
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="tra-footer">
+        Great Value · Investigación de Operaciones
+        · Fase II · 2026
+    </footer>
+
+    <script src="../js/transporte.js"></script>
+
+</body>
+</html>

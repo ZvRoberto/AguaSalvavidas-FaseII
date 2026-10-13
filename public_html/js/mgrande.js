@@ -1,596 +1,709 @@
 
 /*
- * GREAT VALUE - FASE II
- * Método M Grande
- * Hasta 20 variables y 20 restricciones
+ * GREAT VALUE - MÉTODO M GRANDE
+ * Versión independiente
+ * Formularios, algoritmo y resultados
  */
 
-"use strict";
+(() => {
+    "use strict";
 
-const M_GRANDE = 1000000;
-const EPSILON_M = 1e-8;
-const MAX_ITERACIONES_M = 1000;
+    const $ = id => document.getElementById(id);
+    const EPS = 1e-8;
 
-// =====================================================
-// GENERAR MODELO
-// =====================================================
+    const fmt = x =>
+        Math.abs(x) < EPS
+            ? "0"
+            : Number(x.toFixed(6)).toString();
 
-function generarModeloMGrande() {
-    const n = Number(
-        document.getElementById("numVariablesM").value
-    );
+    function mostrarErrorM(mensaje) {
+        const caja = $("mensajeErrorM");
 
-    const m = Number(
-        document.getElementById("numRestriccionesM").value
-    );
-
-    if (!Number.isInteger(n) || n < 1 || n > 20) {
-        mostrarErrorM("Debes ingresar entre 1 y 20 variables.");
-        return;
+        if (caja) {
+            caja.textContent = "⚠ " + mensaje;
+            caja.classList.remove("oculto");
+        }
     }
 
-    if (!Number.isInteger(m) || m < 1 || m > 20) {
-        mostrarErrorM("Debes ingresar entre 1 y 20 restricciones.");
-        return;
+    function ocultarErrorM() {
+        const caja = $("mensajeErrorM");
+
+        if (caja) {
+            caja.textContent = "";
+            caja.classList.add("oculto");
+        }
     }
 
-    generarFuncionObjetivoM(n);
-    generarRestriccionesM(n, m);
+    function actualizarEtapasM(etapa) {
+        for (let i = 1; i <= 3; i++) {
+            const elemento = $("etapaM" + i);
 
-    document.getElementById("panelModeloM")
-        .classList.remove("oculto");
+            if (!elemento) continue;
 
-    document.getElementById("panelResultadosM")
-        .classList.add("oculto");
+            elemento.classList.toggle("activa", i === etapa);
+            elemento.classList.toggle("completada", i < etapa);
+        }
+    }
 
-    ocultarErrorM();
-}
+    function crearCampoM(id) {
+        return `
+            <input
+                type="number"
+                step="any"
+                id="${id}"
+                placeholder="0"
+                style="
+                    width:85px;
+                    padding:9px;
+                    margin:5px;
+                    border:1px solid #cbd9e8;
+                    border-radius:8px;
+                    text-align:center;
+                ">
+        `;
+    }
 
-// =====================================================
-// CREAR ENTRADAS
-// =====================================================
-
-function crearInputM(id) {
-    const input = document.createElement("input");
-
-    input.type = "number";
-    input.step = "any";
-    input.id = id;
-    input.placeholder = "0";
-    input.className = "input-coeficiente";
-
-    input.addEventListener("input", function () {
-        this.classList.remove("campo-invalido");
+    function generarModeloMGrande() {
         ocultarErrorM();
-    });
 
-    return input;
-}
+        const n = Number($("numVariablesM").value);
+        const m = Number($("numRestriccionesM").value);
 
-// =====================================================
-// FUNCIÓN OBJETIVO
-// =====================================================
-
-function generarFuncionObjetivoM(n) {
-    const contenedor = document.getElementById("funcionObjetivoM");
-    contenedor.innerHTML = "";
-
-    const titulo = document.createElement("strong");
-    titulo.textContent = "Z = ";
-    contenedor.appendChild(titulo);
-
-    for (let j = 0; j < n; j++) {
-        contenedor.appendChild(crearInputM("m_fo_" + j));
-
-        const variable = document.createElement("span");
-        variable.textContent = " X" + (j + 1);
-        contenedor.appendChild(variable);
-
-        if (j < n - 1) {
-            const mas = document.createElement("span");
-            mas.textContent = " + ";
-            contenedor.appendChild(mas);
+        if (
+            !Number.isInteger(n) ||
+            !Number.isInteger(m) ||
+            n < 1 || n > 20 ||
+            m < 1 || m > 20
+        ) {
+            mostrarErrorM(
+                "Ingresa entre 1 y 20 variables y restricciones."
+            );
+            return;
         }
-    }
-}
 
-// =====================================================
-// RESTRICCIONES
-// =====================================================
-
-function generarRestriccionesM(n, m) {
-    const contenedor = document.getElementById("restriccionesM");
-    contenedor.innerHTML = "";
-
-    for (let i = 0; i < m; i++) {
-        const fila = document.createElement("div");
-        fila.className = "fila-restriccion";
+        let objetivo = "<strong>Z = </strong>";
 
         for (let j = 0; j < n; j++) {
-            fila.appendChild(
-                crearInputM("m_r_" + i + "_" + j)
-            );
+            objetivo += crearCampoM("m_fo_" + j);
+            objetivo += " X" + (j + 1);
 
-            const variable = document.createElement("span");
-            variable.textContent = " X" + (j + 1);
-            fila.appendChild(variable);
-
-            if (j < n - 1) {
-                const mas = document.createElement("span");
-                mas.textContent = " + ";
-                fila.appendChild(mas);
-            }
+            if (j < n - 1) objetivo += " + ";
         }
 
-        const signo = document.createElement("select");
-        signo.id = "m_signo_" + i;
-        signo.className = "select-signo";
+        $("funcionObjetivoM").innerHTML = objetivo;
 
-        [
-            ["<=", "≤"],
-            [">=", "≥"],
-            ["=", "="]
-        ].forEach(([valor, texto]) => {
-            const opcion = document.createElement("option");
-            opcion.value = valor;
-            opcion.textContent = texto;
-            signo.appendChild(opcion);
-        });
+        let html = "";
 
-        fila.appendChild(signo);
-
-        const rhs = crearInputM("m_rhs_" + i);
-        rhs.classList.add("rhs");
-        fila.appendChild(rhs);
-
-        contenedor.appendChild(fila);
-    }
-}
-
-// =====================================================
-// VALIDACIÓN DE NÚMEROS
-// =====================================================
-
-function leerNumeroM(input) {
-    if (!input || input.value.trim() === "") {
-        if (input) input.classList.add("campo-invalido");
-        throw new Error("Completa todos los coeficientes del modelo.");
-    }
-
-    const valor = Number(input.value);
-
-    if (!Number.isFinite(valor)) {
-        input.classList.add("campo-invalido");
-        throw new Error("Los coeficientes deben ser números válidos.");
-    }
-
-    input.classList.remove("campo-invalido");
-    return valor;
-}
-
-// =====================================================
-// OBTENER DATOS
-// =====================================================
-
-function obtenerDatosMGrande() {
-    const n = Number(
-        document.getElementById("numVariablesM").value
-    );
-
-    const m = Number(
-        document.getElementById("numRestriccionesM").value
-    );
-
-    const tipo = document.getElementById("tipoOptimizacionM").value;
-
-    if (
-        !Number.isInteger(n) || n < 1 || n > 20 ||
-        !Number.isInteger(m) || m < 1 || m > 20
-    ) {
-        throw new Error(
-            "El modelo debe contener entre 1 y 20 variables y restricciones."
-        );
-    }
-
-    if (tipo !== "max" && tipo !== "min") {
-        throw new Error("Selecciona Maximizar o Minimizar.");
-    }
-
-    const objetivo = [];
-
-    for (let j = 0; j < n; j++) {
-        objetivo.push(
-            leerNumeroM(
-                document.getElementById("m_fo_" + j)
-            )
-        );
-    }
-
-    const restricciones = [];
-
-    for (let i = 0; i < m; i++) {
-        const coeficientes = [];
-
-        for (let j = 0; j < n; j++) {
-            coeficientes.push(
-                leerNumeroM(
-                    document.getElementById(
-                        "m_r_" + i + "_" + j
-                    )
-                )
-            );
-        }
-
-        let signo = document.getElementById(
-            "m_signo_" + i
-        ).value;
-
-        let rhs = leerNumeroM(
-            document.getElementById("m_rhs_" + i)
-        );
-
-        if (rhs < 0) {
-            rhs = -rhs;
+        for (let i = 0; i < m; i++) {
+            html += `
+                <div style="
+                    margin:12px 0;
+                    display:flex;
+                    align-items:center;
+                    flex-wrap:wrap;
+                    gap:5px;
+                ">
+            `;
 
             for (let j = 0; j < n; j++) {
-                coeficientes[j] = -coeficientes[j];
+                html += crearCampoM(
+                    "m_r_" + i + "_" + j
+                );
+
+                html += " X" + (j + 1);
+
+                if (j < n - 1) html += " + ";
             }
 
-            if (signo === "<=") {
-                signo = ">=";
-            } else if (signo === ">=") {
-                signo = "<=";
-            }
+            html += `
+                <select
+                    id="m_signo_${i}"
+                    style="
+                        padding:9px;
+                        border:1px solid #cbd9e8;
+                        border-radius:8px;
+                    ">
+                    <option value="<=">≤</option>
+                    <option value=">=">≥</option>
+                    <option value="=">=</option>
+                </select>
+            `;
+
+            html += crearCampoM("m_rhs_" + i);
+            html += "</div>";
         }
 
-        restricciones.push({
-            coeficientes,
-            signo,
-            rhs
-        });
+        $("restriccionesM").innerHTML = html;
+
+        $("panelModeloM").classList.remove("oculto");
+        $("panelResultadosM").classList.add("oculto");
+
+        $("panelModeloM").dataset.dimension =
+            n + "," + m;
+
+        actualizarEtapasM(2);
     }
 
-    return {
-        n,
-        m,
-        tipo,
-        objetivo,
-        restricciones
-    };
-}
+    function leerNumeroM(id) {
+        const campo = $(id);
 
-// =====================================================
-// ALGORITMO
-// =====================================================
-
-/*
- * El algoritmo simbólico de M Grande se implementa
- * en mgrande-corrector.js, que se carga después
- * de este archivo.
- *
- * Este controlador evita mostrar una solución
- * incorrecta si dicho corrector no está cargado.
- */
-
-function ejecutarMGrande(datos) {
-    throw new Error(
-        "No se ha cargado el algoritmo de M Grande. " +
-        "Comprueba el archivo mgrande-corrector.js."
-    );
-}
-
-// =====================================================
-// FORMATO DE NÚMEROS
-// =====================================================
-
-function formatearM(valor) {
-    if (typeof valor === "number") {
-        if (!Number.isFinite(valor)) return String(valor);
-        if (Math.abs(valor) < EPSILON_M) return "0";
-        return Number(valor.toFixed(6)).toString();
-    }
-
-    if (valor && typeof valor === "object") {
-        const m = Number(valor.m || 0);
-        const c = Number(valor.c || 0);
-
-        const partes = [];
-
-        if (Math.abs(m) > EPSILON_M) {
-            partes.push(formatearM(m) + "M");
-        }
-
-        if (Math.abs(c) > EPSILON_M || partes.length === 0) {
-            partes.push(
-                (c >= 0 && partes.length ? "+ " : "") +
-                formatearM(c)
+        if (!campo || campo.value.trim() === "") {
+            throw new Error(
+                "Completa todos los coeficientes y cantidades."
             );
         }
 
-        return partes.join(" ");
+        const valor = Number(campo.value);
+
+        if (!Number.isFinite(valor)) {
+            throw new Error(
+                "Ingresa solamente números válidos."
+            );
+        }
+
+        return valor;
     }
 
-    return String(valor);
-}
+    function obtenerDatosMGrande() {
+        const n = Number($("numVariablesM").value);
+        const m = Number($("numRestriccionesM").value);
 
-// =====================================================
-// TABLAS
-// =====================================================
+        if (
+            $("panelModeloM").dataset.dimension !==
+            n + "," + m
+        ) {
+            throw new Error(
+                "Pulsa Generar modelo nuevamente."
+            );
+        }
 
-function copiarTablaM(tabla) {
-    return tabla.map(fila =>
-        fila.map(valor =>
-            valor && typeof valor === "object"
-                ? { ...valor }
-                : valor
-        )
-    );
-}
+        const c = [];
 
-function construirTablaM(iteracion, nombres) {
-    const contenedor = document.createElement("div");
-    contenedor.className = "tabla-responsive";
+        for (let j = 0; j < n; j++) {
+            c.push(leerNumeroM("m_fo_" + j));
+        }
 
-    const tablaHTML = document.createElement("table");
-    tablaHTML.className = "tabla-simplex";
+        const restricciones = [];
 
-    const encabezado = document.createElement("thead");
-    const filaEncabezado = document.createElement("tr");
+        for (let i = 0; i < m; i++) {
+            const a = [];
 
-    ["Base", ...nombres].forEach(nombre => {
-        const th = document.createElement("th");
-        th.textContent = nombre;
-        filaEncabezado.appendChild(th);
-    });
-
-    encabezado.appendChild(filaEncabezado);
-    tablaHTML.appendChild(encabezado);
-
-    const cuerpo = document.createElement("tbody");
-    const filas = iteracion.tabla || [];
-
-    filas.forEach((fila, i) => {
-        const tr = document.createElement("tr");
-        const celdaBase = document.createElement("td");
-
-        celdaBase.textContent =
-            i < iteracion.base.length
-                ? iteracion.base[i]
-                : "Z";
-
-        tr.appendChild(celdaBase);
-
-        fila.forEach(valor => {
-            const td = document.createElement("td");
-            td.textContent = formatearM(valor);
-            tr.appendChild(td);
-        });
-
-        cuerpo.appendChild(tr);
-    });
-
-    tablaHTML.appendChild(cuerpo);
-    contenedor.appendChild(tablaHTML);
-
-    return contenedor;
-}
-
-// =====================================================
-// MOSTRAR RESULTADOS
-// =====================================================
-
-function mostrarMGrande(datos, resultado) {
-    const contenedor = document.getElementById(
-        "procedimientoMGrande"
-    );
-
-    contenedor.innerHTML = "";
-
-    const resumen = document.createElement("div");
-    resumen.className = "resumen-problema";
-
-    const titulo = document.createElement("h4");
-    titulo.textContent = "Preparación del modelo";
-    resumen.appendChild(titulo);
-
-    const descripcion = document.createElement("p");
-    descripcion.textContent =
-        "Objetivo: " +
-        (datos.tipo === "max" ? "Maximizar" : "Minimizar") +
-        " | Variables: " + datos.n +
-        " | Restricciones: " + datos.m;
-
-    resumen.appendChild(descripcion);
-    contenedor.appendChild(resumen);
-
-    if (Array.isArray(resultado.iteraciones)) {
-        resultado.iteraciones.forEach((iteracion, indice) => {
-            const bloque = document.createElement("div");
-            bloque.className = "iteracion-simplex";
-
-            const encabezado = document.createElement("h4");
-            encabezado.textContent =
-                indice === 0
-                    ? "Tabla inicial"
-                    : "Iteración " + indice;
-
-            bloque.appendChild(encabezado);
-
-            if (iteracion.entrante) {
-                const detalle = document.createElement("p");
-                detalle.className = "texto-iteracion";
-
-                detalle.textContent =
-                    "Variable entrante: " + iteracion.entrante +
-                    " | Variable saliente: " +
-                    (iteracion.saliente || "Ninguna");
-
-                bloque.appendChild(detalle);
+            for (let j = 0; j < n; j++) {
+                a.push(
+                    leerNumeroM("m_r_" + i + "_" + j)
+                );
             }
 
-            bloque.appendChild(
-                construirTablaM(iteracion, resultado.nombres)
-            );
+            restricciones.push({
+                a: a,
+                s: $("m_signo_" + i).value,
+                b: leerNumeroM("m_rhs_" + i)
+            });
+        }
 
-            contenedor.appendChild(bloque);
-        });
+        return {
+            n: n,
+            m: m,
+            tipo: $("tipoOptimizacionM").value,
+            c: c,
+            r: restricciones
+        };
     }
 
-    mostrarResultadoM(contenedor, datos, resultado);
+    function cargarEjemploMGrande() {
+        $("tipoOptimizacionM").value = "max";
+        $("numVariablesM").value = 2;
+        $("numRestriccionesM").value = 2;
 
-    document.getElementById("panelResultadosM")
-        .classList.remove("oculto");
-}
+        generarModeloMGrande();
 
-function mostrarResultadoM(contenedor, datos, resultado) {
-    const bloque = document.createElement("div");
-
-    if (resultado.estado !== "optimo") {
-        bloque.className = "resultado-error";
-
-        const titulo = document.createElement("h3");
-
-        const mensajes = {
-            no_factible: "El problema no tiene solución factible",
-            no_acotado: "El problema no está acotado",
-            limite_iteraciones: "Se alcanzó el límite de iteraciones"
+        const valores = {
+            m_fo_0: 3,
+            m_fo_1: 2,
+            m_r_0_0: 1,
+            m_r_0_1: 1,
+            m_rhs_0: 4,
+            m_r_1_0: 1,
+            m_r_1_1: 3,
+            m_rhs_1: 9
         };
 
-        titulo.textContent =
-            mensajes[resultado.estado] ||
-            "No se pudo determinar una solución óptima";
+        for (const [id, valor] of Object.entries(valores)) {
+            $(id).value = valor;
+        }
 
-        bloque.appendChild(titulo);
-        contenedor.appendChild(bloque);
-        return;
+        $("m_signo_0").value = ">=";
+        $("m_signo_1").value = "<=";
+
+        ocultarErrorM();
     }
 
-    bloque.className = "resultado-final";
+    function limpiarMGrande() {
+        document.querySelectorAll(
+            "#funcionObjetivoM input, #restriccionesM input"
+        ).forEach(campo => {
+            campo.value = "";
+        });
 
-    const titulo = document.createElement("h3");
-    titulo.textContent = "Solución óptima encontrada";
-    bloque.appendChild(titulo);
+        $("panelResultadosM").classList.add("oculto");
 
-    const variables = document.createElement("div");
-    variables.className = "variables-resultado";
-
-    resultado.variables.forEach((valor, indice) => {
-        const elemento = document.createElement("div");
-        elemento.className = "resultado-variable";
-
-        const nombre = document.createElement("span");
-        nombre.textContent = "X" + (indice + 1);
-
-        const numero = document.createElement("strong");
-        numero.textContent = formatearM(valor);
-
-        elemento.appendChild(nombre);
-        elemento.appendChild(numero);
-        variables.appendChild(elemento);
-    });
-
-    const z = document.createElement("div");
-    z.className = "resultado-variable destacado";
-
-    const etiqueta = document.createElement("span");
-    etiqueta.textContent = "Valor óptimo de Z";
-
-    const valor = document.createElement("strong");
-    valor.textContent = formatearM(resultado.valorZ);
-
-    z.appendChild(etiqueta);
-    z.appendChild(valor);
-    variables.appendChild(z);
-
-    bloque.appendChild(variables);
-    contenedor.appendChild(bloque);
-}
-
-// =====================================================
-// RESOLVER
-// =====================================================
-
-function resolverMGrande() {
-    ocultarErrorM();
-
-    try {
-        const datos = obtenerDatosMGrande();
-        const resultado = ejecutarMGrande(datos);
-
-        mostrarMGrande(datos, resultado);
-    } catch (error) {
-        document.getElementById("panelResultadosM")
-            .classList.add("oculto");
-
-        mostrarErrorM(error.message);
+        ocultarErrorM();
+        actualizarEtapasM(2);
     }
-}
 
-// =====================================================
-// EJEMPLO
-// =====================================================
+    /*
+     * ALGORITMO M GRANDE
+     *
+     * Convierte minimización en maximización.
+     * Agrega holguras, excesos y artificiales.
+     * Penaliza artificiales con -M.
+     */
 
-function cargarEjemploMGrande() {
-    document.getElementById("tipoOptimizacionM").value = "min";
-    document.getElementById("numVariablesM").value = 2;
-    document.getElementById("numRestriccionesM").value = 2;
+    function ejecutarMGrande(datos) {
+        const n = datos.n;
+        const m = datos.m;
 
-    generarModeloMGrande();
+        const filas = datos.r.map(restriccion => {
+            let a = [...restriccion.a];
+            let s = restriccion.s;
+            let b = restriccion.b;
 
-    const valores = {
-        m_fo_0: 3,
-        m_fo_1: 2,
-        m_r_0_0: 1,
-        m_r_0_1: 1,
-        m_rhs_0: 4,
-        m_r_1_0: 2,
-        m_r_1_1: 1,
-        m_rhs_1: 5
-    };
+            if (b < 0) {
+                a = a.map(valor => -valor);
+                b = -b;
 
-    Object.entries(valores).forEach(([id, valor]) => {
-        document.getElementById(id).value = valor;
-    });
+                if (s === "<=") s = ">=";
+                else if (s === ">=") s = "<=";
+            }
 
-    document.getElementById("m_signo_0").value = ">=";
-    document.getElementById("m_signo_1").value = ">=";
-}
+            return { a, s, b };
+        });
 
-// =====================================================
-// LIMPIAR
-// =====================================================
+        const nombres = Array.from(
+            { length: n },
+            (_, i) => "X" + (i + 1)
+        );
 
-function limpiarMGrande() {
-    document.querySelectorAll(
-        "#panelModeloM input"
-    ).forEach(input => {
-        input.value = "";
-        input.classList.remove("campo-invalido");
-    });
+        const base = [];
+        const artificiales = [];
+        const adicionales = [];
 
-    document.getElementById("panelResultadosM")
-        .classList.add("oculto");
+        let contadorS = 0;
+        let contadorE = 0;
+        let contadorA = 0;
 
-    document.getElementById("procedimientoMGrande")
-        .innerHTML = "";
+        function agregarVariable(nombre, fila, valor, artificial) {
+            const indice = nombres.length;
 
-    ocultarErrorM();
-}
+            nombres.push(nombre);
 
-// =====================================================
-// MENSAJES
-// =====================================================
+            adicionales.push({
+                indice: indice,
+                fila: fila,
+                valor: valor
+            });
 
-function mostrarErrorM(mensaje) {
-    const elemento = document.getElementById("mensajeErrorM");
+            if (artificial) {
+                artificiales.push(indice);
+            }
 
-    elemento.textContent = "⚠ " + mensaje;
-    elemento.classList.remove("oculto");
-}
+            return indice;
+        }
 
-function ocultarErrorM() {
-    const elemento = document.getElementById("mensajeErrorM");
+        filas.forEach((restriccion, i) => {
+            if (restriccion.s === "<=") {
+                base.push(
+                    agregarVariable(
+                        "S" + (++contadorS),
+                        i,
+                        1,
+                        false
+                    )
+                );
 
-    elemento.textContent = "";
-    elemento.classList.add("oculto");
-}
+            } else if (restriccion.s === ">=") {
+                agregarVariable(
+                    "E" + (++contadorE),
+                    i,
+                    -1,
+                    false
+                );
+
+                base.push(
+                    agregarVariable(
+                        "A" + (++contadorA),
+                        i,
+                        1,
+                        true
+                    )
+                );
+
+            } else if (restriccion.s === "=") {
+                base.push(
+                    agregarVariable(
+                        "A" + (++contadorA),
+                        i,
+                        1,
+                        true
+                    )
+                );
+
+            } else {
+                throw new Error(
+                    "Signo de restricción inválido."
+                );
+            }
+        });
+
+        const N = nombres.length;
+
+        const tabla = filas.map((restriccion, i) => {
+            const fila = Array(N + 1).fill(0);
+
+            restriccion.a.forEach((valor, j) => {
+                fila[j] = valor;
+            });
+
+            adicionales.forEach(variable => {
+                if (variable.fila === i) {
+                    fila[variable.indice] = variable.valor;
+                }
+            });
+
+            fila[N] = restriccion.b;
+
+            return fila;
+        });
+
+        const escala = Math.max(
+            1,
+            ...datos.c.map(Math.abs)
+        );
+
+        const GRAN_M = 1000000 * escala;
+
+        const costos = Array(N).fill(0);
+
+        datos.c.forEach((valor, j) => {
+            costos[j] =
+                (datos.tipo === "max" ? 1 : -1) * valor;
+        });
+
+        artificiales.forEach(indice => {
+            costos[indice] = -GRAN_M;
+        });
+
+        const z = Array(N + 1).fill(0);
+
+        function recalcularZ() {
+            for (let j = 0; j <= N; j++) {
+                let valor = j === N ? 0 : -costos[j];
+
+                for (let i = 0; i < m; i++) {
+                    valor +=
+                        costos[base[i]] * tabla[i][j];
+                }
+
+                z[j] =
+                    Math.abs(valor) < EPS ? 0 : valor;
+            }
+        }
+
+        recalcularZ();
+
+        const iteraciones = [];
+
+        function guardarIteracion(descripcion) {
+            iteraciones.push({
+                descripcion: descripcion,
+                base: base.map(indice => nombres[indice]),
+                tabla: [
+                    ...tabla.map(fila => [...fila]),
+                    [...z]
+                ]
+            });
+        }
+
+        guardarIteracion("Tabla inicial");
+
+        let estado = "optimo";
+        let contador = 0;
+
+        while (contador < 500) {
+            let columna = -1;
+            let minimo = -EPS;
+
+            for (let j = 0; j < N; j++) {
+                if (artificiales.includes(j)) {
+                    continue;
+                }
+
+                if (z[j] < minimo) {
+                    minimo = z[j];
+                    columna = j;
+                }
+            }
+
+            if (columna < 0) {
+                break;
+            }
+
+            let filaPivote = -1;
+            let mejorRazon = Infinity;
+
+            for (let i = 0; i < m; i++) {
+                if (tabla[i][columna] > EPS) {
+                    const razon =
+                        tabla[i][N] / tabla[i][columna];
+
+                    if (
+                        razon < mejorRazon - EPS ||
+                        (
+                            Math.abs(razon - mejorRazon) <= EPS &&
+                            (
+                                filaPivote < 0 ||
+                                base[i] < base[filaPivote]
+                            )
+                        )
+                    ) {
+                        mejorRazon = razon;
+                        filaPivote = i;
+                    }
+                }
+            }
+
+            if (filaPivote < 0) {
+                estado = "no_acotado";
+                break;
+            }
+
+            const entrante = nombres[columna];
+            const saliente = nombres[base[filaPivote]];
+            const pivote = tabla[filaPivote][columna];
+
+            for (let j = 0; j <= N; j++) {
+                tabla[filaPivote][j] /= pivote;
+            }
+
+            for (let i = 0; i < m; i++) {
+                if (i === filaPivote) continue;
+
+                const factor = tabla[i][columna];
+
+                for (let j = 0; j <= N; j++) {
+                    tabla[i][j] -=
+                        factor * tabla[filaPivote][j];
+                }
+            }
+
+            base[filaPivote] = columna;
+
+            recalcularZ();
+
+            contador++;
+
+            guardarIteracion(
+                "Entra " + entrante +
+                ", sale " + saliente +
+                ", pivote = " + fmt(pivote)
+            );
+        }
+
+        if (contador >= 500) {
+            estado = "limite";
+        }
+
+        const artificialPositiva = base.some(
+            (indice, i) =>
+                artificiales.includes(indice) &&
+                tabla[i][N] > 1e-6
+        );
+
+        if (artificialPositiva) {
+            estado = "no_factible";
+        }
+
+        const variables = Array(n).fill(0);
+
+        base.forEach((indice, i) => {
+            if (indice < n) {
+                variables[indice] = tabla[i][N];
+            }
+        });
+
+        const valorZ = variables.reduce(
+            (suma, valor, j) =>
+                suma + valor * datos.c[j],
+            0
+        );
+
+        return {
+            estado: estado,
+            nombres: [...nombres, "RHS"],
+            iteraciones: iteraciones,
+            variables: variables,
+            valorZ: valorZ,
+            artificiales: artificiales.map(
+                indice => nombres[indice]
+            )
+        };
+    }
+
+    /*
+     * PRESENTACIÓN DE RESULTADOS
+     */
+
+    function mostrarMGrande(datos, resultado) {
+        const contenedor = $("procedimientoMGrande");
+
+        let html = `
+            <h3>Modelo de ${
+                datos.tipo === "max"
+                    ? "maximización"
+                    : "minimización"
+            }</h3>
+
+            <p>
+                <strong>Variables artificiales:</strong>
+                ${
+                    resultado.artificiales.join(", ") ||
+                    "Ninguna"
+                }
+            </p>
+        `;
+
+        resultado.iteraciones.forEach(
+            (iteracion, indice) => {
+                html += `
+                    <h4>
+                        Iteración ${indice}:
+                        ${iteracion.descripcion}
+                    </h4>
+
+                    <div style="overflow-x:auto">
+                        <table style="
+                            border-collapse:collapse;
+                            width:100%;
+                            min-width:500px;
+                        ">
+                            <thead>
+                                <tr>
+                                    <th>Base</th>
+                `;
+
+                resultado.nombres.forEach(nombre => {
+                    html += `<th>${nombre}</th>`;
+                });
+
+                html += `
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                iteracion.tabla.forEach((fila, i) => {
+                    const nombreBase =
+                        i < datos.m
+                            ? iteracion.base[i]
+                            : "Zj - Cj";
+
+                    html += `<tr><th>${nombreBase}</th>`;
+
+                    fila.forEach(valor => {
+                        html += `<td>${fmt(valor)}</td>`;
+                    });
+
+                    html += "</tr>";
+                });
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+        );
+
+        if (resultado.estado === "optimo") {
+            html += `
+                <div style="
+                    margin-top:20px;
+                    padding:20px;
+                    background:#e8f8ef;
+                    border-radius:12px;
+                ">
+                    <h3>✓ Solución óptima</h3>
+            `;
+
+            resultado.variables.forEach((valor, i) => {
+                html += `
+                    <p>
+                        <strong>X${i + 1} =</strong>
+                        ${fmt(valor)}
+                    </p>
+                `;
+            });
+
+            html += `
+                    <h3>
+                        Valor óptimo Z =
+                        ${fmt(resultado.valorZ)}
+                    </h3>
+                </div>
+            `;
+
+        } else {
+            const mensajes = {
+                no_factible:
+                    "El problema no tiene solución factible.",
+                no_acotado:
+                    "El problema es no acotado.",
+                limite:
+                    "Se alcanzó el límite de iteraciones."
+            };
+
+            html += `
+                <div style="
+                    padding:18px;
+                    background:#fff0f2;
+                    border-radius:12px;
+                ">
+                    <strong>
+                        ${mensajes[resultado.estado]}
+                    </strong>
+                </div>
+            `;
+        }
+
+        contenedor.innerHTML = html;
+
+        $("panelResultadosM").classList.remove("oculto");
+
+        actualizarEtapasM(3);
+    }
+
+    function resolverMGrande() {
+        ocultarErrorM();
+
+        try {
+            const datos = obtenerDatosMGrande();
+            const resultado = ejecutarMGrande(datos);
+
+            mostrarMGrande(datos, resultado);
+
+            $("panelResultadosM").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+        } catch (error) {
+            console.error("Error en M Grande:", error);
+            mostrarErrorM(error.message);
+        }
+    }
+
+    window.generarModeloMGrande = generarModeloMGrande;
+    window.cargarEjemploMGrande = cargarEjemploMGrande;
+    window.limpiarMGrande = limpiarMGrande;
+    window.resolverMGrande = resolverMGrande;
+})();

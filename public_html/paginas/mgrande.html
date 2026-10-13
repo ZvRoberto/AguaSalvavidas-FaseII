@@ -1,35 +1,30 @@
 
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Método M Grande | Great Value</title>
-
     <link rel="stylesheet" href="../css/estilos.css">
 
     <style>
+        * { box-sizing: border-box; }
+
         body {
             margin: 0;
             background: #f3f7fc;
             color: #172b46;
-            font-family: "DM Sans", Arial, sans-serif;
-        }
-
-        * {
-            box-sizing: border-box;
+            font-family: Arial, sans-serif;
         }
 
         .encabezado {
-            background: #ffffff;
+            background: white;
             border-bottom: 1px solid #dce7f1;
         }
 
         .barra-superior {
             width: min(92%, 1200px);
-            min-height: 88px;
+            min-height: 85px;
             margin: auto;
             display: flex;
             align-items: center;
@@ -40,85 +35,69 @@
         .logo-texto {
             display: flex;
             align-items: center;
-            gap: 13px;
+            gap: 12px;
         }
 
         .gota {
-            display: grid;
-            place-items: center;
-            width: 50px;
-            height: 50px;
-            border-radius: 14px;
+            padding: 12px;
             background: #e7f7ff;
-            font-size: 26px;
+            border-radius: 12px;
+            font-size: 25px;
         }
 
         .logo-texto h1 {
             margin: 0;
             color: #071b36;
-            font-size: 1.5rem;
         }
 
         .logo-texto p {
-            margin: 0;
+            margin: 3px 0;
             color: #71829a;
-            font-size: 0.8rem;
+            font-size: 13px;
         }
 
         .btn-volver {
-            padding: 11px 17px;
-            border-radius: 10px;
+            padding: 12px 16px;
             background: #eaf4ff;
             color: #0758a6;
-            font-weight: 800;
+            border-radius: 10px;
             text-decoration: none;
-        }
-
-        .btn-volver:hover {
-            background: #d7ebff;
+            font-weight: bold;
         }
 
         .contenedor-metodo {
             width: min(94%, 1200px);
-            margin: 30px auto 65px;
+            margin: 30px auto 60px;
         }
-
-        /* PORTADA */
 
         .simplex-hero {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            gap: 25px;
+            align-items: center;
+            gap: 20px;
             padding: 45px;
             border-radius: 22px;
-            background: linear-gradient(
-                120deg,
-                #071b36,
-                #104575 70%,
-                #0877dc
-            );
-            color: #ffffff;
-            box-shadow: 0 15px 35px #071b3615;
+            background: linear-gradient(120deg, #071b36, #104575, #0877dc);
+            color: white;
         }
 
         .simplex-categoria {
             color: #a8eaff;
-            font-size: 0.78rem;
-            font-weight: 800;
-            letter-spacing: 1.3px;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
         }
 
         .simplex-hero h2 {
-            margin: 13px 0;
-            color: #ffffff;
-            font-size: clamp(2rem, 4vw, 3.1rem);
+            margin: 15px 0;
+            color: white;
+            font-size: clamp(30px, 4vw, 48px);
         }
 
         .simplex-hero p {
-            max-width: 690px;
+            max-width: 650px;
             color: #deefff;
-            line-height: 1.8;
+            line-height: 1.7;
         }
 
         .simplex-hero-etiquetas {
@@ -129,26 +108,23 @@
         }
 
         .simplex-hero-etiquetas span {
-            padding: 7px 12px;
-            border: 1px solid #ffffff40;
+            padding: 8px 12px;
+            border: 1px solid #ffffff50;
             border-radius: 20px;
             background: #ffffff15;
-            font-size: 0.82rem;
+            font-size: 13px;
         }
 
         .simplex-hero-icono {
             display: grid;
             place-items: center;
-            width: 125px;
-            height: 125px;
-            flex-shrink: 0;
-            border: 1px solid #ffffff40;
+            width: 120px;
+            height: 120px;
             border-radius: 25px;
-            background: #ffffff16;
-            font-size: 65px;
+            background: #ffffff20;
+            font-size: 55px;
+            font-weight: bold;
         }
-
-        /* INDICADORES */
 
         .simplex-progreso {
             display: grid;
@@ -162,9 +138,9 @@
             align-items: center;
             gap: 12px;
             padding: 18px;
+            background: white;
             border: 1px solid #dce7f1;
             border-radius: 14px;
-            background: #ffffff;
         }
 
         .simplex-etapa.activa {
@@ -172,16 +148,17 @@
             background: #edf7ff;
         }
 
-        .simplex-etapa-numero {
+        .simplex-etapa-numero,
+        .paso {
             display: grid;
             place-items: center;
-            width: 40px;
-            height: 40px;
             flex-shrink: 0;
-            border-radius: 11px;
+            width: 42px;
+            height: 42px;
             background: #e8f4ff;
             color: #0758a6;
-            font-weight: 800;
+            border-radius: 12px;
+            font-weight: bold;
         }
 
         .simplex-etapa strong,
@@ -190,18 +167,17 @@
         }
 
         .simplex-etapa small {
+            margin-top: 4px;
             color: #71829a;
         }
-
-        /* PANELES */
 
         .panel {
             margin-bottom: 25px;
             padding: 30px;
+            background: white;
             border: 1px solid #dce7f1;
             border-radius: 20px;
-            background: #ffffff;
-            box-shadow: 0 10px 30px #071b360a;
+            box-shadow: 0 8px 25px #071b360a;
         }
 
         .panel-titulo {
@@ -211,22 +187,10 @@
             margin-bottom: 25px;
         }
 
-        .paso {
-            display: grid;
-            place-items: center;
-            width: 44px;
-            height: 44px;
-            flex-shrink: 0;
-            border-radius: 12px;
-            background: #e8f4ff;
-            color: #0758a6;
-            font-weight: 800;
-        }
-
         .panel-titulo h3 {
-            margin: 0 0 5px;
+            margin: 0 0 7px;
             color: #071b36;
-            font-size: 1.45rem;
+            font-size: 23px;
         }
 
         .panel-titulo p {
@@ -234,64 +198,43 @@
             color: #71829a;
         }
 
-        .simplex-ayuda {
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-            margin-bottom: 25px;
+        .simplex-ayuda,
+        .simplex-nota {
             padding: 18px;
+            background: #edf7ff;
             border: 1px solid #d2e8fa;
             border-radius: 12px;
-            background: #f0f8ff;
+            margin-bottom: 25px;
         }
 
-        .simplex-ayuda-icono {
-            font-size: 25px;
-        }
-
-        .simplex-ayuda p {
-            margin: 5px 0 0;
+        .simplex-ayuda p,
+        .simplex-nota p {
             color: #506b86;
+            line-height: 1.7;
         }
-
-        /* FORMULARIOS */
 
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(
-                auto-fit,
-                minmax(210px, 1fr)
-            );
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
         }
 
         .campo label {
             display: block;
-            margin-bottom: 9px;
+            margin-bottom: 10px;
             color: #405a76;
-            font-size: 0.78rem;
-            font-weight: 800;
+            font-size: 12px;
+            font-weight: bold;
         }
 
         .campo input,
         .campo select {
             width: 100%;
-            min-height: 46px;
-            padding: 10px 13px;
+            padding: 13px;
             border: 1px solid #cbd9e8;
             border-radius: 10px;
-            background: #ffffff;
-            color: #172b46;
+            background: white;
         }
-
-        .campo input:focus,
-        .campo select:focus {
-            border-color: #0877dc;
-            outline: none;
-            box-shadow: 0 0 0 3px #0877dc20;
-        }
-
-        /* BOTONES */
 
         .acciones {
             display: flex;
@@ -302,13 +245,12 @@
         }
 
         .acciones button {
-            min-height: 46px;
-            padding: 11px 20px;
+            padding: 14px 20px;
             border: none;
             border-radius: 10px;
             background: #0877dc;
-            color: #ffffff;
-            font-weight: 800;
+            color: white;
+            font-weight: bold;
             cursor: pointer;
         }
 
@@ -318,85 +260,65 @@
 
         .acciones .btn-secundario,
         .acciones .btn-limpiar {
-            border: 1px solid #cce2f5;
             background: #edf6ff;
             color: #0758a6;
         }
 
-        /* MODELO MATEMÁTICO */
-
         .simplex-bloque-etiqueta {
-            margin: 24px 0 12px;
+            margin: 25px 0 12px;
             color: #0877dc;
-            font-size: 0.8rem;
-            font-weight: 800;
+            font-size: 12px;
+            font-weight: bold;
             letter-spacing: 1px;
         }
 
         .bloque-modelo {
-            min-width: 0;
-            margin-bottom: 22px;
             padding: 22px;
+            margin-bottom: 20px;
+            background: #f8fbff;
             border: 1px solid #dce7f1;
             border-radius: 13px;
-            background: #f8fbff;
             overflow-x: auto;
         }
 
         .bloque-modelo h4 {
-            margin: 0 0 18px;
-            color: #071b36;
-        }
-
-        .ecuacion {
-            min-width: max-content;
-            padding: 12px 0;
+            margin-top: 0;
         }
 
         .bloque-modelo input {
             width: 85px;
-            max-width: none;
-            padding: 9px;
+            padding: 10px;
+            margin: 5px;
             border: 1px solid #cbd9e8;
             border-radius: 8px;
             text-align: center;
         }
 
         .bloque-modelo select {
-            padding: 9px;
+            padding: 10px;
+            margin: 5px;
             border: 1px solid #cbd9e8;
             border-radius: 8px;
         }
 
-        .simplex-nota {
-            padding: 16px 19px;
-            border-left: 4px solid #0877dc;
-            border-radius: 10px;
-            background: #edf6ff;
+        #restriccionesM > div {
+            margin-bottom: 12px;
         }
 
-        .simplex-nota p {
-            margin: 5px 0 0;
-            color: #506b86;
-        }
-
-        .mensaje-error {
-            margin-top: 18px;
-            padding: 14px;
-            border-radius: 10px;
-            background: #fff0f2;
-            color: #a52e3d;
-        }
-
-        /* RESULTADOS */
-
+        .leyenda-m,
         .simplex-leyenda {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 25px;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
             color: #506b86;
-            font-size: 0.88rem;
+        }
+
+        .leyenda-m span {
+            padding: 8px 12px;
+            background: #edf6ff;
+            border-radius: 8px;
         }
 
         .simplex-leyenda > div {
@@ -408,112 +330,79 @@
         .simplex-color-entrante,
         .simplex-color-saliente,
         .simplex-color-pivote {
-            display: inline-block;
             width: 15px;
             height: 15px;
             border-radius: 4px;
         }
 
-        .simplex-color-entrante {
-            background: #cfeaff;
-        }
-
-        .simplex-color-saliente {
-            background: #ffe6b8;
-        }
-
-        .simplex-color-pivote {
-            background: #c6f1da;
-        }
+        .simplex-color-entrante { background: #cfeaff; }
+        .simplex-color-saliente { background: #ffe6b8; }
+        .simplex-color-pivote { background: #c6f1da; }
 
         #procedimientoMGrande {
-            max-width: 100%;
             overflow-x: auto;
         }
 
         #procedimientoMGrande table {
             width: max-content;
             min-width: 100%;
-            margin: 15px 0;
             border-collapse: collapse;
-            background: #ffffff;
+            margin: 15px 0;
         }
 
         #procedimientoMGrande th,
         #procedimientoMGrande td {
-            padding: 10px 13px;
             border: 1px solid #dce7f1;
+            padding: 10px;
             text-align: center;
         }
 
         #procedimientoMGrande th {
             background: #eaf4ff;
-            color: #071b36;
         }
 
-        .oculto {
-            display: none !important;
+        .mensaje-error {
+            padding: 15px;
+            background: #fff0f2;
+            color: #a52e3d;
+            border-radius: 10px;
+            margin-top: 15px;
         }
+
+        .oculto { display: none !important; }
 
         footer {
-            padding: 25px 15px;
-            border-top: 1px solid #dce7f1;
-            background: #ffffff;
-            color: #71829a;
+            padding: 25px;
+            background: white;
             text-align: center;
-            font-size: 0.85rem;
+            color: #71829a;
         }
 
         @media (max-width: 700px) {
-            .simplex-hero {
-                padding: 28px;
-            }
-
-            .simplex-hero-icono {
-                display: none;
-            }
-
-            .simplex-progreso {
-                grid-template-columns: 1fr;
-            }
-
-            .panel {
-                padding: 20px 15px;
-            }
-
-            .acciones button {
-                width: 100%;
-            }
-
-            .barra-superior {
-                flex-wrap: wrap;
-                padding: 15px 0;
-            }
+            .simplex-hero { padding: 28px; }
+            .simplex-hero-icono { display: none; }
+            .simplex-progreso { grid-template-columns: 1fr; }
+            .panel { padding: 20px 15px; }
+            .barra-superior { flex-wrap: wrap; padding: 15px 0; }
         }
     </style>
-
 </head>
 
 <body>
 
 <header class="encabezado">
     <div class="barra-superior">
-
         <div class="logo-texto">
-
             <div class="gota">💧</div>
-
             <div>
                 <h1>Great Value</h1>
                 <p>Investigación de Operaciones</p>
             </div>
-
         </div>
 
         <a href="../index.html" class="btn-volver">
             ← Volver al menú
         </a>
-
     </div>
 </header>
 
@@ -522,7 +411,6 @@
     <!-- PORTADA -->
 
     <section class="simplex-hero">
-
         <div class="simplex-hero-contenido">
 
             <span class="simplex-categoria">
@@ -533,25 +421,18 @@
 
             <p>
                 Resuelve problemas de programación lineal
-                que necesitan variables artificiales,
-                analizando el procedimiento mediante
-                tablas de iteración y operaciones de pivoteo.
+                utilizando variables artificiales, penalización M
+                y operaciones de pivoteo.
             </p>
 
             <div class="simplex-hero-etiquetas">
-
                 <span>✓ Variables artificiales</span>
                 <span>✓ Restricciones mixtas</span>
-                <span>✓ Iteraciones paso a paso</span>
-
+                <span>✓ Procedimiento paso a paso</span>
             </div>
-
         </div>
 
-        <div class="simplex-hero-icono">
-            🧮
-        </div>
-
+        <div class="simplex-hero-icono">M</div>
     </section>
 
     <!-- ETAPAS -->
@@ -559,119 +440,90 @@
     <section class="simplex-progreso">
 
         <div class="simplex-etapa activa" id="etapaM1">
-
             <span class="simplex-etapa-numero">01</span>
-
             <div>
                 <strong>Configuración</strong>
                 <small>Definir el problema</small>
             </div>
-
         </div>
 
         <div class="simplex-etapa" id="etapaM2">
-
             <span class="simplex-etapa-numero">02</span>
-
             <div>
                 <strong>Modelo</strong>
-                <small>Ingresar restricciones</small>
+                <small>Ingresar coeficientes</small>
             </div>
-
         </div>
 
         <div class="simplex-etapa" id="etapaM3">
-
             <span class="simplex-etapa-numero">03</span>
-
             <div>
                 <strong>Resultados</strong>
-                <small>Analizar las iteraciones</small>
+                <small>Analizar iteraciones</small>
             </div>
-
         </div>
 
     </section>
 
-    <!-- CONFIGURACIÓN -->
+    <!-- PASO 1 -->
 
     <section class="panel">
 
         <div class="panel-titulo">
-
             <span class="paso">1</span>
-
             <div>
                 <h3>Configuración del problema</h3>
-
                 <p>
-                    Selecciona el tipo de optimización,
-                    las variables y las restricciones.
+                    Selecciona el tipo de optimización y
+                    las dimensiones del modelo.
                 </p>
             </div>
-
         </div>
 
         <div class="simplex-ayuda">
-
-            <div class="simplex-ayuda-icono">💡</div>
-
-            <div>
-                <strong>¿Cuándo utilizar M Grande?</strong>
-
-                <p>
-                    Se utiliza cuando un problema presenta
-                    restricciones mayores o iguales que,
-                    o igualdades que requieren variables
-                    artificiales para iniciar el procedimiento.
-                </p>
-            </div>
-
+            <strong>💡 ¿Cuándo utilizar M Grande?</strong>
+            <p>
+                Cuando un modelo presenta restricciones
+                mayores o iguales que, o igualdades, pueden
+                necesitarse variables artificiales para
+                comenzar el procedimiento.
+            </p>
         </div>
 
         <div class="form-grid">
 
             <div class="campo">
-
-                <label for="tipoMGrande">
+                <label for="tipoOptimizacionM">
                     TIPO DE OPTIMIZACIÓN
                 </label>
-
-                <select id="tipoMGrande">
+                <select id="tipoOptimizacionM">
                     <option value="max">Maximizar</option>
                     <option value="min">Minimizar</option>
                 </select>
-
             </div>
 
             <div class="campo">
-
-                <label for="numVariablesMGrande">
+                <label for="numVariablesM">
                     VARIABLES DE DECISIÓN
                 </label>
-
                 <input
                     type="number"
-                    id="numVariablesMGrande"
+                    id="numVariablesM"
                     min="1"
                     max="20"
                     value="2">
-
             </div>
 
             <div class="campo">
-
-                <label for="numRestriccionesMGrande">
+                <label for="numRestriccionesM">
                     NÚMERO DE RESTRICCIONES
                 </label>
-
                 <input
                     type="number"
-                    id="numRestriccionesMGrande"
+                    id="numRestriccionesM"
                     min="1"
                     max="20"
-                    value="3">
-
+                    value="2">
             </div>
 
         </div>
@@ -682,42 +534,31 @@
                 type="button"
                 class="btn-secundario"
                 onclick="cargarEjemploMGrande()">
-
                 ✦ Cargar ejemplo Great Value
-
             </button>
 
             <button
                 type="button"
                 onclick="generarModeloMGrande()">
-
                 Generar modelo →
-
             </button>
 
         </div>
-
     </section>
 
-    <!-- MODELO -->
+    <!-- PASO 2 -->
 
-    <section
-        class="panel oculto"
-        id="panelModeloMGrande">
+    <section class="panel oculto" id="panelModeloM">
 
         <div class="panel-titulo">
-
             <span class="paso">2</span>
-
             <div>
                 <h3>Construcción del modelo</h3>
-
                 <p>
-                    Ingresa los coeficientes de la función
-                    objetivo y las restricciones del problema.
+                    Ingresa los coeficientes y selecciona
+                    el signo de cada restricción.
                 </p>
             </div>
-
         </div>
 
         <div class="simplex-bloque-etiqueta">
@@ -725,14 +566,12 @@
         </div>
 
         <div class="bloque-modelo">
-
             <h4>Coeficientes de la función objetivo</h4>
 
             <div
-                id="funcionObjetivoMGrande"
+                id="funcionObjetivoM"
                 class="ecuacion">
             </div>
-
         </div>
 
         <div class="simplex-bloque-etiqueta">
@@ -740,28 +579,29 @@
         </div>
 
         <div class="bloque-modelo">
+            <h4>Restricciones y recursos disponibles</h4>
 
-            <h4>Restricciones y condiciones</h4>
+            <div id="restriccionesM"></div>
+        </div>
 
-            <div id="restriccionesMGrande"></div>
-
+        <div class="leyenda-m">
+            <strong>Variables utilizadas:</strong>
+            <span>S = Holgura</span>
+            <span>E = Exceso</span>
+            <span>A = Artificial</span>
+            <span>M = Penalización</span>
         </div>
 
         <div class="simplex-nota">
-
-            <strong>Variables artificiales</strong>
-
+            <strong>Condición de no negatividad</strong>
             <p>
-                El método incorpora una penalización M
-                para las variables artificiales. El objetivo
-                es eliminarlas de la solución básica y
-                encontrar una solución factible del problema.
+                Todas las variables de decisión deben
+                ser mayores o iguales que cero.
             </p>
-
         </div>
 
         <div
-            id="mensajeErrorMGrande"
+            id="mensajeErrorM"
             class="mensaje-error oculto">
         </div>
 
@@ -771,43 +611,31 @@
                 type="button"
                 class="btn-limpiar"
                 onclick="limpiarMGrande()">
-
                 Limpiar datos
-
             </button>
 
             <button
                 type="button"
                 onclick="resolverMGrande()">
-
                 Resolver paso a paso →
-
             </button>
 
         </div>
-
     </section>
 
-    <!-- RESULTADOS -->
+    <!-- PASO 3 -->
 
-    <section
-        class="panel oculto"
-        id="panelResultadosMGrande">
+    <section class="panel oculto" id="panelResultadosM">
 
         <div class="panel-titulo">
-
             <span class="paso">3</span>
-
             <div>
                 <h3>Procedimiento matemático</h3>
-
                 <p>
-                    Consulta las tablas del método M Grande,
-                    los elementos pivote y el resultado
-                    final del problema.
+                    Examina las variables artificiales,
+                    las iteraciones y la solución final.
                 </p>
             </div>
-
         </div>
 
         <div class="simplex-leyenda">
@@ -842,8 +670,10 @@
     </p>
 </footer>
 
-<script src="../js/validaciones.js"></script>
-<script src="../js/mgrande.js"></script>
 
+
+<script src="../js/mgrande.js"></script>
 </body>
 </html>
+
+

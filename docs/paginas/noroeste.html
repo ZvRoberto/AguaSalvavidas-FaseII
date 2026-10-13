@@ -1,0 +1,735 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esquina Noroeste | Great Value</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #f3f7fc;
+            color: #172b46;
+            font-family: Arial, sans-serif;
+        }
+
+        .encabezado {
+            background: white;
+            border-bottom: 1px solid #dce7f1;
+        }
+
+        .barra-superior {
+            width: min(92%, 1200px);
+            min-height: 85px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .logo-texto {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .gota {
+            padding: 12px;
+            background: #e7f7ff;
+            border-radius: 12px;
+            font-size: 25px;
+        }
+
+        .logo-texto h1 {
+            margin: 0;
+            color: #071b36;
+        }
+
+        .logo-texto p {
+            margin: 3px 0;
+            color: #71829a;
+            font-size: 13px;
+        }
+
+        .btn-volver {
+            padding: 12px 16px;
+            background: #eaf4ff;
+            color: #0758a6;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .contenedor-metodo {
+            width: min(94%, 1200px);
+            margin: 30px auto 60px;
+        }
+
+        .simplex-hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            padding: 45px;
+            border-radius: 22px;
+            background: linear-gradient(
+                120deg,
+                #071b36,
+                #104575,
+                #0877dc
+            );
+            color: white;
+        }
+
+        .simplex-categoria {
+            color: #a8eaff;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .simplex-hero h2 {
+            margin: 15px 0;
+            color: white;
+            font-size: clamp(30px, 4vw, 48px);
+        }
+
+        .simplex-hero p {
+            max-width: 650px;
+            color: #deefff;
+            line-height: 1.7;
+        }
+
+        .simplex-hero-etiquetas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .simplex-hero-etiquetas span {
+            padding: 8px 12px;
+            border: 1px solid #ffffff50;
+            border-radius: 20px;
+            background: #ffffff15;
+            font-size: 13px;
+        }
+
+        .simplex-hero-icono {
+            display: grid;
+            place-items: center;
+            width: 120px;
+            height: 120px;
+            border-radius: 25px;
+            background: #ffffff20;
+            font-size: 55px;
+        }
+
+        .simplex-progreso {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .simplex-etapa {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px;
+            background: white;
+            border: 1px solid #dce7f1;
+            border-radius: 14px;
+        }
+
+        .simplex-etapa.activa {
+            border-color: #0877dc;
+            background: #edf7ff;
+        }
+
+        .simplex-etapa-numero,
+        .paso {
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            width: 42px;
+            height: 42px;
+            background: #e8f4ff;
+            color: #0758a6;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .simplex-etapa strong,
+        .simplex-etapa small {
+            display: block;
+        }
+
+        .simplex-etapa small {
+            margin-top: 4px;
+            color: #71829a;
+        }
+
+        .panel {
+            margin-bottom: 25px;
+            padding: 30px;
+            background: white;
+            border: 1px solid #dce7f1;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px #071b360a;
+        }
+
+        .panel-titulo {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .panel-titulo h3 {
+            margin: 0 0 7px;
+            color: #071b36;
+            font-size: 23px;
+        }
+
+        .panel-titulo p {
+            margin: 0;
+            color: #71829a;
+        }
+
+        .simplex-ayuda,
+        .simplex-nota {
+            padding: 18px;
+            background: #edf7ff;
+            border: 1px solid #d2e8fa;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .simplex-ayuda p,
+        .simplex-nota p {
+            color: #506b86;
+            line-height: 1.7;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fit,
+                minmax(200px, 1fr)
+            );
+            gap: 20px;
+        }
+
+        .campo label {
+            display: block;
+            margin-bottom: 10px;
+            color: #405a76;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .campo input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #cbd9e8;
+            border-radius: 10px;
+            background: white;
+        }
+
+        .acciones {
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .acciones button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #0877dc;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .acciones button:hover {
+            background: #0758a6;
+        }
+
+        .acciones .btn-secundario,
+        .acciones .btn-limpiar {
+            background: #edf6ff;
+            color: #0758a6;
+        }
+
+        .simplex-bloque-etiqueta {
+            margin: 25px 0 12px;
+            color: #0877dc;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .noroeste-guia {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fit,
+                minmax(180px, 1fr)
+            );
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .noroeste-guia-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            border: 1px solid #dce7f1;
+            border-radius: 12px;
+            background: #f8fbff;
+        }
+
+        .noroeste-guia-icono {
+            font-size: 25px;
+        }
+
+        .noroeste-guia-item strong,
+        .noroeste-guia-item small {
+            display: block;
+        }
+
+        .noroeste-guia-item small {
+            color: #71829a;
+            margin-top: 4px;
+        }
+
+        .noroeste-matriz-marco {
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #dce7f1;
+            border-radius: 13px;
+            background: #f8fbff;
+            overflow-x: auto;
+        }
+
+        .tabla-transporte,
+        #procedimientoNoroeste table {
+            width: max-content;
+            min-width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .tabla-transporte th,
+        .tabla-transporte td,
+        #procedimientoNoroeste th,
+        #procedimientoNoroeste td {
+            border: 1px solid #dce7f1;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .tabla-transporte th,
+        #procedimientoNoroeste th {
+            background: #eaf4ff;
+            color: #071b36;
+        }
+
+        .tabla-transporte input,
+        .input-matriz {
+            width: 85px;
+            padding: 10px;
+            border: 1px solid #cbd9e8;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        #resumenBalance {
+            margin-bottom: 20px;
+        }
+
+        #procedimientoNoroeste {
+            overflow-x: auto;
+        }
+
+        .noroeste-leyenda {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 25px;
+            color: #506b86;
+        }
+
+        .noroeste-leyenda > div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .noroeste-muestra-asignacion,
+        .noroeste-muestra-oferta,
+        .noroeste-muestra-demanda {
+            width: 15px;
+            height: 15px;
+            border-radius: 4px;
+        }
+
+        .noroeste-muestra-asignacion {
+            background: #c6f1da;
+        }
+
+        .noroeste-muestra-oferta {
+            background: #cfeaff;
+        }
+
+        .noroeste-muestra-demanda {
+            background: #ffe6b8;
+        }
+
+        .mensaje-error {
+            padding: 15px;
+            background: #fff0f2;
+            color: #a52e3d;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .oculto { display: none !important; }
+
+        footer {
+            padding: 25px;
+            background: white;
+            text-align: center;
+            color: #71829a;
+        }
+
+        @media (max-width: 700px) {
+            .simplex-hero { padding: 28px; }
+            .simplex-hero-icono { display: none; }
+            .simplex-progreso { grid-template-columns: 1fr; }
+            .panel { padding: 20px 15px; }
+            .barra-superior { flex-wrap: wrap; padding: 15px 0; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="encabezado">
+    <div class="barra-superior">
+
+        <div class="logo-texto">
+            <div class="gota">💧</div>
+            <div>
+                <h1>Great Value</h1>
+                <p>Investigación de Operaciones</p>
+            </div>
+        </div>
+
+        <a href="../index.html" class="btn-volver">
+            ← Volver al menú
+        </a>
+
+    </div>
+</header>
+
+<main class="contenedor-metodo">
+
+    <!-- PORTADA -->
+
+    <section class="simplex-hero">
+
+        <div class="simplex-hero-contenido">
+
+            <span class="simplex-categoria">
+                MODELOS DE TRANSPORTE · MÉTODO 04
+            </span>
+
+            <h2>Método de la Esquina Noroeste</h2>
+
+            <p>
+                Organiza los costos de transporte, la oferta
+                y la demanda, y construye una solución inicial
+                mediante asignaciones sucesivas.
+            </p>
+
+            <div class="simplex-hero-etiquetas">
+                <span>✓ Matriz de costos</span>
+                <span>✓ Oferta y demanda</span>
+                <span>✓ Asignaciones paso a paso</span>
+            </div>
+
+        </div>
+
+        <div class="simplex-hero-icono">🚚</div>
+
+    </section>
+
+    <!-- ETAPAS -->
+
+    <section class="simplex-progreso">
+
+        <div class="simplex-etapa activa" id="etapaN1">
+            <span class="simplex-etapa-numero">01</span>
+            <div>
+                <strong>Configuración</strong>
+                <small>Orígenes y destinos</small>
+            </div>
+        </div>
+
+        <div class="simplex-etapa" id="etapaN2">
+            <span class="simplex-etapa-numero">02</span>
+            <div>
+                <strong>Matriz</strong>
+                <small>Costos, oferta y demanda</small>
+            </div>
+        </div>
+
+        <div class="simplex-etapa" id="etapaN3">
+            <span class="simplex-etapa-numero">03</span>
+            <div>
+                <strong>Resultados</strong>
+                <small>Asignaciones y costo total</small>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- PASO 1 -->
+
+    <section class="panel">
+
+        <div class="panel-titulo">
+            <span class="paso">1</span>
+            <div>
+                <h3>Configuración del transporte</h3>
+                <p>
+                    Define cuántos orígenes y destinos
+                    participan en el problema.
+                </p>
+            </div>
+        </div>
+
+        <div class="simplex-ayuda">
+            <strong>💡 ¿Qué es la Esquina Noroeste?</strong>
+            <p>
+                Es un procedimiento que comienza en la primera
+                celda de la matriz y distribuye cantidades
+                avanzando hacia la derecha o hacia abajo.
+                Permite obtener una solución inicial factible.
+            </p>
+        </div>
+
+        <div class="form-grid">
+
+            <div class="campo">
+                <label for="numOrigenes">
+                    NÚMERO DE ORÍGENES
+                </label>
+
+                <input
+                    type="number"
+                    id="numOrigenes"
+                    min="1"
+                    max="20"
+                    value="3">
+            </div>
+
+            <div class="campo">
+                <label for="numDestinos">
+                    NÚMERO DE DESTINOS
+                </label>
+
+                <input
+                    type="number"
+                    id="numDestinos"
+                    min="1"
+                    max="20"
+                    value="4">
+            </div>
+
+            <div class="campo">
+                <label>TIPO DE PROCEDIMIENTO</label>
+
+                <input
+                    type="text"
+                    value="Solución inicial de transporte"
+                    disabled>
+            </div>
+
+        </div>
+
+        <div class="acciones">
+
+            <button
+                type="button"
+                class="btn-secundario"
+                onclick="cargarEjemploNoroeste()">
+                ✦ Cargar ejemplo Great Value
+            </button>
+
+            <button
+                type="button"
+                onclick="generarMatrizNoroeste()">
+                Generar matriz →
+            </button>
+
+        </div>
+    </section>
+
+    <!-- PASO 2 -->
+
+    <section class="panel oculto" id="panelMatrizNoroeste">
+
+        <div class="panel-titulo">
+            <span class="paso">2</span>
+            <div>
+                <h3>Matriz de transporte</h3>
+                <p>
+                    Ingresa los costos unitarios, la oferta
+                    disponible y la demanda requerida.
+                </p>
+            </div>
+        </div>
+
+        <div class="noroeste-guia">
+
+            <div class="noroeste-guia-item">
+                <span class="noroeste-guia-icono">🏭</span>
+                <div>
+                    <strong>Orígenes</strong>
+                    <small>Puntos de distribución</small>
+                </div>
+            </div>
+
+            <div class="noroeste-guia-item">
+                <span class="noroeste-guia-icono">📍</span>
+                <div>
+                    <strong>Destinos</strong>
+                    <small>Puntos de entrega</small>
+                </div>
+            </div>
+
+            <div class="noroeste-guia-item">
+                <span class="noroeste-guia-icono">💰</span>
+                <div>
+                    <strong>Costos</strong>
+                    <small>Costo por unidad transportada</small>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="simplex-bloque-etiqueta">
+            MATRIZ DE COSTOS
+        </div>
+
+        <div class="noroeste-matriz-marco">
+
+            <div id="matrizEntradaNoroeste"></div>
+
+        </div>
+
+        <div class="simplex-bloque-etiqueta">
+            VERIFICACIÓN DEL BALANCE
+        </div>
+
+        <div id="resumenBalance"></div>
+
+        <div class="simplex-nota">
+            <strong>Balance automático</strong>
+
+            <p>
+                Si la oferta total es diferente de la demanda,
+                el simulador puede agregar un origen o destino
+                ficticio para equilibrar el problema.
+            </p>
+        </div>
+
+        <div
+            id="mensajeErrorNoroeste"
+            class="mensaje-error oculto">
+        </div>
+
+        <div class="acciones">
+
+            <button
+                type="button"
+                class="btn-limpiar"
+                onclick="limpiarNoroeste()">
+                Limpiar datos
+            </button>
+
+            <button
+                type="button"
+                onclick="resolverNoroeste()">
+                Calcular asignaciones →
+            </button>
+
+        </div>
+    </section>
+
+    <!-- PASO 3 -->
+
+    <section class="panel oculto" id="panelResultadosNoroeste">
+
+        <div class="panel-titulo">
+            <span class="paso">3</span>
+            <div>
+                <h3>Asignaciones y resultados</h3>
+                <p>
+                    Examina cómo se distribuyen las unidades,
+                    los costos de cada asignación y el costo
+                    total obtenido.
+                </p>
+            </div>
+        </div>
+
+        <div class="noroeste-leyenda">
+
+            <div>
+                <span class="noroeste-muestra-asignacion"></span>
+                Celda con asignación
+            </div>
+
+            <div>
+                <span class="noroeste-muestra-oferta"></span>
+                Oferta disponible
+            </div>
+
+            <div>
+                <span class="noroeste-muestra-demanda"></span>
+                Demanda requerida
+            </div>
+
+        </div>
+
+        <div id="procedimientoNoroeste"></div>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>
+        © 2026 Great Value ·
+        Simulador de Investigación de Operaciones
+    </p>
+</footer>
+
+<script src="../js/validaciones.js"></script>
+<script src="../js/noroeste.js"></script>
+<script src="../js/noroeste-corrector.js"></script>
+<script src="../js/noroeste-visual.js"></script>
+
+</body>
+</html>

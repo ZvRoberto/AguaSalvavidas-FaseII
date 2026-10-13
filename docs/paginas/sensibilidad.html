@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Sensibilidad | Great Value</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+
+<body class="pagina-sensibilidad">
+
+<header class="sen-nav">
+    <a href="../index.html">← Volver al menú</a>
+    <strong>💧 Great Value</strong>
+    <span>FASE II · SENSIBILIDAD</span>
+</header>
+
+<main class="sen-contenedor">
+
+    <section class="sen-hero">
+        <span>PROGRAMACIÓN LINEAL</span>
+        <h1>Análisis de Sensibilidad</h1>
+        <p>
+            Analiza cómo cambian los resultados óptimos
+            cuando modificas los recursos disponibles
+            o los coeficientes de la función objetivo.
+        </p>
+    </section>
+
+    <section class="sen-panel">
+        <div class="sen-titulo">
+            <span class="sen-paso">01</span>
+            <div>
+                <h2>Configuración del modelo</h2>
+                <p>
+                    Define variables y restricciones.
+                    Este módulo utiliza maximización
+                    con restricciones menores o iguales.
+                </p>
+            </div>
+        </div>
+
+        <div class="sen-config">
+            <label>
+                Variables
+                <input type="number" id="senN"
+                       min="1" max="20" step="1" value="2">
+            </label>
+
+            <label>
+                Restricciones
+                <input type="number" id="senM"
+                       min="1" max="20" step="1" value="3">
+            </label>
+        </div>
+
+        <div class="sen-botones">
+            <button onclick="senGenerar()">
+                Generar modelo
+            </button>
+            <button class="sen-secundario"
+                    onclick="senEjemplo()">
+                Cargar ejemplo
+            </button>
+            <button class="sen-secundario"
+                    onclick="senLimpiar()">
+                Limpiar
+            </button>
+        </div>
+    </section>
+
+    <section id="senModelo"
+             class="sen-panel oculto">
+
+        <div class="sen-titulo">
+            <span class="sen-paso">02</span>
+            <div>
+                <h2>Datos del problema</h2>
+                <p>
+                    Ingresa los beneficios unitarios,
+                    los consumos de recursos y
+                    las cantidades disponibles.
+                </p>
+            </div>
+        </div>
+
+        <div id="senFormulario"></div>
+
+        <div class="sen-botones">
+            <button onclick="senResolver()">
+                Resolver y analizar →
+            </button>
+        </div>
+    </section>
+
+    <div id="senError"
+         class="sen-error oculto"
+         role="alert"></div>
+
+    <section id="senResultados"
+             class="sen-panel oculto">
+
+        <div class="sen-titulo">
+            <span class="sen-paso">03</span>
+            <div>
+                <h2>Resultados del análisis</h2>
+                <p>
+                    Solución óptima, precios sombra,
+                    rangos y procedimiento.
+                </p>
+            </div>
+        </div>
+
+        <div id="senContenido"></div>
+
+        <div class="sen-botones">
+            <button class="sen-secundario"
+                    onclick="window.print()">
+                Imprimir resultados
+            </button>
+        </div>
+    </section>
+
+</main>
+
+<footer class="sen-footer">
+    Great Value · Investigación de Operaciones
+    · Fase II · 2026
+</footer>
+
+<script src="../js/sensibilidad.js"></script>
+</body>
+</html>
