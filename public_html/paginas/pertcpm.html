@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>PERT/CPM | Great Value</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+
+<body class="pagina-pert">
+
+<header class="sen-nav">
+    <a href="../index.html">← Volver al menú</a>
+    <strong>💧 Great Value</strong>
+    <span>FASE III · PERT/CPM</span>
+</header>
+
+<main class="sen-contenedor">
+
+    <section class="sen-hero">
+        <span>REDES DE PROYECTO</span>
+        <h1>PERT / CPM</h1>
+        <p>
+            Calcula el tiempo esperado, la varianza, los tiempos
+            de inicio y fin, las holguras y la ruta crítica de un
+            proyecto. Todo el procedimiento queda visible para
+            comprobarlo manualmente, junto con el diagrama de red.
+        </p>
+    </section>
+
+    <!-- 01 - CONFIGURACIÓN -->
+    <section class="sen-panel">
+        <div class="sen-titulo">
+            <span class="sen-paso">01</span>
+            <div>
+                <h2>Configuración del proyecto</h2>
+                <p>
+                    Indica cuántas actividades tiene el proyecto.
+                    Puedes cambiar este número después sin perder
+                    los datos ya escritos.
+                </p>
+            </div>
+        </div>
+
+        <div class="sen-config">
+            <label>
+                Número de actividades
+                <input type="number" id="pertN"
+                       min="1" max="30" step="1" value="6">
+            </label>
+        </div>
+
+        <div class="sen-botones">
+            <button onclick="pertGenerar()">
+                Generar tabla
+            </button>
+            <button class="sen-secundario"
+                    onclick="pertEjemplo()">
+                Cargar ejemplo
+            </button>
+            <button class="sen-secundario"
+                    onclick="pertLimpiar()">
+                Limpiar
+            </button>
+        </div>
+    </section>
+
+    <!-- 02 - DATOS -->
+    <section id="pertModelo"
+             class="sen-panel oculto">
+
+        <div class="sen-titulo">
+            <span class="sen-paso">02</span>
+            <div>
+                <h2>Actividades y tiempos</h2>
+                <p>
+                    Ingresa los tiempos optimista (a), más probable (m)
+                    y pesimista (b) de cada actividad.
+                </p>
+            </div>
+        </div>
+
+        <div class="sen-nota">
+            <strong>Predecesoras:</strong> escribe las letras de las
+            actividades que deben terminar antes, separadas por coma
+            (por ejemplo <code>A, B</code>). Si no tiene, déjalo vacío.<br>
+            <strong>CPM determinista:</strong> si el tiempo es único,
+            escribe el mismo valor en a, m y b (la varianza será 0).
+        </div>
+
+        <div class="sen-tabla-scroll">
+            <table class="sen-tabla pert-tabla">
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Descripción (opcional)</th>
+                        <th>Predecesoras</th>
+                        <th>a (optimista)</th>
+                        <th>m (más probable)</th>
+                        <th>b (pesimista)</th>
+                    </tr>
+                </thead>
+                <tbody id="pertCuerpo"></tbody>
+            </table>
+        </div>
+
+        <div class="sen-botones">
+            <button onclick="pertResolver()">
+                Resolver y mostrar procedimiento →
+            </button>
+        </div>
+    </section>
+
+    <div id="pertError"
+         class="sen-error oculto"
+         role="alert"></div>
+
+    <!-- 03 - RESULTADOS -->
+    <section id="pertResultados"
+             class="sen-panel oculto">
+
+        <div class="sen-titulo">
+            <span class="sen-paso">03</span>
+            <div>
+                <h2>Resultados y procedimiento</h2>
+                <p>
+                    Resumen, tabla de resultados, diagrama de red
+                    y cada paso del cálculo.
+                </p>
+            </div>
+        </div>
+
+        <div id="pertContenido"></div>
+
+        <div class="sen-botones">
+            <button class="sen-secundario"
+                    onclick="window.print()">
+                Imprimir resultados
+            </button>
+        </div>
+    </section>
+
+</main>
+
+<footer class="sen-footer">
+    Great Value · Investigación de Operaciones
+    · Fase III · 2026
+</footer>
+
+<script src="../js/pertcpm.js"></script>
+</body>
+</html>

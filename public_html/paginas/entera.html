@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Programación Entera | Great Value</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+
+<body class="pagina-entera">
+
+<header class="sen-nav">
+    <a href="../index.html">← Volver al menú</a>
+    <strong>💧 Great Value</strong>
+    <span>FASE III · PROGRAMACIÓN ENTERA</span>
+</header>
+
+<main class="sen-contenedor">
+
+    <section class="sen-hero">
+        <span>RAMIFICACIÓN Y ACOTAMIENTO</span>
+        <h1>Programación Entera</h1>
+        <p>
+            Resuelve problemas donde las variables deben ser enteras
+            con el método de ramificación y acotamiento (Branch and
+            Bound). Cada subproblema se resuelve con Simplex y se
+            muestra el árbol completo, las podas y la solución óptima.
+        </p>
+    </section>
+
+    <!-- 01 - CONFIGURACIÓN -->
+    <section class="sen-panel">
+        <div class="sen-titulo">
+            <span class="sen-paso">01</span>
+            <div>
+                <h2>Configuración del problema</h2>
+                <p>
+                    Define el número de variables y restricciones,
+                    si se maximiza o se minimiza, y cómo se elige el
+                    siguiente nodo a explorar. Todas las variables
+                    son mayores o iguales a cero.
+                </p>
+            </div>
+        </div>
+
+        <div class="sen-config">
+            <label>
+                Variables
+                <input type="number" id="entN"
+                       min="1" max="8" step="1" value="2">
+            </label>
+
+            <label>
+                Restricciones
+                <input type="number" id="entM"
+                       min="1" max="10" step="1" value="2">
+            </label>
+
+            <label>
+                Objetivo
+                <select id="entObjetivo">
+                    <option value="max">Maximizar</option>
+                    <option value="min">Minimizar</option>
+                </select>
+            </label>
+
+            <label>
+                Orden de exploración
+                <select id="entEstrategia">
+                    <option value="dfs">Profundidad primero</option>
+                    <option value="mejor">Mejor cota primero</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="sen-botones">
+            <button onclick="entGenerar()">
+                Generar modelo
+            </button>
+            <button class="sen-secundario"
+                    onclick="entEjemplo()">
+                Cargar ejemplo
+            </button>
+            <button class="sen-secundario"
+                    onclick="entLimpiar()">
+                Limpiar
+            </button>
+        </div>
+    </section>
+
+    <!-- 02 - DATOS -->
+    <section id="entModelo"
+             class="sen-panel oculto">
+
+        <div class="sen-titulo">
+            <span class="sen-paso">02</span>
+            <div>
+                <h2>Función objetivo y restricciones</h2>
+                <p>
+                    Escribe los coeficientes. Marca "¿Entera?" en las
+                    variables que deben ser enteras; las que dejes sin
+                    marcar serán continuas (problema mixto).
+                </p>
+            </div>
+        </div>
+
+        <div class="sen-tabla-scroll">
+            <table class="sen-tabla ent-tabla">
+                <thead id="entCabecera"></thead>
+                <tbody id="entCuerpo"></tbody>
+            </table>
+        </div>
+
+        <div class="sen-botones">
+            <button onclick="entResolver()">
+                Resolver y mostrar procedimiento →
+            </button>
+        </div>
+    </section>
+
+    <div id="entError"
+         class="sen-error oculto"
+         role="alert"></div>
+
+    <!-- 03 - RESULTADOS -->
+    <section id="entResultados"
+             class="sen-panel oculto">
+
+        <div class="sen-titulo">
+            <span class="sen-paso">03</span>
+            <div>
+                <h2>Resultados y procedimiento</h2>
+                <p>
+                    Solución óptima, árbol de ramificación y
+                    acotamiento, y el detalle de cada nodo.
+                </p>
+            </div>
+        </div>
+
+        <div id="entContenido"></div>
+
+        <div class="sen-botones">
+            <button class="sen-secundario"
+                    onclick="window.print()">
+                Imprimir resultados
+            </button>
+        </div>
+    </section>
+
+</main>
+
+<footer class="sen-footer">
+    Great Value · Investigación de Operaciones
+    · Fase III · 2026
+</footer>
+
+<script src="../js/entera.js"></script>
+</body>
+</html>

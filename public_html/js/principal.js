@@ -50,7 +50,20 @@ function abrirMetodo(metodo) {
             window.location.href =
                 "paginas/transporte.html";
             break;
-
+            
+        case "pertcpm":
+            window.location.href =
+                "paginas/pertcpm.html";
+            break;
+        case "hungaro":
+            window.location.href =
+                "paginas/hungaro.html";
+            break; 
+        case "entera":
+            window.location.href =
+                "paginas/entera.html";
+            break;
+            
         default:
             alert("Método no disponible.");
             break;

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Método Húngaro | Great Value</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+
+<body class="pagina-hungaro">
+
+<header class="sen-nav">
+    <a href="../index.html">← Volver al menú</a>
+    <strong>💧 Great Value</strong>
+    <span>FASE III · MÉTODO HÚNGARO</span>
+</header>
+
+<main class="sen-contenedor">
+
+    <section class="sen-hero">
+        <span>PROBLEMAS DE ASIGNACIÓN</span>
+        <h1>Método Húngaro</h1>
+        <p>
+            Asigna cada fila a una columna con el menor costo
+            (o el mayor beneficio). Se muestran las reducciones
+            de filas y columnas, la cobertura de ceros con líneas,
+            los ajustes y la asignación final, paso a paso.
+        </p>
+    </section>
+
+    <!-- 01 - CONFIGURACIÓN -->
+    <section class="sen-panel">
+        <div class="sen-titulo">
+            <span class="sen-paso">01</span>
+            <div>
+                <h2>Configuración del problema</h2>
+                <p>
+                    Define el tamaño de la matriz y si se busca
+                    minimizar costos o maximizar beneficios. Si no es
+                    cuadrada, se completa con filas o columnas
+                    ficticias de ceros.
+                </p>
+            </div>
+        </div>
+
+        <div class="sen-config">
+            <label>
+                Filas
+                <input type="number" id="hunFilas"
+                       min="1" max="20" step="1" value="4">
+            </label>
+
+            <label>
+                Columnas
+                <input type="number" id="hunColumnas"
+                       min="1" max="20" step="1" value="4">
+            </label>
+
+            <label>
+                Objetivo
+                <select id="hunObjetivo">
+                    <option value="min">Minimizar (costos)</option>
+                    <option value="max">Maximizar (beneficios)</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="sen-botones">
+            <button onclick="hunGenerar()">
+                Generar matriz
+            </button>
+            <button class="sen-secundario"
+                    onclick="hunEjemplo()">
+                Cargar ejemplo
+            </button>
+            <button class="sen-secundario"
+                    onclick="hunLimpiar()">
+                Limpiar
+            </button>
+        </div>
+    </section>
+
+    <!-- 02 - DATOS -->
+    <section id="hunModelo"
+             class="sen-panel oculto">
+
+        <div class="sen-titulo">
+            <span class="sen-paso">02</span>
+            <div>
+                <h2>Matriz de costos</h2>
+                <p>
+                    Escribe los valores de cada asignación. También
+                    puedes cambiar los nombres de filas y columnas.
+                </p>
+            </div>
+        </div>
+
+        <div class="sen-tabla-scroll">
+            <table class="sen-tabla hun-tabla">
+                <thead id="hunCabecera"></thead>
+                <tbody id="hunCuerpo"></tbody>
+            </table>
+        </div>
+
+        <div class="sen-botones">
+            <button onclick="hunResolver()">
+                Resolver y mostrar procedimiento →
+            </button>
+        </div>
+    </section>
+
+    <div id="hunError"
+         class="sen-error oculto"
+         role="alert"></div>
+
+    <!-- 03 - RESULTADOS -->
+    <section id="hunResultados"
+             class="sen-panel oculto">
+
+        <div class="sen-titulo">
+            <span class="sen-paso">03</span>
+            <div>
+                <h2>Resultados y procedimiento</h2>
+                <p>
+                    Asignación óptima, costo total y cada paso
+                    del método.
+                </p>
+            </div>
+        </div>
+
+        <div id="hunContenido"></div>
+
+        <div class="sen-botones">
+            <button class="sen-secundario"
+                    onclick="window.print()">
+                Imprimir resultados
+            </button>
+        </div>
+    </section>
+
+</main>
+
+<footer class="sen-footer">
+    Great Value · Investigación de Operaciones
+    · Fase III · 2026
+</footer>
+
+<script src="../js/hungaro.js"></script>
+</body>
+</html>
