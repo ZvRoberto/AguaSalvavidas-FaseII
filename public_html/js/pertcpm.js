@@ -1,13 +1,11 @@
-/* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/javascript.js to edit this template
- */
-
-
 /*
  * GREAT VALUE
  * MÓDULO PERT / CPM
  * FASE III - 2026
+ *
+ * Calcula tiempo esperado, varianza, ES, EF, LS, LF,
+ * holguras y ruta crítica. Muestra el procedimiento
+ * completo y el diagrama de red (actividad en nodo).
  */
 
 "use strict";
@@ -15,13 +13,18 @@
 const PERT_MAX = 30;
 const PERT_TOL = 1e-7;
 
-/* ========== UTILIDADES ========== */
+/* =====================================================
+   UTILIDADES DE FORMATO
+   ===================================================== */
 
 function pertEsc(texto) {
     return String(texto).replace(/[&<>"']/g, function (c) {
         return {
-            "&": "&amp;", "<": "&lt;", ">": "&gt;",
-            "\"": "&quot;", "'": "&#39;"
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "\"": "&quot;",
+            "'": "&#39;"
         }[c];
     });
 }
@@ -38,8 +41,13 @@ function f4(x) {
 
 function pertNumero(texto) {
     const t = String(texto).trim().replace(",", ".");
-    if (t === "") { return null; }
+
+    if (t === "") {
+        return null;
+    }
+
     const n = Number(t);
+
     return Number.isFinite(n) ? n : null;
 }
 
@@ -56,13 +64,17 @@ function pertPredecesoras(texto) {
     });
 }
 
-/* ========== CÁLCULO ========== */
+/* =====================================================
+   CÁLCULO
+   ===================================================== */
 
 function pertOrdenTopologico(actividades) {
+    const porId = new Map();
     const pendientes = new Map();
     const sucesoras = new Map();
 
     actividades.forEach(function (a) {
+        porId.set(a.id, a);
         pendientes.set(a.id, a.pred.length);
         sucesoras.set(a.id, []);
     });
@@ -87,7 +99,10 @@ function pertOrdenTopologico(actividades) {
 
         sucesoras.get(id).forEach(function (s) {
             pendientes.set(s, pendientes.get(s) - 1);
-            if (pendientes.get(s) === 0) { cola.push(s); }
+
+            if (pendientes.get(s) === 0) {
+                cola.push(s);
+            }
         });
     }
 
@@ -139,8 +154,11 @@ function pertValidar(filas) {
         }
 
         actividades.push({
-            id: f.id, desc: f.desc,
-            a: a, m: m, b: b,
+            id: f.id,
+            desc: f.desc,
+            a: a,
+            m: m,
+            b: b,
             pred: pertPredecesoras(f.pred)
         });
     }
@@ -195,6 +213,7 @@ function pertCalcular(actividades) {
     const orden = pertOrdenTopologico(actividades);
 
     /* Paso hacia adelante */
+
     orden.forEach(function (id) {
         const a = porId.get(id);
 
@@ -212,6 +231,7 @@ function pertCalcular(actividades) {
     }));
 
     /* Paso hacia atrás */
+
     orden.slice().reverse().forEach(function (id) {
         const a = porId.get(id);
 
@@ -224,24 +244,29 @@ function pertCalcular(actividades) {
         a.LS = a.LF - a.te;
     });
 
-    /* Holguras y críticas */
+    /* Holguras y actividades críticas */
+
     actividades.forEach(function (a) {
         a.H = a.LS - a.ES;
         a.critica = Math.abs(a.H) < PERT_TOL;
     });
 
     /* Rutas críticas */
+
     const rutas = [];
 
     function recorrer(id, camino) {
-        if (rutas.length >= 50) { return; }
+        if (rutas.length >= 50) {
+            return;
+        }
 
         const a = porId.get(id);
         const nuevo = camino.concat(id);
 
         const siguientes = a.suc.filter(function (s) {
             const sa = porId.get(s);
-            return sa.critica && Math.abs(a.EF - sa.ES) < PERT_TOL;
+            return sa.critica &&
+                Math.abs(a.EF - sa.ES) < PERT_TOL;
         });
 
         if (siguientes.length === 0) {
@@ -249,14 +274,18 @@ function pertCalcular(actividades) {
             return;
         }
 
-        siguientes.forEach(function (s) { recorrer(s, nuevo); });
+        siguientes.forEach(function (s) {
+            recorrer(s, nuevo);
+        });
     }
 
     actividades
         .filter(function (a) {
             return a.critica && a.pred.length === 0;
         })
-        .forEach(function (a) { recorrer(a.id, []); });
+        .forEach(function (a) {
+            recorrer(a.id, []);
+        });
 
     const info = rutas.map(function (ruta) {
         const acts = ruta.map(function (id) { return porId.get(id); });
@@ -283,11 +312,18 @@ function pertCalcular(actividades) {
     };
 }
 
-/* ========== DIAGRAMA DE RED (SVG) ========== */
+/* =====================================================
+   DIAGRAMA DE RED (SVG)
+   ===================================================== */
 
 function pertDiagrama(r) {
-    const NW = 124, NH = 84, HG = 64, VG = 30, PAD = 24;
-    const VW = 64, VH = 36;
+    const NW = 124;
+    const NH = 84;
+    const HG = 64;
+    const VG = 30;
+    const PAD = 24;
+    const VW = 64;
+    const VH = 36;
 
     const nivel = new Map();
     let maxNivel = 0;
@@ -359,6 +395,7 @@ function pertDiagrama(r) {
     const alto = PAD * 2 + altoMax;
 
     /* Aristas */
+
     const aristas = [];
 
     r.actividades.forEach(function (a) {
@@ -486,9 +523,118 @@ function pertDiagrama(r) {
     return svg;
 }
 
-/* ========== PROCEDIMIENTO PASO A PASO ========== */
+/* =====================================================
+   PROBABILIDAD (VALOR Z)
+   ===================================================== */
 
-function pertTabla(encabezados, filas) {
+/* Distribución normal estándar acumulada Φ(x) (error < 1e-7) */
+
+function pertNormalCDF(x) {
+    const t = 1 / (1 + 0.2316419 * Math.abs(x));
+    const d = 0.3989422804014327 * Math.exp(-x * x / 2);
+
+    const p = d * t * (0.319381530 + t * (-0.356563782 +
+        t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+
+    return x >= 0 ? 1 - p : p;
+}
+
+function pertProbabilidad(r, D) {
+    const sigma = r.desviacion;
+
+    if (sigma < 1e-9) {
+        return {
+            D: D,
+            sigma: sigma,
+            determinista: true,
+            P: D >= r.T - PERT_TOL ? 1 : 0
+        };
+    }
+
+    const Z = (D - r.T) / sigma;
+    const Z2 = Math.round(Z * 100) / 100;
+
+    return {
+        D: D,
+        sigma: sigma,
+        determinista: false,
+        Z: Z,
+        Z2: Z2,
+        P: pertNormalCDF(Z2),
+        Pexacta: pertNormalCDF(Z)
+    };
+}
+
+function pertPorcentaje(p) {
+    return (p * 100).toFixed(2) + " %";
+}
+
+function pertKpiZ(r) {
+    if (!r.prob) {
+        return "";
+    }
+
+    const pr = r.prob;
+
+    return "<div class=\"pert-kpi\"><span>Z (D = " + f2(pr.D) +
+        ")</span><strong>" +
+        (pr.determinista ? "—" : f2(pr.Z2)) + "</strong></div>" +
+        "<div class=\"pert-kpi\"><span>P(T ≤ " + f2(pr.D) +
+        ")</span><strong>" + pertPorcentaje(pr.P) + "</strong></div>";
+}
+
+function pertPasoZ(r) {
+    const pr = r.prob;
+
+    let h = "<div class=\"sen-iteracion\">" +
+        "<h4>Paso 7 · Valor Z y probabilidad de terminar en D = " +
+        f2(pr.D) + "</h4>";
+
+    if (pr.determinista) {
+        h += "<p>La varianza de la ruta crítica es 0 (todos los " +
+            "tiempos son fijos), por lo que no hay incertidumbre y " +
+            "Z no se puede calcular. El proyecto dura exactamente " +
+            "T = " + f2(r.T) + ", así que " +
+            (pr.P === 1
+                ? "termina en D = " + f2(pr.D) + " o antes (100 %)."
+                : "no alcanza a terminar en D = " + f2(pr.D) + " (0 %).") +
+            "</p></div>";
+
+        return h;
+    }
+
+    h += "<p>El tiempo total del proyecto se aproxima con una " +
+        "distribución normal de media T = <strong>" + f2(r.T) +
+        "</strong> y desviación estándar σ = <strong>" +
+        f4(pr.sigma) + "</strong> (la de la ruta crítica).</p>" +
+        "<p class=\"pert-formula\">Z = (D − T) / σ = (" + f2(pr.D) +
+        " − " + f2(r.T) + ") / " + f4(pr.sigma) +
+        " = <strong>" + f4(pr.Z) + "</strong></p>" +
+        "<p class=\"pert-formula\">Z redondeado a 2 decimales " +
+        "(para buscar en la tabla normal) = <strong>" + f2(pr.Z2) +
+        "</strong></p>" +
+        "<p class=\"pert-formula\">P(T ≤ D) = Φ(" + f2(pr.Z2) +
+        ") = <strong>" + f4(pr.P) + "</strong> &nbsp;→&nbsp; <strong>" +
+        pertPorcentaje(pr.P) + "</strong></p>" +
+        "<p>Hay aproximadamente un <strong>" + pertPorcentaje(pr.P) +
+        "</strong> de probabilidad de que el proyecto termine en " +
+        f2(pr.D) + " o antes. " +
+        (pr.Z2 < 0
+            ? "Como Z es negativo, D es menor que la duración esperada."
+            : (pr.Z2 > 0
+                ? "Como Z es positivo, D es mayor que la duración esperada."
+                : "D coincide con la duración esperada.")) +
+        " Sin redondear Z, la probabilidad es " +
+        pertPorcentaje(pr.Pexacta) + ".</p></div>";
+
+    return h;
+}
+
+/* =====================================================
+   PROCEDIMIENTO PASO A PASO
+   ===================================================== */
+
+function pertTabla(encabezados, filas, claseFila) {
     let h = "<div class=\"sen-tabla-scroll\">" +
         "<table class=\"sen-tabla pert-tabla-proc\"><thead><tr>";
 
@@ -520,6 +666,7 @@ function pertPasos(r) {
     let h = "";
 
     /* Paso 1 */
+
     h += "<div class=\"sen-iteracion\">" +
         "<h4>Paso 1 · Tiempo esperado y varianza</h4>" +
         "<p>t<sub>e</sub> = (a + 4m + b) / 6 &nbsp;&nbsp;·&nbsp;&nbsp; " +
@@ -541,6 +688,7 @@ function pertPasos(r) {
         ) + "</div>";
 
     /* Paso 2 */
+
     h += "<div class=\"sen-iteracion\">" +
         "<h4>Paso 2 · Paso hacia adelante (ES y EF)</h4>" +
         "<p>ES = máx{EF de las predecesoras} (0 si no tiene) " +
@@ -579,6 +727,7 @@ function pertPasos(r) {
         ) + "</div>";
 
     /* Paso 3 */
+
     const finales = act.filter(function (a) {
         return a.suc.length === 0;
     });
@@ -594,6 +743,7 @@ function pertPasos(r) {
         "</div>";
 
     /* Paso 4 */
+
     h += "<div class=\"sen-iteracion\">" +
         "<h4>Paso 4 · Paso hacia atrás (LF y LS)</h4>" +
         "<p>LF = mín{LS de las sucesoras} (T si no tiene) " +
@@ -633,6 +783,7 @@ function pertPasos(r) {
         ) + "</div>";
 
     /* Paso 5 */
+
     h += "<div class=\"sen-iteracion\">" +
         "<h4>Paso 5 · Holguras y actividades críticas</h4>" +
         "<p>H = LS − ES = LF − EF. Una actividad es crítica " +
@@ -659,6 +810,7 @@ function pertPasos(r) {
         ) + "</div>";
 
     /* Paso 6 */
+
     h += "<div class=\"sen-iteracion\">" +
         "<h4>Paso 6 · Ruta crítica y comprobación</h4>";
 
@@ -707,10 +859,16 @@ function pertPasos(r) {
         " La suma de t<sub>e</sub> de la ruta crítica coincide " +
         "con la duración T = " + f2(r.T) + "</li></ul></div>";
 
+    if (r.prob) {
+        h += pertPasoZ(r);
+    }
+
     return h;
 }
 
-/* ========== RESULTADOS EN PANTALLA ========== */
+/* =====================================================
+   RESULTADOS EN PANTALLA
+   ===================================================== */
 
 function pertRenderResultados(r) {
     const act = r.actividades;
@@ -728,7 +886,10 @@ function pertRenderResultados(r) {
         "<div class=\"pert-kpi\"><span>Varianza del proyecto</span>" +
         "<strong>" + f4(r.varianza) + "</strong></div>" +
         "<div class=\"pert-kpi\"><span>Desviación estándar</span>" +
-        "<strong>" + f4(r.desviacion) + "</strong></div></div>";
+        "<strong>" + f4(r.desviacion) + "</strong></div>" +
+        pertKpiZ(r) + "</div>";
+
+    /* Tabla de resultados */
 
     h += "<h3>Tabla de resultados</h3>" +
         "<div class=\"sen-tabla-scroll\"><table class=\"sen-tabla\">" +
@@ -752,6 +913,8 @@ function pertRenderResultados(r) {
 
     h += "</tbody></table></div>";
 
+    /* Diagrama */
+
     h += "<h3>Diagrama de red</h3>" +
         "<p class=\"pert-leyenda-texto\">Cada actividad muestra " +
         "<strong>ES | EF</strong> arriba, su nombre y " +
@@ -763,12 +926,16 @@ function pertRenderResultados(r) {
         "<span><i class=\"pert-muestra\"></i> Actividad con holgura</span>" +
         "</div>";
 
+    /* Procedimiento */
+
     h += "<h3>Procedimiento paso a paso</h3>" + pertPasos(r);
 
     return h;
 }
 
-/* ========== TABLA DE ENTRADA ========== */
+/* =====================================================
+   TABLA DE ENTRADA
+   ===================================================== */
 
 function pertIdDefecto(i) {
     return i < 26 ? String.fromCharCode(65 + i) : "T" + (i + 1);
@@ -844,7 +1011,9 @@ function pertMostrarError(mensaje) {
     caja.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-/* ========== BOTONES ========== */
+/* =====================================================
+   ACCIONES DE LOS BOTONES
+   ===================================================== */
 
 function pertGenerar() {
     const n = parseInt(document.getElementById("pertN").value, 10);
@@ -873,11 +1042,13 @@ function pertEjemplo() {
     ];
 
     document.getElementById("pertN").value = datos.length;
+    document.getElementById("pertD").value = 24;
     pertConstruir(datos.length, datos);
 }
 
 function pertLimpiar() {
     document.getElementById("pertN").value = 6;
+    document.getElementById("pertD").value = "";
     document.getElementById("pertCuerpo").innerHTML = "";
     document.getElementById("pertModelo").classList.add("oculto");
     document.getElementById("pertContenido").innerHTML = "";
@@ -896,7 +1067,25 @@ function pertResolver() {
         return;
     }
 
+    const textoD = document.getElementById("pertD").value.trim();
+    let D = null;
+
+    if (textoD !== "") {
+        D = pertNumero(textoD);
+
+        if (D === null || D < 0) {
+            document.getElementById("pertResultados")
+                .classList.add("oculto");
+            pertMostrarError("El tiempo límite D debe ser un número " +
+                "mayor o igual a 0 (o déjalo vacío).");
+            return;
+        }
+    }
+
     const resultado = pertCalcular(validacion.actividades);
+
+    resultado.prob = D === null ? null : pertProbabilidad(resultado, D);
+
     const panel = document.getElementById("pertResultados");
 
     document.getElementById("pertContenido").innerHTML =
@@ -907,12 +1096,35 @@ function pertResolver() {
 }
 
 /* Si cambian los datos, los resultados anteriores ya no aplican */
+
 (function () {
-    if (typeof document === "undefined") { return; }
+    if (typeof document === "undefined") {
+        return;
+    }
 
     const cuerpo = document.getElementById("pertCuerpo");
 
     if (cuerpo) {
         cuerpo.addEventListener("input", pertOcultarResultados);
     }
+
+    const campoD = document.getElementById("pertD");
+
+    if (campoD) {
+        campoD.addEventListener("input", pertOcultarResultados);
+    }
 })();
+
+/* Exportación para pruebas en Node */
+
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = {
+        pertValidar: pertValidar,
+        pertCalcular: pertCalcular,
+        pertDiagrama: pertDiagrama,
+        pertPasos: pertPasos,
+        pertNormalCDF: pertNormalCDF,
+        pertProbabilidad: pertProbabilidad,
+        pertRenderResultados: pertRenderResultados
+    };
+}
