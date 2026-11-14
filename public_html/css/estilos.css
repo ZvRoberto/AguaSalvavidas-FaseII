@@ -1999,3 +1999,72 @@ table td {
     .pagina-entera .ent-arbol { overflow: visible; }
     .pagina-entera .ent-svg { max-width: 100%; height: auto; }
 }
+
+/* =====================================================
+   TEORÍA DE COLAS M/M/1 Y M/M/2 - FASE III
+   ===================================================== */
+
+.pagina-colas {
+    background: var(--background);
+    color: var(--text);
+}
+
+.pagina-colas .sen-config {
+    grid-template-columns: repeat(
+        auto-fit, minmax(190px, 1fr)
+    );
+}
+
+.pagina-colas .sen-config input,
+.pagina-colas .sen-config select {
+    width: 100%;
+}
+
+.pagina-colas .sen-tabla {
+    width: 100%;
+}
+
+.pagina-colas .pert-kpis {
+    margin-top: 20px;
+}
+
+.pagina-colas .pert-kpi strong {
+    color: var(--blue-dark);
+}
+
+.pagina-colas .colas-formula {
+    margin: 10px 0;
+    padding: 12px 15px;
+    border-radius: 10px;
+    background: #edf5fd;
+    color: var(--navy);
+    overflow-wrap: anywhere;
+}
+
+.pagina-colas .sen-iteracion h3 {
+    color: var(--navy);
+    margin-top: 0;
+}
+
+.pagina-colas .mensaje-exito {
+    margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+    .pagina-colas .sen-config {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media print {
+    .pagina-colas .sen-nav,
+    .pagina-colas .sen-botones,
+    .pagina-colas form {
+        display: none !important;
+    }
+
+    .pagina-colas .sen-panel {
+        box-shadow: none;
+        break-inside: avoid;
+    }
+}
