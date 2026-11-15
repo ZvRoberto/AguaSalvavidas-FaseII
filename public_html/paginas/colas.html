@@ -1,179 +1,308 @@
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teoría de Colas | Great Value</title>
+
+    <title>Teoría de Colas M/M/1 y M/M/2 | Great Value</title>
+
     <link rel="stylesheet" href="../css/estilos.css">
-    <script src="../js/colas.js" defer></script>
 </head>
 
 <body class="pagina-colas">
 
-<header class="sen-nav">
-    <a href="../index.html">← Volver al menú</a>
-    <strong>💧 Great Value</strong>
-    <span>FASE III · TEORÍA DE COLAS</span>
-</header>
+    <!-- ENCABEZADO -->
+    <header class="sen-nav">
+        <div class="sen-contenedor">
 
-<main class="sen-contenedor">
+            <a href="../index.html" class="sen-secundario">
+                ← Volver al menú
+            </a>
 
-    <section class="sen-hero">
-        <span>MODELOS DE LÍNEAS DE ESPERA</span>
-        <h1>Teoría de Colas M/M/1 y M/M/2</h1>
-        <p>
-            Analiza sistemas de uno o dos servidores.
-            Calcula probabilidades, utilización, número
-            de clientes y tiempos de espera. Consulta
-            las fórmulas, sustituciones y resultados
-            de ambos modelos.
-        </p>
-    </section>
-
-    <section class="sen-panel">
-        <div class="sen-titulo">
-            <span class="sen-paso">01</span>
             <div>
-                <h2>Configuración del sistema</h2>
-                <p>Introduce las tasas y selecciona el modelo.</p>
+                <strong>💧 Great Value</strong>
+                <span>FASE III · TEORÍA DE COLAS</span>
             </div>
+
         </div>
+    </header>
 
-        <form id="colasFormulario">
-            <div class="sen-config">
+    <main class="sen-contenedor">
 
-                <label>
-                    Tasa de llegadas (λ)
-                    <input id="colasLambda" type="number"
-                           min="0" step="any" required
-                           placeholder="Ejemplo: 8">
-                </label>
+        <!-- PORTADA -->
+        <section class="sen-hero">
 
-                <label>
-                    Tasa de servicio por servidor (μ)
-                    <input id="colasMu" type="number"
-                           min="0" step="any" required
-                           placeholder="Ejemplo: 5">
-                </label>
+            <span class="sen-etiqueta">
+                MODELOS DE LÍNEAS DE ESPERA
+            </span>
 
-                <label>
-                    Unidad de tiempo
-                    <select id="colasUnidad">
-                        <option value="hora">Horas</option>
-                        <option value="minuto">Minutos</option>
-                        <option value="segundo">Segundos</option>
-                    </select>
-                </label>
+            <h1>Teoría de Colas M/M/1 y M/M/2</h1>
 
-                <label>
-                    Modelo seleccionado
-                    <select id="colasModelo">
-                        <option value="MM1">M/M/1 - Un servidor</option>
-                        <option value="MM2">M/M/2 - Dos servidores</option>
-                    </select>
-                </label>
+            <p>
+                Analiza sistemas de uno o dos servidores.
+                Calcula probabilidades, utilización, número
+                de clientes y tiempos de espera. Consulta
+                las fórmulas, sustituciones y resultados
+                de ambos modelos.
+            </p>
 
-                <label>
-                    Número de clientes (n)
-                    <input id="colasN" type="number"
-                           min="0" step="1" value="2" required>
-                </label>
+        </section>
+
+        <!-- CONFIGURACIÓN -->
+        <section class="sen-panel">
+
+            <div class="sen-titulo">
+                <span class="sen-paso">01</span>
+
+                <div>
+                    <h2>Configuración del sistema</h2>
+                    <p>
+                        Introduce las tasas y selecciona el modelo.
+                    </p>
+                </div>
+            </div>
+
+            <form id="colasFormulario" novalidate>
+
+                <div class="sen-config">
+
+                    <div>
+                        <label for="colasLambda">
+                            Tasa de llegadas (λ)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="colasLambda"
+                            name="lambda"
+                            min="0"
+                            step="any"
+                            placeholder="Ejemplo: 8"
+                            required>
+                    </div>
+
+                    <div>
+                        <label for="colasMu">
+                            Tasa de servicio por servidor (μ)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="colasMu"
+                            name="mu"
+                            min="0.000001"
+                            step="any"
+                            placeholder="Ejemplo: 5"
+                            required>
+                    </div>
+
+                    <div>
+                        <label for="colasUnidad">
+                            Unidad de tiempo
+                        </label>
+
+                        <select id="colasUnidad" name="unidad">
+                            <option value="horas">Horas</option>
+                            <option value="minutos">Minutos</option>
+                            <option value="segundos">Segundos</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="colasModelo">
+                            Modelo seleccionado
+                        </label>
+
+                        <select id="colasModelo" name="modelo">
+                            <option value="MM1">
+                                M/M/1 - Un servidor
+                            </option>
+
+                            <option value="MM2">
+                                M/M/2 - Dos servidores
+                            </option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="colasN">
+                            Número de clientes (n)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="colasN"
+                            name="n"
+                            min="0"
+                            step="1"
+                            value="2"
+                            required>
+                    </div>
+
+                </div>
+
+                <div class="sen-nota">
+                    <strong>Importante:</strong>
+                    λ representa las llegadas por unidad de tiempo
+                    y μ la capacidad de atención de cada servidor.
+                    Ambas tasas deben utilizar la misma unidad.
+                    Se permite λ = 0, pero μ debe ser mayor que cero.
+                </div>
+
+                <!-- MENSAJES DE ERROR -->
+                <div
+                    id="colasError"
+                    class="mensaje-error"
+                    role="alert"
+                    style="display:none;">
+                </div>
+
+                <!-- BOTONES -->
+                <div class="sen-botones">
+
+                    <button
+                        type="submit"
+                        id="colasResolver">
+                        Resolver y mostrar procedimiento →
+                    </button>
+
+                    <button
+                        type="button"
+                        id="colasEjemplo"
+                        class="sen-secundario">
+                        Cargar ejemplo
+                    </button>
+
+                    <button
+                        type="reset"
+                        id="colasLimpiar"
+                        class="sen-secundario">
+                        Limpiar
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+        <!-- RESULTADOS -->
+        <section
+            class="sen-panel"
+            id="colasResultados"
+            style="display:none;">
+
+            <div class="sen-titulo">
+
+                <span class="sen-paso">02</span>
+
+                <div>
+                    <h2>Resultados del sistema</h2>
+                    <p>
+                        Indicadores y estabilidad del modelo seleccionado.
+                    </p>
+                </div>
 
             </div>
 
-            <div class="sen-nota">
-                <strong>Importante:</strong>
-                λ representa las llegadas por unidad de tiempo
-                y μ la capacidad de atención de cada servidor.
-                Ambas tasas deben utilizar la misma unidad.
-                Se permite λ = 0, pero μ debe ser mayor que cero.
+            <div id="colasEstado"></div>
+
+            <div
+                id="colasKpis"
+                class="pert-kpis">
             </div>
+
+        </section>
+
+        <!-- COMPARACIÓN -->
+        <section
+            class="sen-panel"
+            id="colasComparacion"
+            style="display:none;">
+
+            <div class="sen-titulo">
+
+                <span class="sen-paso">03</span>
+
+                <div>
+                    <h2>Comparación M/M/1 y M/M/2</h2>
+                    <p>
+                        Ambos modelos utilizan exactamente
+                        los mismos datos de entrada.
+                    </p>
+                </div>
+
+            </div>
+
+            <div id="colasTabla">
+
+                <div class="sen-tabla-scroll">
+
+                    <table class="sen-tabla">
+                        <thead>
+                            <tr>
+                                <th>Indicador</th>
+                                <th>M/M/1</th>
+                                <th>M/M/2</th>
+                            </tr>
+                        </thead>
+
+                        <tbody></tbody>
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- PROCEDIMIENTO -->
+        <section
+            class="sen-panel"
+            id="colasProcedimiento"
+            style="display:none;">
+
+            <div class="sen-titulo">
+
+                <span class="sen-paso">04</span>
+
+                <div>
+                    <h2>Fórmulas y procedimiento</h2>
+                    <p>
+                        Desarrollo matemático paso a paso
+                        del modelo seleccionado.
+                    </p>
+                </div>
+
+            </div>
+
+            <div id="colasPasos"></div>
 
             <div class="sen-botones">
-                <button type="submit">
-                    Resolver y mostrar procedimiento →
+
+                <button
+                    type="button"
+                    id="colasImprimir"
+                    class="sen-secundario">
+                    Imprimir resultados
                 </button>
-                <button type="button" id="colasEjemplo"
-                        class="sen-secundario">
-                    Cargar ejemplo
-                </button>
-                <button type="reset" class="sen-secundario">
-                    Limpiar
-                </button>
+
             </div>
-        </form>
 
-        <div id="colasError" class="mensaje-error oculto"
-             role="alert"></div>
-    </section>
+        </section>
 
-    <section id="colasResultados" class="sen-panel oculto">
-        <div class="sen-titulo">
-            <span class="sen-paso">02</span>
-            <div>
-                <h2>Resultados del sistema</h2>
-                <p>Indicadores y estabilidad del modelo seleccionado.</p>
-            </div>
-        </div>
+    </main>
 
-        <div id="colasEstado"></div>
-        <div id="colasKpis" class="pert-kpis"></div>
-    </section>
+    <!-- PIE DE PÁGINA -->
+    <footer class="sen-footer">
+        Great Value · Investigación de Operaciones
+        · Fase III · 2026
+    </footer>
 
-    <section id="colasComparacion" class="sen-panel oculto">
-        <div class="sen-titulo">
-            <span class="sen-paso">03</span>
-            <div>
-                <h2>Comparación M/M/1 y M/M/2</h2>
-                <p>
-                    Ambos modelos utilizan exactamente
-                    los mismos datos de entrada.
-                </p>
-            </div>
-        </div>
-
-        <div class="sen-tabla-scroll">
-            <table class="sen-tabla">
-                <thead>
-                    <tr>
-                        <th>Indicador</th>
-                        <th>M/M/1</th>
-                        <th>M/M/2</th>
-                    </tr>
-                </thead>
-                <tbody id="colasTabla"></tbody>
-            </table>
-        </div>
-    </section>
-
-    <section id="colasProcedimiento" class="sen-panel oculto">
-        <div class="sen-titulo">
-            <span class="sen-paso">04</span>
-            <div>
-                <h2>Fórmulas y procedimiento</h2>
-                <p>
-                    Desarrollo matemático paso a paso
-                    del modelo seleccionado.
-                </p>
-            </div>
-        </div>
-
-        <div id="colasPasos"></div>
-
-        <div class="sen-botones">
-            <button type="button" id="colasImprimir">
-                Imprimir resultados
-            </button>
-        </div>
-    </section>
-
-</main>
-
-<footer class="sen-footer">
-    Great Value · Investigación de Operaciones
-    · Fase III · 2026
-</footer>
+    <!-- JAVASCRIPT -->
+    <script src="../js/colas.js"></script>
 
 </body>
 </html>
