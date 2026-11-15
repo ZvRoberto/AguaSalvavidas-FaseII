@@ -1,368 +1,720 @@
+
 "use strict";
+
+/* =========================================================
+   GREAT VALUE - TEORÍA DE COLAS M/M/1 Y M/M/2
+   Resultados decimales y porcentuales
+   ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    const $ = id => document.getElementById(id);
+    const $ = (id) => document.getElementById(id);
 
-    const fmt = n => Number.isFinite(n)
-        ? Number(n.toPrecision(12)).toLocaleString("es-GT", {
-            maximumFractionDigits: 6
-        })
-        : "No definido";
+    const formulario = $("colasFormulario");
+    const lambdaInput = $("colasLambda");
+    const muInput = $("colasMu");
+    const unidadInput = $("colasUnidad");
+    const modeloInput = $("colasModelo");
+    const nInput = $("colasN");
 
-    const indicadores = [
-        ["rho", "ρ - Utilización"],
-        ["P0", "P₀ - Sistema vacío"],
-        ["L", "L - Clientes en el sistema"],
-        ["Lq", "Lq - Clientes en cola"],
-        ["W", "W - Tiempo en el sistema"],
-        ["Wq", "Wq - Tiempo en cola"],
-        ["Pn", "Pn - Exactamente n clientes"]
-    ];
+    const botonEjemplo = $("colasEjemplo");
+    const botonImprimir = $("colasImprimir");
 
-    function calcular(lambda, mu, n, servidores) {
-        const capacidad = servidores * mu;
+    const errorDiv = $("colasError");
+    const resultadosDiv = $("colasResultados");
+    const estadoDiv = $("colasEstado");
+    const kpisDiv = $("colasKpis");
+    const comparacionDiv = $("colasComparacion");
+    const tablaDiv = $("colasTabla");
+    const procedimientoDiv = $("colasProcedimiento");
+    const pasosDiv = $("colasPasos");
 
-        if (lambda >= capacidad) {
+    /* =========================
+       FORMATOS
+       ========================= */
+
+    function decimal(valor, cifras = 4) {
+        if (!Number.isFinite(valor)) return "No definido";
+        return valor.toFixed(cifras);
+    }
+
+    function porcentaje(valor) {
+        if (!Number.isFinite(valor)) return "No definido";
+
+        return `${decimal(valor)} (${(valor * 100).toFixed(2)}%)`;
+    }
+
+    function numero(valor) {
+        if (!Number.isFinite(valor)) return "No definido";
+        return valor.toFixed(6);
+    }
+
+    function textoUnidad(unidad) {
+        const valor = String(unidad || "horas").toLowerCase();
+
+        if (valor.includes("min")) return "minutos";
+        if (valor.includes("seg")) return "segundos";
+        if (valor.includes("día") || valor.includes("dia")) return "días";
+
+        return "horas";
+    }
+
+    function mostrar(elemento) {
+        if (elemento) elemento.style.display = "";
+    }
+
+    function ocultar(elemento) {
+        if (elemento) elemento.style.display = "none";
+    }
+
+    function mostrarError(mensaje) {
+        if (errorDiv) {
+            errorDiv.textContent = mensaje;
+            mostrar(errorDiv);
+        }
+
+        ocultar(resultadosDiv);
+        ocultar(comparacionDiv);
+        ocultar(procedimientoDiv);
+    }
+
+    function limpiarError() {
+        if (errorDiv) {
+            errorDiv.textContent = "";
+            ocultar(errorDiv);
+        }
+    }
+
+    /* =========================
+       MODELO M/M/1
+       ========================= */
+
+    function calcularMM1(lambda, mu, n) {
+
+        const estable = lambda < mu;
+        const rho = lambda / mu;
+
+        if (!estable) {
             return {
+                modelo: "M/M/1",
                 estable: false,
-                capacidad,
-                servidores
+                rho,
+                P0: null,
+                L: null,
+                Lq: null,
+                W: null,
+                Wq: null,
+                Pn: null
             };
         }
 
-        const a = lambda / mu;
-        const rho = lambda / capacidad;
+        const P0 = 1 - rho;
+        const L = lambda / (mu - lambda);
+        const Lq = (lambda * lambda) / (mu * (mu - lambda));
 
-        if (servidores === 1) {
-            const P0 = 1 - rho;
-            const L = rho / (1 - rho);
-            const Lq = rho * L;
-            const W = 1 / (mu - lambda);
-            const Wq = rho / (mu - lambda);
-            const Pn = P0 * Math.pow(rho, n);
+        const W = 1 / (mu - lambda);
+        const Wq = lambda / (mu * (mu - lambda));
 
-            return {
-                estable: true, servidores, capacidad,
-                a, rho, P0, L, Lq, W, Wq, Pn
-            };
-        }
-
-        const P0 = 1 / (
-            1 + a + (a * a) / (2 * (1 - rho))
-        );
-
-        const Lq = P0 * a * a * rho /
-                   (2 * Math.pow(1 - rho, 2));
-
-        const L = Lq + a;
-        const Wq = lambda === 0 ? 0 : Lq / lambda;
-        const W = Wq + 1 / mu;
-
-        // Para n=0 y n=1 se utiliza n!.
-        // Para n>=2 se utiliza 2! * 2^(n-2).
-        let Pn;
-
-        if (n === 0) {
-            Pn = P0;
-        } else if (n === 1) {
-            Pn = P0 * a;
-        } else {
-            Pn = P0 * a * a / 2 *
-                 Math.pow(rho, n - 2);
-        }
+        const Pn = P0 * Math.pow(rho, n);
 
         return {
-            estable: true, servidores, capacidad,
-            a, rho, P0, L, Lq, W, Wq, Pn
+            modelo: "M/M/1",
+            estable: true,
+            rho,
+            P0,
+            L,
+            Lq,
+            W,
+            Wq,
+            Pn
         };
     }
 
-    function valor(resultado, clave, unidad) {
-        if (!resultado.estable) return "Inestable";
+    /* =========================
+       MODELO M/M/2
+       ========================= */
 
-        if (clave === "rho") {
-            return fmt(resultado.rho * 100) + " %";
+    function calcularMM2(lambda, mu, n) {
+
+        const c = 2;
+        const rho = lambda / (c * mu);
+        const a = lambda / mu;
+
+        const estable = lambda < c * mu;
+
+        if (!estable) {
+            return {
+                modelo: "M/M/2",
+                estable: false,
+                rho,
+                P0: null,
+                L: null,
+                Lq: null,
+                W: null,
+                Wq: null,
+                Pn: null
+            };
         }
 
-        if (clave === "W" || clave === "Wq") {
-            return fmt(resultado[clave]) + " " + unidad + "(s)";
+        const suma = 1 + a;
+        const terminoFinal = (a * a) / (2 * (1 - rho));
+
+        const P0 = 1 / (suma + terminoFinal);
+
+        const Lq = (
+            P0 * a * a * rho
+        ) / (
+            2 * Math.pow(1 - rho, 2)
+        );
+
+        const L = Lq + a;
+
+        // Para lambda = 0 no hay clientes ni espera.
+        // W y Wq representan los tiempos de un cliente hipotético.
+        const Wq = lambda === 0 ? 0 : Lq / lambda;
+        const W = Wq + 1 / mu;
+
+        let Pn;
+
+        if (n < c) {
+            Pn = P0 * Math.pow(a, n) / factorial(n);
+        } else {
+            Pn = P0 *
+                Math.pow(a, n) /
+                (factorial(c) * Math.pow(c, n - c));
         }
 
-        return fmt(resultado[clave]);
+        return {
+            modelo: "M/M/2",
+            estable: true,
+            rho,
+            P0,
+            L,
+            Lq,
+            W,
+            Wq,
+            Pn
+        };
     }
 
-    function paso(titulo, formula, sustitucion, resultado) {
+    function factorial(n) {
+        let resultado = 1;
+
+        for (let i = 2; i <= n; i++) {
+            resultado *= i;
+        }
+
+        return resultado;
+    }
+
+    /* =========================
+       TARJETAS DE RESULTADOS
+       ========================= */
+
+    function crearKPI(titulo, valor, descripcion) {
         return `
-            <article class="sen-iteracion">
-                <h3>${titulo}</h3>
-                <p class="colas-formula">
-                    <strong>Fórmula:</strong> ${formula}
-                </p>
-                <p class="colas-formula">
-                    <strong>Sustitución:</strong> ${sustitucion}
-                </p>
-                <p class="colas-formula">
-                    <strong>Resultado:</strong> ${resultado}
-                </p>
-            </article>
+            <div class="pert-kpi">
+                <span>${titulo}</span>
+                <strong>${valor}</strong>
+                <small>${descripcion}</small>
+            </div>
         `;
     }
 
-    function procedimiento(l, m, n, r, unidad) {
-        const c = r.servidores;
-        const a = r.a;
-        const rho = r.rho;
+    function mostrarResultados(resultado, unidad, n) {
+
+        if (!resultado.estable) {
+
+            estadoDiv.innerHTML = `
+                <div class="mensaje-error">
+                    <strong>Sistema inestable</strong>
+                    <p>
+                        El modelo ${resultado.modelo}
+                        no cumple la condición de estabilidad.
+                    </p>
+                    <p>
+                        Utilización:
+                        <strong>${porcentaje(resultado.rho)}</strong>
+                    </p>
+                    <p>
+                        No existen resultados estacionarios
+                        finitos para los demás indicadores.
+                    </p>
+                </div>
+            `;
+
+            kpisDiv.innerHTML = "";
+            mostrar(resultadosDiv);
+            return;
+        }
+
+        estadoDiv.innerHTML = `
+            <div class="mensaje-exito">
+                <strong>Sistema estable</strong>
+                <p>
+                    El modelo ${resultado.modelo}
+                    cumple la condición de estabilidad.
+                </p>
+            </div>
+        `;
+
+        kpisDiv.innerHTML = `
+            ${crearKPI(
+                "ρ - Utilización",
+                porcentaje(resultado.rho),
+                "Porcentaje de ocupación por servidor"
+            )}
+
+            ${crearKPI(
+                "P₀ - Sistema vacío",
+                porcentaje(resultado.P0),
+                "Probabilidad de cero clientes"
+            )}
+
+            ${crearKPI(
+                "L - Clientes en sistema",
+                numero(resultado.L),
+                "Promedio de clientes en el sistema"
+            )}
+
+            ${crearKPI(
+                "Lq - Clientes en cola",
+                numero(resultado.Lq),
+                "Promedio de clientes esperando"
+            )}
+
+            ${crearKPI(
+                "W - Tiempo en sistema",
+                numero(resultado.W) + " " + unidad,
+                "Tiempo promedio total"
+            )}
+
+            ${crearKPI(
+                "Wq - Tiempo en cola",
+                numero(resultado.Wq) + " " + unidad,
+                "Tiempo promedio de espera"
+            )}
+
+            ${crearKPI(
+                "P" + n + " - Probabilidad",
+                porcentaje(resultado.Pn),
+                "Probabilidad de exactamente " + n + " clientes"
+            )}
+        `;
+
+        mostrar(resultadosDiv);
+    }
+
+    /* =========================
+       TABLA COMPARATIVA
+       ========================= */
+
+    function mostrarComparacion(mm1, mm2, unidad, n) {
+
+        function valor(resultado, propiedad, esPorcentaje = false) {
+
+            if (!resultado.estable) {
+                return "Inestable";
+            }
+
+            if (esPorcentaje) {
+                return porcentaje(resultado[propiedad]);
+            }
+
+            return numero(resultado[propiedad]);
+        }
+
+        tablaDiv.innerHTML = `
+            <div class="sen-tabla-scroll">
+                <table class="sen-tabla">
+                    <thead>
+                        <tr>
+                            <th>Indicador</th>
+                            <th>M/M/1</th>
+                            <th>M/M/2</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>Estado</td>
+                            <td>${mm1.estable ? "Estable" : "Inestable"}</td>
+                            <td>${mm2.estable ? "Estable" : "Inestable"}</td>
+                        </tr>
+
+                        <tr>
+                            <td>ρ - Utilización</td>
+                            <td>${porcentaje(mm1.rho)}</td>
+                            <td>${porcentaje(mm2.rho)}</td>
+                        </tr>
+
+                        <tr>
+                            <td>P₀ - Sistema vacío</td>
+                            <td>${valor(mm1, "P0", true)}</td>
+                            <td>${valor(mm2, "P0", true)}</td>
+                        </tr>
+
+                        <tr>
+                            <td>L - Clientes en sistema</td>
+                            <td>${valor(mm1, "L")}</td>
+                            <td>${valor(mm2, "L")}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Lq - Clientes en cola</td>
+                            <td>${valor(mm1, "Lq")}</td>
+                            <td>${valor(mm2, "Lq")}</td>
+                        </tr>
+
+                        <tr>
+                            <td>W - Tiempo en sistema (${unidad})</td>
+                            <td>${valor(mm1, "W")}</td>
+                            <td>${valor(mm2, "W")}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Wq - Tiempo en cola (${unidad})</td>
+                            <td>${valor(mm1, "Wq")}</td>
+                            <td>${valor(mm2, "Wq")}</td>
+                        </tr>
+
+                        <tr>
+                            <td>P${n} - Probabilidad</td>
+                            <td>${valor(mm1, "Pn", true)}</td>
+                            <td>${valor(mm2, "Pn", true)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        mostrar(comparacionDiv);
+    }
+
+    /* =========================
+       PROCEDIMIENTO MATEMÁTICO
+       ========================= */
+
+    function paso(titulo, formula, sustitucion, resultado) {
+
+        return `
+            <div class="sen-iteracion">
+                <h4>${titulo}</h4>
+
+                <p><strong>Fórmula:</strong></p>
+                <p>${formula}</p>
+
+                <p><strong>Sustitución:</strong></p>
+                <p>${sustitucion}</p>
+
+                <p><strong>Resultado:</strong></p>
+                <p><strong>${resultado}</strong></p>
+            </div>
+        `;
+    }
+
+    function procedimientoMM1(r, lambda, mu, n, unidad) {
+
         let html = "";
 
         html += paso(
-            "1. Condición de estabilidad",
-            "λ < cμ",
-            `${fmt(l)} < ${c} × ${fmt(m)}`,
-            "Sistema estable"
+            "1. Factor de utilización (ρ)",
+            "ρ = λ / μ",
+            `ρ = ${lambda} / ${mu}`,
+            porcentaje(r.rho)
+        );
+
+        if (!r.estable) {
+            html += `
+                <div class="mensaje-error">
+                    M/M/1 es inestable porque λ ≥ μ.
+                    No se calculan indicadores estacionarios.
+                </div>
+            `;
+            return html;
+        }
+
+        html += paso(
+            "2. Probabilidad de sistema vacío (P₀)",
+            "P₀ = 1 - ρ",
+            `P₀ = 1 - ${numero(r.rho)}`,
+            porcentaje(r.P0)
         );
 
         html += paso(
-            "2. Utilización del sistema (ρ)",
-            "ρ = λ / (cμ)",
-            `${fmt(l)} / (${c} × ${fmt(m)})`,
-            `${fmt(rho)} = ${fmt(rho * 100)} %`
+            "3. Número promedio en el sistema (L)",
+            "L = λ / (μ - λ)",
+            `L = ${lambda} / (${mu} - ${lambda})`,
+            numero(r.L) + " clientes"
         );
 
-        if (c === 1) {
-            html += paso(
-                "3. Probabilidad del sistema vacío (P₀)",
-                "P₀ = 1 - ρ",
-                `1 - ${fmt(rho)}`,
-                fmt(r.P0)
-            );
+        html += paso(
+            "4. Número promedio en cola (Lq)",
+            "Lq = λ² / [μ(μ - λ)]",
+            `Lq = ${lambda}² / [${mu}(${mu} - ${lambda})]`,
+            numero(r.Lq) + " clientes"
+        );
 
-            html += paso(
-                "4. Clientes promedio en el sistema (L)",
-                "L = λ / (μ - λ)",
-                `${fmt(l)} / (${fmt(m)} - ${fmt(l)})`,
-                fmt(r.L)
-            );
+        html += paso(
+            "5. Tiempo promedio en el sistema (W)",
+            "W = 1 / (μ - λ)",
+            `W = 1 / (${mu} - ${lambda})`,
+            numero(r.W) + " " + unidad
+        );
 
-            html += paso(
-                "5. Clientes promedio en cola (Lq)",
-                "Lq = λ² / [μ(μ - λ)]",
-                `${fmt(l)}² / [${fmt(m)} × (${fmt(m)} - ${fmt(l)})]`,
-                fmt(r.Lq)
-            );
+        html += paso(
+            "6. Tiempo promedio en cola (Wq)",
+            "Wq = λ / [μ(μ - λ)]",
+            `Wq = ${lambda} / [${mu}(${mu} - ${lambda})]`,
+            numero(r.Wq) + " " + unidad
+        );
 
-            html += paso(
-                "6. Tiempo promedio en el sistema (W)",
-                "W = 1 / (μ - λ)",
-                `1 / (${fmt(m)} - ${fmt(l)})`,
-                fmt(r.W) + " " + unidad + "(s)"
-            );
-
-            html += paso(
-                "7. Tiempo promedio en cola (Wq)",
-                "Wq = λ / [μ(μ - λ)]",
-                `${fmt(l)} / [${fmt(m)} × (${fmt(m)} - ${fmt(l)})]`,
-                fmt(r.Wq) + " " + unidad + "(s)"
-            );
-
-            html += paso(
-                `8. Probabilidad de ${n} clientes (Pn)`,
-                "Pn = (1 - ρ) × ρⁿ",
-                `${fmt(r.P0)} × ${fmt(rho)}^${n}`,
-                fmt(r.Pn)
-            );
-
-        } else {
-            html += paso(
-                "3. Carga ofrecida (a)",
-                "a = λ / μ",
-                `${fmt(l)} / ${fmt(m)}`,
-                fmt(a)
-            );
-
-            html += paso(
-                "4. Probabilidad del sistema vacío (P₀)",
-                "P₀ = 1 / [1 + a + a² / (2(1-ρ))]",
-                `1 / [1 + ${fmt(a)} + ${fmt(a)}² / (2(1-${fmt(rho)}))]`,
-                fmt(r.P0)
-            );
-
-            html += paso(
-                "5. Clientes promedio en cola (Lq)",
-                "Lq = P₀ × a² × ρ / [2(1-ρ)²]",
-                `${fmt(r.P0)} × ${fmt(a)}² × ${fmt(rho)} / [2(1-${fmt(rho)})²]`,
-                fmt(r.Lq)
-            );
-
-            html += paso(
-                "6. Clientes promedio en el sistema (L)",
-                "L = Lq + λ/μ",
-                `${fmt(r.Lq)} + ${fmt(l)}/${fmt(m)}`,
-                fmt(r.L)
-            );
-
-            html += paso(
-                "7. Tiempo promedio en cola (Wq)",
-                "Wq = Lq / λ, para λ > 0",
-                l === 0
-                    ? "λ = 0: no existen llegadas ni espera en cola"
-                    : `${fmt(r.Lq)} / ${fmt(l)}`,
-                fmt(r.Wq) + " " + unidad + "(s)"
-            );
-
-            html += paso(
-                "8. Tiempo promedio en el sistema (W)",
-                "W = Wq + 1/μ",
-                `${fmt(r.Wq)} + 1/${fmt(m)}`,
-                fmt(r.W) + " " + unidad + "(s)"
-            );
-
-            const formulaPn = n < 2
-                ? "Pn = P₀ × aⁿ / n!"
-                : "Pn = P₀ × a² / 2! × ρ⁽ⁿ⁻²⁾";
-
-            const sustitucionPn = n < 2
-                ? `${fmt(r.P0)} × ${fmt(a)}^${n} / ${n}!`
-                : `${fmt(r.P0)} × ${fmt(a)}² / 2 × ${fmt(rho)}^${n - 2}`;
-
-            html += paso(
-                `9. Probabilidad de ${n} clientes (Pn)`,
-                formulaPn,
-                sustitucionPn,
-                fmt(r.Pn)
-            );
-        }
+        html += paso(
+            `7. Probabilidad de ${n} clientes (P${n})`,
+            "Pn = (1 - ρ)ρⁿ",
+            `P${n} = (1 - ${numero(r.rho)}) × ${numero(r.rho)}^${n}`,
+            porcentaje(r.Pn)
+        );
 
         return html;
     }
 
-    function ejecutar(evento) {
-        evento.preventDefault();
+    function procedimientoMM2(r, lambda, mu, n, unidad) {
 
-        const lambdaTexto = $("colasLambda").value.trim();
-        const muTexto = $("colasMu").value.trim();
-        const nTexto = $("colasN").value.trim();
+        let html = "";
 
-        const l = Number(lambdaTexto);
-        const m = Number(muTexto);
-        const n = Number(nTexto);
-        const unidad = $("colasUnidad").value;
-        const modelo = $("colasModelo").value;
+        const a = lambda / mu;
+        const rho = lambda / (2 * mu);
 
-        const error = $("colasError");
-        error.classList.add("oculto");
+        html += paso(
+            "1. Factor de utilización (ρ)",
+            "ρ = λ / (2μ)",
+            `ρ = ${lambda} / (2 × ${mu})`,
+            porcentaje(rho)
+        );
 
-        ["colasResultados", "colasComparacion",
-         "colasProcedimiento"].forEach(id => {
-            $(id).classList.add("oculto");
-        });
+        if (!r.estable) {
+            html += `
+                <div class="mensaje-error">
+                    M/M/2 es inestable porque λ ≥ 2μ.
+                    No se calculan indicadores estacionarios.
+                </div>
+            `;
+            return html;
+        }
+
+        html += paso(
+            "2. Carga ofrecida (a)",
+            "a = λ / μ",
+            `a = ${lambda} / ${mu}`,
+            numero(a)
+        );
+
+        const termino1 = 1 + a;
+        const termino2 = a * a / (2 * (1 - rho));
+        const denominador = termino1 + termino2;
+
+        html += paso(
+            "3. Probabilidad de sistema vacío (P₀)",
+            "P₀ = 1 / [1 + a + a² / (2(1 - ρ))]",
+            `P₀ = 1 / [1 + ${numero(a)} + ${numero(a)}² / (2(1 - ${numero(rho)}))]` +
+            `<p>Primer término: 1 + a = ${numero(termino1)}</p>` +
+            `<p>Segundo término: a² / [2(1 - ρ)] = ${numero(termino2)}</p>` +
+            `<p>Denominador = ${numero(denominador)}</p>`,
+            porcentaje(r.P0)
+        );
+
+        const numeradorLq = r.P0 * a * a * rho;
+        const denominadorLq = 2 * Math.pow(1 - rho, 2);
+
+        html += paso(
+            "4. Número promedio en cola (Lq)",
+            "Lq = [P₀ × a² × ρ] / [2(1 - ρ)²]",
+            `Lq = [${numero(r.P0)} × ${numero(a)}² × ${numero(rho)}] / [2(1 - ${numero(rho)})²]` +
+            `<p>Numerador = ${numero(numeradorLq)}</p>` +
+            `<p>Denominador = ${numero(denominadorLq)}</p>`,
+            numero(r.Lq) + " clientes"
+        );
+
+        html += paso(
+            "5. Número promedio en el sistema (L)",
+            "L = Lq + λ / μ",
+            `L = ${numero(r.Lq)} + ${lambda} / ${mu}`,
+            numero(r.L) + " clientes"
+        );
+
+        html += paso(
+            "6. Tiempo promedio en cola (Wq)",
+            "Wq = Lq / λ, para λ > 0",
+            lambda === 0
+                ? "Como λ = 0, no hay llegadas ni espera."
+                : `Wq = ${numero(r.Lq)} / ${lambda}`,
+            numero(r.Wq) + " " + unidad
+        );
+
+        html += paso(
+            "7. Tiempo promedio en el sistema (W)",
+            "W = Wq + 1 / μ",
+            `W = ${numero(r.Wq)} + 1 / ${mu}`,
+            numero(r.W) + " " + unidad
+        );
+
+        let formulaPn;
+        let sustitucionPn;
+
+        if (n < 2) {
+            formulaPn = "Pn = P₀ × aⁿ / n!";
+            sustitucionPn =
+                `P${n} = ${numero(r.P0)} × ${numero(a)}^${n} / ${n}!`;
+        } else {
+            formulaPn = "Pn = P₀ × aⁿ / [2! × 2⁽ⁿ⁻²⁾]";
+            sustitucionPn =
+                `P${n} = ${numero(r.P0)} × ${numero(a)}^${n} / ` +
+                `[2! × 2^(${n} - 2)]`;
+        }
+
+        html += paso(
+            `8. Probabilidad de ${n} clientes (P${n})`,
+            formulaPn,
+            sustitucionPn,
+            porcentaje(r.Pn)
+        );
+
+        return html;
+    }
+
+    /* =========================
+       RESOLVER EJERCICIO
+       ========================= */
+
+    function resolver() {
+
+        limpiarError();
+
+        const lambdaTexto = lambdaInput.value.trim();
+        const muTexto = muInput.value.trim();
+        const nTexto = nInput.value.trim();
 
         if (
-            !lambdaTexto || !muTexto || !nTexto ||
-            !Number.isFinite(l) || !Number.isFinite(m) ||
-            l < 0 || m <= 0 ||
-            !Number.isSafeInteger(n) || n < 0 ||
-            !Number.isFinite(2 * m)
+            lambdaTexto === "" ||
+            muTexto === "" ||
+            nTexto === ""
         ) {
-            error.textContent =
-                "Datos inválidos: λ debe ser mayor o igual a 0, " +
-                "μ debe ser mayor que 0 y n debe ser un entero no negativo.";
-            error.classList.remove("oculto");
+            mostrarError("Completa todos los campos.");
             return;
         }
 
-        const mm1 = calcular(l, m, n, 1);
-        const mm2 = calcular(l, m, n, 2);
-        const seleccionado = modelo === "MM1" ? mm1 : mm2;
+        const lambda = Number(lambdaTexto);
+        const mu = Number(muTexto);
+        const n = Number(nTexto);
 
-        $("colasResultados").classList.remove("oculto");
-        $("colasComparacion").classList.remove("oculto");
-        $("colasProcedimiento").classList.remove("oculto");
-
-        if (!seleccionado.estable) {
-            $("colasEstado").innerHTML = `
-                <div class="mensaje-error">
-                    <strong>Sistema inestable.</strong>
-                    λ = ${fmt(l)} y la capacidad es
-                    ${fmt(seleccionado.capacidad)}.
-                    No se cumple λ &lt; cμ.
-                    No existen resultados de estado estable.
-                </div>
-            `;
-
-            $("colasKpis").innerHTML = "";
-
-            $("colasPasos").innerHTML = paso(
-                "Validación de estabilidad",
-                "λ < cμ",
-                `${fmt(l)} < ${fmt(seleccionado.capacidad)}`,
-                "Condición incumplida. Sistema inestable."
-            );
-        } else {
-            $("colasEstado").innerHTML = `
-                <div class="mensaje-exito">
-                    <strong>Sistema estable.</strong>
-                    La tasa de llegadas es menor que
-                    la capacidad total de atención.
-                </div>
-            `;
-
-            $("colasKpis").innerHTML = indicadores.map(
-                ([clave, nombre]) => `
-                    <article class="pert-kpi">
-                        <span>${nombre}</span>
-                        <strong>${valor(seleccionado, clave, unidad)}</strong>
-                    </article>
-                `
-            ).join("");
-
-            $("colasPasos").innerHTML =
-                procedimiento(l, m, n, seleccionado, unidad);
+        if (
+            !Number.isFinite(lambda) ||
+            !Number.isFinite(mu) ||
+            !Number.isSafeInteger(n)
+        ) {
+            mostrarError("Ingresa valores numéricos válidos.");
+            return;
         }
 
-        let tabla = `
-            <tr>
-                <th>Estabilidad</th>
-                <td>${mm1.estable ? "Estable" : "Inestable"}</td>
-                <td>${mm2.estable ? "Estable" : "Inestable"}</td>
-            </tr>
-        `;
+        if (lambda < 0) {
+            mostrarError("La tasa de llegadas λ no puede ser negativa.");
+            return;
+        }
 
-        indicadores.forEach(([clave, nombre]) => {
-            tabla += `
-                <tr>
-                    <th>${nombre}</th>
-                    <td>${valor(mm1, clave, unidad)}</td>
-                    <td>${valor(mm2, clave, unidad)}</td>
-                </tr>
-            `;
-        });
+        if (mu <= 0) {
+            mostrarError("La tasa de servicio μ debe ser mayor que cero.");
+            return;
+        }
 
-        $("colasTabla").innerHTML = tabla;
+        if (n < 0) {
+            mostrarError("El número de clientes n debe ser un entero no negativo.");
+            return;
+        }
+
+        const unidad = textoUnidad(unidadInput.value);
+        const modeloTexto = String(modeloInput.value).toUpperCase();
+        const modelo = modeloTexto.includes("2") ? "MM2" : "MM1";
+
+        const mm1 = calcularMM1(lambda, mu, n);
+        const mm2 = calcularMM2(lambda, mu, n);
+
+        const seleccionado = modelo === "MM2" ? mm2 : mm1;
+
+        mostrarResultados(seleccionado, unidad, n);
+        mostrarComparacion(mm1, mm2, unidad, n);
+
+        pasosDiv.innerHTML = modelo === "MM2"
+            ? procedimientoMM2(mm2, lambda, mu, n, unidad)
+            : procedimientoMM1(mm1, lambda, mu, n, unidad);
+
+        mostrar(procedimientoDiv);
     }
 
-    $("colasFormulario").addEventListener("submit", ejecutar);
+    /* =========================
+       CARGAR EJEMPLO
+       ========================= */
 
-    $("colasEjemplo").addEventListener("click", () => {
-        $("colasLambda").value = 8;
-        $("colasMu").value = 5;
-        $("colasN").value = 2;
-        $("colasUnidad").value = "hora";
-        $("colasModelo").value = "MM2";
-        $("colasFormulario").requestSubmit();
-    });
+    if (botonEjemplo) {
 
-    $("colasFormulario").addEventListener("reset", () => {
-        $("colasError").classList.add("oculto");
+        botonEjemplo.addEventListener("click", (evento) => {
 
-        ["colasResultados", "colasComparacion",
-         "colasProcedimiento"].forEach(id => {
-            $(id).classList.add("oculto");
+            evento.preventDefault();
+
+            lambdaInput.value = 8;
+            muInput.value = 5;
+            nInput.value = 2;
+
+            // Seleccionar M/M/2 según el valor real del HTML.
+            const opcionMM2 = Array.from(modeloInput.options)
+                .find(opcion => opcion.value.toUpperCase().includes("2"));
+
+            if (opcionMM2) {
+                modeloInput.value = opcionMM2.value;
+            }
+
+            const opcionHoras = Array.from(unidadInput.options)
+                .find(opcion =>
+                    opcion.value.toLowerCase().includes("hora")
+                );
+
+            if (opcionHoras) {
+                unidadInput.value = opcionHoras.value;
+            }
+
+            resolver();
         });
-    });
+    }
 
-    $("colasImprimir").addEventListener("click", () => {
-        window.print();
-    });
+    /* =========================
+       FORMULARIO
+       ========================= */
+
+    if (formulario) {
+        formulario.addEventListener("submit", (evento) => {
+            evento.preventDefault();
+            resolver();
+        });
+    }
+
+    /* =========================
+       IMPRIMIR
+       ========================= */
+
+    if (botonImprimir) {
+        botonImprimir.addEventListener("click", (evento) => {
+            evento.preventDefault();
+            window.print();
+        });
+    }
+
+    /* =========================
+       ESTADO INICIAL
+       ========================= */
+
+    limpiarError();
+    ocultar(resultadosDiv);
+    ocultar(comparacionDiv);
+    ocultar(procedimientoDiv);
 
 });
